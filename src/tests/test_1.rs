@@ -10,105 +10,71 @@ use mio::{
     Events, Interest, Poll, Token,
 };
 
-struct Connections {
-    inner: Vec<Connection>,
-    index_queue: Vec<usize>,
+struct Connection {
+    stream: TcpStream,
+    acc: i32,
 }
 
-impl Connections {
-    fn new() -> Connections {
-        Connections {
-            inner: Vec::new(),
-            index_queue: Vec::new(),
-        }
-    }
-
-    fn add<F>(&mut self, mut connection: Connection, f: F)
-    where
-        F: FnOnce(usize, &mut Connection) -> (),
-    {
-        if let Some(index) = self.index_queue.pop() {
-            f(index, &mut connection);
-            self.inner[index] = connection;
-        } else {
-            let len = self.inner.len();
-            f(len, &mut connection);
-            self.inner.push(connection);
-        }
-    }
-
-    fn remove(&mut self, index: usize) {
-        self.index_queue.push(index);
-    }
-
-    fn get(&mut self, index: usize) -> &mut Connection {
-        unsafe { self.inner.get_unchecked_mut(index) }
-    }
-}
-
-#[test]
-fn test_1() {
-    let server_addr: SocketAddr = "127.0.0.1:25565".parse().unwrap();
-    let mut listener = TcpListener::bind(server_addr).unwrap();
-
+fn run(addr: SocketAddr) {
     let mut poll = Poll::new().unwrap();
-    let mut events = Events::with_capacity(128);
+    let mut events = Events::with_capacity(256);
+    let mut connections = Vec::<Connection>::with_capacity(256);
+    let mut index_queue = Vec::<usize>::with_capacity(256);
+    let mut listener = TcpListener::bind(addr).unwrap();
     let server_token = Token(usize::MAX);
     poll.registry()
         .register(&mut listener, server_token, Interest::READABLE)
         .unwrap();
-    let mut connections = Connections::new();
-
-    println!("server started!");
-    start_bot_daemons(server_addr);
 
     loop {
         poll.poll(&mut events, None).unwrap();
         for event in events.iter() {
             let token = event.token();
-            if token == server_token {
-                println!("new accept omitted");
-                if let Ok((mut stream, addr)) = listener.accept() {
-                    let index = connections.add(
-                        Connection {
-                            stream: stream,
-                            acc: 0,
-                        },
-                        |index, connection| {
-                            poll.registry().register(
-                                &mut connection.stream,
-                                Token(index),
-                                Interest::READABLE,
-                            );
-                        },
-                    );
-                    println!("new client token={:#?}", index);
-                };
-                continue;
-            }
             let token_index = token.0;
-            let mut buf = [0u8; 1000];
-            let connection = connections.get(token_index);
-            let read = connection.stream.read(&mut buf).unwrap();
-            if read == 0 {
-                println!("connection closed(token={:#?})", token_index);
-                poll.registry().deregister(&mut connection.stream);
-                connections.remove(token_index);
-                continue;
-            }
-            let read_buf = &buf[0..read];
-            println!("read: {:#?}", read_buf);
-            connection.acc += 1;
-            if connection.acc == 10 {
-                println!("acc: {}", connection.acc);
+            if token_index == usize::MAX {
+                if let Ok((mut stream, addr)) = listener.accept() {
+                    let mut connection = Connection { stream, acc: 0 };
+                    let index = if let Some(index) = index_queue.pop() {
+                        poll.registry().register(
+                            &mut connection.stream,
+                            Token(index),
+                            Interest::READABLE,
+                        );
+                        connections[index] = connection;
+                        index
+                    } else {
+                        let len = connections.len();
+                        poll.registry().register(
+                            &mut connection.stream,
+                            Token(len),
+                            Interest::READABLE,
+                        );
+                        connections.push(connection);
+                        len
+                    };
+                }
+            } else {
+                let mut buf = [0u8; 1000];
+                let connection = unsafe { connections.get_unchecked_mut(token_index) };
+                let read = connection.stream.read(&mut buf).unwrap();
+                if read == 0 {
+                    poll.registry().deregister(&mut connection.stream);
+                    index_queue.push(token_index);
+                    continue;
+                }
+                let read_buf = &buf[0..read];
+                println!("read: {:#?}", read_buf);
             }
         }
     }
 }
 
-struct Connection {
-    stream: TcpStream,
-    acc: i32,
+#[test]
+fn test_1() {
+    println!("server started!");
+    let addr = "127.0.0.1:25565".parse().unwrap();
+    start_bot_daemons(addr);
+    run(addr);
 }
 
 fn start_bot_daemons(server_addr: SocketAddr) {
