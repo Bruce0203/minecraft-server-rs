@@ -5,25 +5,23 @@ use mio::{
 use std::{
     io::{Read, Write},
     net::SocketAddr,
-    thread::{self},
 };
 
-struct Socket<T> {
-    stream: TcpStream,
-    token: usize,
-    addr: SocketAddr,
-    connection: Box<T>,
+pub struct Socket<T> {
+    pub stream: TcpStream,
+    pub token: usize,
+    pub addr: SocketAddr,
+    pub connection: Box<T>,
 }
 
 impl<T> Socket<T> {
-    fn register_and_new(
+    fn new_and_register(
         mut stream: TcpStream,
         token: usize,
         addr: SocketAddr,
         connection: Box<T>,
         poll: &mut Poll,
     ) -> Socket<T> {
-        //todo check when result throw err
         poll.registry()
             .register(&mut stream, Token(token), Interest::READABLE)
             .unwrap();
@@ -37,44 +35,43 @@ impl<T> Socket<T> {
 }
 
 type IndexQueue = Vec<usize>;
-type Connections<T> = Vec<Option<Socket<T>>>;
+type IndexedConnections<T> = Vec<Option<Socket<T>>>;
 
-struct SocketSelector<T> {
+struct Selector<T> {
     listener: TcpListener,
     poll: Poll,
-    connections: Connections<T>,
+    indexed_connection: IndexedConnections<T>,
     index_queue: IndexQueue,
 }
 
-impl<T: Default> SocketSelector<T> {
-    pub fn bind(addr: SocketAddr, max_connection_pool: usize) -> SocketSelector<T> {
-        SocketSelector {
+impl<T: Default> Selector<T> {
+    pub fn bind(addr: SocketAddr, max_connection_pool: usize) -> Selector<T> {
+        Selector {
             listener: TcpListener::bind(addr).unwrap(),
             poll: Poll::new().unwrap(),
-            connections: Connections::with_capacity(max_connection_pool),
+            indexed_connection: IndexedConnections::with_capacity(max_connection_pool),
             index_queue: IndexQueue::with_capacity(max_connection_pool),
         }
     }
 
     fn accept_socket<T2: Server<T>>(&mut self, socket_server: &mut T2) {
         if let Ok((stream, addr)) = self.listener.accept() {
-            let index = 1usize;
             macro_rules! new_socket {
                 ($index:expr, $poll:expr, $stream:expr) => {
-                    Socket::<T>::register_and_new(
+                    Socket::<T>::new_and_register(
                         $stream,
                         $index,
                         addr,
-                        Box::new(socket_server.new_connection()),
+                        Box::new(socket_server.handle_connection_accept()),
                         $poll,
-                    );
+                    )
                 };
             }
             if let Some(index) = self.index_queue.pop() {
-                self.connections[index] = Some(new_socket!(index, &mut self.poll, stream));
+                self.indexed_connection[index] = Some(new_socket!(index, &mut self.poll, stream));
             } else {
-                let index = self.connections.len();
-                self.connections
+                let index = self.indexed_connection.len();
+                self.indexed_connection
                     .push(Some(new_socket!(index, &mut self.poll, stream)));
             }
         }
@@ -86,42 +83,55 @@ impl<T: Default> SocketSelector<T> {
         token_index: usize,
         buf: &mut [u8],
     ) {
-        let connection = unsafe { self.connections.get_unchecked_mut(token_index) }
+        let socket = unsafe { self.indexed_connection.get_unchecked_mut(token_index) }
             .as_mut()
             .unwrap();
-        let read = connection.stream.read(buf).unwrap();
+        let read = socket.stream.read(buf).unwrap();
         if read == 0 {
-            self.poll
-                .registry()
-                .deregister(&mut connection.stream)
-                .unwrap();
+            self.poll.registry().deregister(&mut socket.stream).unwrap();
+            socket_server.handle_connection_closed(socket);
             self.index_queue.push(token_index);
-            self.connections[token_index] = None;
+            self.indexed_connection[token_index] = None;
         } else {
-            let mut read_buf = &buf[0..read];
-            socket_server.handle_connection_read(read_buf);
+            let read_buf = &buf[0..read];
+            socket_server.handle_connection_read(socket, read_buf);
         }
+    }
+
+    fn debug_selector(&mut self) {
+        println!(
+            "{:#?}",
+            self.indexed_connection
+                .iter()
+                .map(|mut conn| {
+                    if let Some(conn) = conn.as_ref() {
+                        conn.addr.to_string()
+                    } else {
+                        "none".to_string()
+                    }
+                })
+                .fold(String::new(), |acc, elem| acc + &elem + ", ")
+                .to_string()
+        );
     }
 }
 
-pub trait Server<T: Default>: Sized {
-    fn new_connection(&mut self) -> T;
-    fn handle_connection_read(&mut self, buf: &[u8]);
+pub trait Server<T: Default + Sized>: Sized {
+    fn handle_connection_accept(&mut self) -> T;
+    fn handle_connection_read(&mut self, socket: &mut Socket<T>, buf: &[u8]);
+    fn handle_connection_closed(&mut self, socket: &mut Socket<T>);
 
-    fn start_selection_loop(
-        &mut self,
-        addr: SocketAddr,
-        events_capacity: usize,
-        max_connection_pool: usize,
-    ) {
-        let mut selector = SocketSelector::<T>::bind(addr, max_connection_pool);
+    fn start_selection_loop(&mut self, addr: SocketAddr, max_connection_pool: usize) {
+        let mut selector = Selector::<T>::bind(addr, max_connection_pool);
         let server_token = Token(usize::MAX);
         selector
             .poll
             .registry()
             .register(&mut selector.listener, server_token, Interest::READABLE)
             .unwrap();
-        let mut buf = [0u8; 1000];
+        const MAX_READ_BUFFER_SIZE: usize = 2097151;
+        let mut buf = [0u8; MAX_READ_BUFFER_SIZE];
+        let events_capacity = 128;
         let mut events = Events::with_capacity(events_capacity);
         loop {
             selector.poll.poll(&mut events, None).unwrap();
@@ -134,52 +144,66 @@ pub trait Server<T: Default>: Sized {
                     selector.handle_socket_read(self, token_index, &mut buf);
                 }
             }
+            selector.debug_selector();
         }
     }
 }
-struct HandShakeSelector {}
 
 #[test]
-fn test_1() {
-    struct Player;
+#[ignore]
+fn test_selector() {
+    struct Player {
+        acc: i32,
+    }
+
     impl Default for Player {
         fn default() -> Self {
-            Self {}
+            Self { acc: 0 }
         }
     }
+
     struct MyServer {}
+
     impl Server<Player> for MyServer {
-        fn new_connection(&mut self) -> Player {
-            Player {}
+        fn handle_connection_accept(&mut self) -> Player {
+            println!("socket accepted!");
+            Player::default()
         }
 
-        fn handle_connection_read(&mut self, buf: &[u8]) {
-            println!("read: {:#?}", buf);
+        fn handle_connection_read(&mut self, socket: &mut Socket<Player>, buf: &[u8]) {
+            socket.connection.acc += buf[0] as i32;
+        }
+
+        fn handle_connection_closed(&mut self, socket: &mut Socket<Player>) {
+            println!("socket closed!");
         }
     }
+
     let addr = "127.0.0.1:25565".parse().unwrap();
     start_bot_daemons(addr);
-    let server = MyServer {}.start_selection_loop(addr, 256, 256);
-}
+    MyServer {}.start_selection_loop(addr, 256);
 
-fn start_bot_daemons(server_addr: SocketAddr) {
-    thread::spawn(move || {
-        println!("bot started!");
-        let mut i = 0;
-        let mut vec = Vec::<std::net::TcpStream>::new();
-        while i != 10 {
-            if let Ok(mut client) = std::net::TcpStream::connect(server_addr) {
-                for i in 0..1 {
-                    client.write_all(&[i, i, i]).unwrap();
-                }
-                vec.push(client);
-                thread::sleep_ms(1000);
-                i += 1;
-            };
-        }
-        for ele in vec {
-            drop(ele);
-            thread::sleep_ms(1000);
-        }
-    });
+    fn start_bot_daemons(server_addr: SocketAddr) {
+        use std::{thread, time::Duration};
+
+        thread::sleep(Duration::from_millis(500));
+        thread::spawn(move || {
+            println!("bot started!");
+            let mut i = 0;
+            let mut vec = Vec::<std::net::TcpStream>::new();
+            while i != 11 {
+                if let Ok(mut client) = std::net::TcpStream::connect(server_addr) {
+                    for i in 0..1 {
+                        std::io::Write::write_all(&mut client, &[i, i, i]).unwrap();
+                    }
+                    vec.push(client);
+                    i += 1;
+                };
+            }
+            for mut client in vec {
+                client.flush();
+            }
+            thread::sleep(Duration::from_secs(1000));
+        });
+    }
 }

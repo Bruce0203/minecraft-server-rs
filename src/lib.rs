@@ -1,3 +1,5 @@
 pub mod selector;
-mod tests;
 
+pub mod var_int;
+pub mod var_string;
+pub mod handshake_selector;
