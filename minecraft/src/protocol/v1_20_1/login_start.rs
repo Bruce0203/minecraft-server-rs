@@ -1,11 +1,11 @@
 use std::io::Error;
 
 use bytes::{Buf, BytesMut};
+use common_server::{selector::Socket, var_string::VarStringRead};
 use uuid::Uuid;
 
 use crate::{
-    minecraft::{packet_handler::PacketHandler, player::Player},
-    var_string::VarStringRead,
+    packet_handler::PacketHandler, player::Player,
 };
 
 pub struct LoginStart {
@@ -25,8 +25,8 @@ impl TryFrom<BytesMut> for LoginStart {
     }
 }
 
-impl PacketHandler<Player> for LoginStart {
-    fn handle_packet(&self, system: &mut Player) {
+impl PacketHandler for LoginStart {
+    fn handle_packet(&self, system: &mut Socket<Player>) {
         println!(
             "LoginStart(name={:?}, player_uuid={:?}",
             self.name, self.player_uuid

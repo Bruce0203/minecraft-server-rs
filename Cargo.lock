@@ -15,6 +15,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "common-server"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "mio",
+]
+
+[[package]]
 name = "derivative"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -37,6 +45,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
+
+[[package]]
 name = "libc"
 version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -47,6 +61,18 @@ name = "log"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
+
+[[package]]
+name = "minecraft"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "common-server",
+ "derivative",
+ "json",
+ "mio",
+ "uuid",
+]
 
 [[package]]
 name = "mio"
@@ -117,9 +143,15 @@ dependencies = [
 [[package]]
 name = "server-workspace"
 version = "0.1.0"
+
+[[package]]
+name = "skeep"
+version = "0.1.0"
 dependencies = [
  "bytes",
+ "common-server",
  "derivative",
+ "json",
  "mio",
  "uuid",
 ]

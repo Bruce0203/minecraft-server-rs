@@ -37,20 +37,51 @@ impl<T> Socket<T> {
 type IndexQueue = Vec<usize>;
 type IndexedConnections<T> = Vec<Option<Socket<T>>>;
 
-struct Selector<T> {
-    listener: TcpListener,
+pub struct Selector<T> {
+    pub listener: TcpListener,
     poll: Poll,
     indexed_connection: IndexedConnections<T>,
     index_queue: IndexQueue,
 }
 
-impl<T: Default> Selector<T> {
+impl<T> Selector<T> {
     pub fn bind(addr: SocketAddr, max_connection_pool: usize) -> Selector<T> {
         Selector {
             listener: TcpListener::bind(addr).unwrap(),
             poll: Poll::new().unwrap(),
             indexed_connection: IndexedConnections::with_capacity(max_connection_pool),
             index_queue: IndexQueue::with_capacity(max_connection_pool),
+        }
+    }
+
+    pub fn start_selection_loop<T2>(
+        &mut self,
+        connection_handler: &mut T2,
+           ) where
+        T2: ConnectionHandler<T>,
+    {
+        let server_token = Token(usize::MAX);
+        self
+            .poll
+            .registry()
+            .register(&mut self.listener, server_token, Interest::READABLE)
+            .unwrap();
+        const MAX_READ_BUFFER_SIZE: usize = 2097151;
+        let mut buf = [0u8; MAX_READ_BUFFER_SIZE];
+        let events_capacity = 128;
+        let mut events = Events::with_capacity(events_capacity);
+        loop {
+            self.poll.poll(&mut events, None).unwrap();
+            for event in events.iter() {
+                let token = event.token();
+                if token == server_token {
+                    self.accept_socket(connection_handler);
+                } else {
+                    let token_index = token.0;
+                    self.handle_socket_read(connection_handler, token_index, &mut buf);
+                }
+            }
+            self.debug_selector();
         }
     }
 
@@ -117,41 +148,13 @@ impl<T: Default> Selector<T> {
     }
 }
 
-pub trait ConnectionHandler<T: Default + Sized>: Sized {
+pub trait ConnectionHandler<T: Sized>: Sized {
     fn handle_connection_accept(&mut self) -> T;
     fn handle_connection_read(&mut self, socket: &mut Socket<T>, buf: &[u8]);
     fn handle_connection_closed(&mut self, socket: &mut Socket<T>);
-
-    fn start_selection_loop(&mut self, addr: SocketAddr, max_connection_pool: usize) {
-        let mut selector = Selector::<T>::bind(addr, max_connection_pool);
-        let server_token = Token(usize::MAX);
-        selector
-            .poll
-            .registry()
-            .register(&mut selector.listener, server_token, Interest::READABLE)
-            .unwrap();
-        const MAX_READ_BUFFER_SIZE: usize = 2097151;
-        let mut buf = [0u8; MAX_READ_BUFFER_SIZE];
-        let events_capacity = 128;
-        let mut events = Events::with_capacity(events_capacity);
-        loop {
-            selector.poll.poll(&mut events, None).unwrap();
-            for event in events.iter() {
-                let token = event.token();
-                if token == server_token {
-                    selector.accept_socket(self);
-                } else {
-                    let token_index = token.0;
-                    selector.handle_socket_read(self, token_index, &mut buf);
-                }
-            }
-            selector.debug_selector();
-        }
-    }
 }
 
 #[test]
-#[ignore]
 fn test_selector() {
     struct Player {
         acc: i32,
@@ -182,7 +185,9 @@ fn test_selector() {
 
     let addr = "127.0.0.1:25565".parse().unwrap();
     start_bot_daemons(addr);
-    MyServer {}.start_selection_loop(addr, 256);
+    let mut selector = Selector::bind(addr, 256);
+    let mut server = MyServer{};
+    selector.start_selection_loop(&mut server);
 
     fn start_bot_daemons(server_addr: SocketAddr) {
         use std::{thread, time::Duration};
@@ -202,7 +207,7 @@ fn test_selector() {
                 };
             }
             for mut client in vec {
-                client.flush();
+                client.flush().unwrap();
             }
             thread::sleep(Duration::from_secs(1000));
         });

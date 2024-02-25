@@ -1,11 +1,9 @@
 use std::io::{Error, ErrorKind, Result};
-
 use bytes::{Buf, BytesMut};
+use common_server::{selector::Socket, var_int::VarIntRead, var_string::VarStringRead};
 
 use crate::{
-    minecraft::{packet_handler::PacketHandler, player::Player, session_relay::ConnectionState},
-    var_int::VarIntRead,
-    var_string::VarStringRead,
+    packet_handler::PacketHandler, player::Player, session_relay::ConnectionState,
 };
 
 #[derive(Debug)]
@@ -62,8 +60,8 @@ impl TryFrom<BytesMut> for NextState {
     }
 }
 
-impl PacketHandler<Player> for HandShake {
-    fn handle_packet(&self, system: &mut Player) {
-        system.session_relay.connection_state = (&self.next_state).into();
+impl PacketHandler for HandShake {
+    fn handle_packet(&self, value: &mut Socket<Player>) {
+        value.connection.session_relay.connection_state = (&self.next_state).into();
     }
 }
