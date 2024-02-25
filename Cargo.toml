@@ -6,5 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mc-varint = "0.1.1"
+bytes = "1.5.0"
+derivative = "2.2.0"
 mio = { version = "0.8.10", features = ["os-poll", "net"] }
+uuid = { version = "1.7.0", features = ["v4", "fast-rng", "macro-diagnostics"] }
+
+

@@ -1,37 +1,15 @@
-use std::io::{Cursor, Error, ErrorKind, Result};
+use std::io::{Error, ErrorKind, Result};
 
-use bytes::{buf::Reader, Buf, Bytes, BytesMut};
+use bytes::{Buf, BytesMut};
 
 use crate::{
-    selector::{Server, Socket},
+    minecraft::{packet_handler::PacketHandler, player::Player, session_relay::ConnectionState},
     var_int::VarIntRead,
     var_string::VarStringRead,
 };
 
-struct HandShakeServer {}
-
-#[derive(Default)]
-struct HandShakePlayer {}
-impl Server<HandShakePlayer> for HandShakeServer {
-    fn handle_connection_accept(&mut self) -> HandShakePlayer {
-        HandShakePlayer::default()
-    }
-
-    fn handle_connection_read(&mut self, socket: &mut Socket<HandShakePlayer>, buf: &[u8]) {
-        println!("{:?}", buf);
-        let mut reader = BytesMut::from(buf).reader();
-        let packet_length = reader.read_var_i32();
-        let packet_id = reader.read_var_i32();
-        let packet = HandShake::try_from(reader.into_inner());
-        println!("{:?}", packet);
-        //todo stopship: move to another selector 
-    }
-
-    fn handle_connection_closed(&mut self, _socket: &mut Socket<HandShakePlayer>) {}
-}
-
 #[derive(Debug)]
-struct HandShake {
+pub struct HandShake {
     protocol_version: i32,
     server_address: String,
     server_port: u16,
@@ -53,9 +31,18 @@ impl TryFrom<BytesMut> for HandShake {
 }
 
 #[derive(Debug)]
-enum NextState {
-    Status = 1,
-    Login = 2,
+pub enum NextState {
+    Status,
+    Login,
+}
+
+impl From<&NextState> for ConnectionState {
+    fn from(value: &NextState) -> Self {
+        match value {
+            NextState::Login => ConnectionState::Login,
+            NextState::Status => ConnectionState::Status,
+        }
+    }
 }
 
 impl TryFrom<BytesMut> for NextState {
@@ -75,9 +62,8 @@ impl TryFrom<BytesMut> for NextState {
     }
 }
 
-#[test]
-fn test_handshake_server() {
-    println!("Server started!");
-    let mut server = HandShakeServer {};
-    server.start_selection_loop("127.0.0.1:25565".parse().unwrap(), 100);
+impl PacketHandler<Player> for HandShake {
+    fn handle_packet(&self, system: &mut Player) {
+        system.session_relay.connection_state = (&self.next_state).into();
+    }
 }

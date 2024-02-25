@@ -54,7 +54,7 @@ impl<T: Default> Selector<T> {
         }
     }
 
-    fn accept_socket<T2: Server<T>>(&mut self, socket_server: &mut T2) {
+    fn accept_socket<T2: ConnectionHandler<T>>(&mut self, socket_server: &mut T2) {
         if let Ok((stream, addr)) = self.listener.accept() {
             macro_rules! new_socket {
                 ($index:expr, $poll:expr, $stream:expr) => {
@@ -77,7 +77,7 @@ impl<T: Default> Selector<T> {
         }
     }
 
-    fn handle_socket_read<T2: Server<T>>(
+    fn handle_socket_read<T2: ConnectionHandler<T>>(
         &mut self,
         socket_server: &mut T2,
         token_index: usize,
@@ -99,6 +99,7 @@ impl<T: Default> Selector<T> {
     }
 
     fn debug_selector(&mut self) {
+        return;
         println!(
             "{:#?}",
             self.indexed_connection
@@ -116,7 +117,7 @@ impl<T: Default> Selector<T> {
     }
 }
 
-pub trait Server<T: Default + Sized>: Sized {
+pub trait ConnectionHandler<T: Default + Sized>: Sized {
     fn handle_connection_accept(&mut self) -> T;
     fn handle_connection_read(&mut self, socket: &mut Socket<T>, buf: &[u8]);
     fn handle_connection_closed(&mut self, socket: &mut Socket<T>);
@@ -164,7 +165,7 @@ fn test_selector() {
 
     struct MyServer {}
 
-    impl Server<Player> for MyServer {
+    impl ConnectionHandler<Player> for MyServer {
         fn handle_connection_accept(&mut self) -> Player {
             println!("socket accepted!");
             Player::default()
