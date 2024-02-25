@@ -1,0 +1,12 @@
+[package]
+name = "skeep"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common-server = { path = "../common-server" }
+bytes.workspace = true
+json.workspace = true
+mio.workspace = true
+uuid.workspace = true
+derivative.workspace = true
