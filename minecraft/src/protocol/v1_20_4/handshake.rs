@@ -1,9 +1,12 @@
-use std::io::{Error, ErrorKind, Result};
 use bytes::{Buf, BytesMut};
-use common_server::{selector::Socket, var_int::VarIntRead, var_string::VarStringRead};
+use common_server::{
+    packet::PacketHandler, selector::Socket, var_int::VarIntRead, var_string::VarStringRead,
+};
+use std::io::{Error, ErrorKind, Result};
 
 use crate::{
-    packet_handler::PacketHandler, player::Player, session_relay::ConnectionState,
+    player::Player,
+    session_relay::{self, ConnectionState}, server::Server,
 };
 
 #[derive(Debug)]
@@ -46,7 +49,7 @@ impl From<&NextState> for ConnectionState {
 impl TryFrom<BytesMut> for NextState {
     type Error = Error;
 
-    fn try_from(mut value: BytesMut) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: BytesMut) -> std::result::Result<Self, Self::Error> {
         Ok(match value.reader().read_var_i32()? {
             1 => NextState::Status,
             2 => NextState::Login,
@@ -60,8 +63,11 @@ impl TryFrom<BytesMut> for NextState {
     }
 }
 
-impl PacketHandler for HandShake {
-    fn handle_packet(&self, value: &mut Socket<Player>) {
-        value.connection.session_relay.connection_state = (&self.next_state).into();
+impl PacketHandler<Player, Server> for HandShake {
+    fn handle_packet(&self, server: &mut Server, value: &mut Socket<Player>) {
+        println!("handshake!");
+        let session_relay = &mut value.connection.session_relay;
+        session_relay.connection_state = Into::into(&self.next_state);
+        session_relay.protocol_id = self.protocol_version;
     }
 }

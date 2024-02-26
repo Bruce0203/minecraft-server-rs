@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-common-server = { path = "../common-server" }
+common_server = { path = "../common_server" }
 bytes.workspace = true
 json.workspace = true
 mio.workspace = true

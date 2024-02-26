@@ -1,9 +1,13 @@
 use std::io::{Error, ErrorKind, Result, Write};
 
-use bytes::{Buf, BytesMut};
-use common_server::{selector::{ConnectionHandler, Socket, Selector}, var_int::VarIntRead};
+use bytes::{Buf, BufMut, BytesMut};
+use common_server::{
+    encoder::Encoder,
+    selector::{ConnectionHandler, Selector, Socket},
+    var_int::{VarIntRead, VarIntWrite},
+};
 
-use crate::protocol::v1_20_1::V1_20_1;
+use crate::protocol::v1_20_4::V1_20_4;
 
 use super::{packet_read_handler::PacketReadHandler, player::Player, server::Server};
 
@@ -13,7 +17,7 @@ impl ConnectionHandler<Player> for Server {
     }
 
     fn handle_connection_read(&mut self, socket: &mut Socket<Player>, buf: &[u8]) {
-        if let Err(_) = handle_packet_read(socket, buf) {
+        if let Err(_) = self.handle_packet_read(socket, buf) {
             socket.stream.flush().unwrap();
         }
     }
@@ -21,32 +25,37 @@ impl ConnectionHandler<Player> for Server {
     fn handle_connection_closed(&mut self, _socket: &mut Socket<Player>) {}
 }
 
-fn handle_packet_read(socket: &mut Socket<Player>, buf: &[u8]) -> Result<()> {
-    let mut reader = BytesMut::from(buf).reader();
-    let packet_length = reader.read_var_i32();
-    let bytes = reader.into_inner();
-    if bytes.is_empty() {
-        return Err(Error::new(
-            ErrorKind::InvalidInput,
-            format!(
-                "packet length is {:?}, but buffer size is {:?}",
-                packet_length,
-                bytes.len()
-            ),
-        ));
-    }
-    match socket.connection.session_relay.protocol_id {
-        764 => {
-            V1_20_1::handle_packet_read(socket, bytes)?;
-        }
-        n => {
+impl Server {
+    fn handle_packet_read(&mut self, socket: &mut Socket<Player>, buf: &[u8]) -> Result<()> {
+        let mut reader = BytesMut::from(buf).reader();
+        let packet_length = reader.read_var_i32();
+        let value = reader.into_inner();
+        if value.is_empty() {
             return Err(Error::new(
                 ErrorKind::InvalidInput,
-                format!("unknown protocol: {:?}", n),
-            ))
+                format!(
+                    "packet length is {:?}, but buffer size is {:?}",
+                    packet_length,
+                    value.len()
+                ),
+            ));
         }
+        match socket.connection.session_relay.protocol_id {
+            0 =>  {
+                V1_20_4::handle_packet_read(self, socket, value)?;
+            }
+            765 => {
+                V1_20_4::handle_packet_read(self, socket, value)?;
+            }
+            n => {
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("unknown protocol: {:?}", n),
+                ))
+            }
+        }
+        Ok(())
     }
-    Ok(())
 }
 
 #[test]

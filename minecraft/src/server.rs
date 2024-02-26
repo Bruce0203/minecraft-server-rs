@@ -3,17 +3,21 @@ use uuid::Uuid;
 use super::chat::Chat;
 
 pub struct Server {
-    version: i32,
-    description: Chat,
-    favicon: Option<String>,
-    enforce_secure_chat: bool,
-    previews_chat: bool,
+    pub server_status: ServerStatus,
+}
+
+pub struct ServerStatus {
+    pub version: i32,
+    pub description: Chat,
+    pub favicon: Option<String>,
+    pub enforce_secure_chat: bool,
+    pub previews_chat: bool,
 }
 
 pub struct Players {
-    max: i32,
-    online: i32,
-    sample: Vec<SamplePlayer>,
+    pub max: i32,
+    pub online: i32,
+    pub sample: Vec<SamplePlayer>,
 }
 
 pub struct SamplePlayer {
@@ -24,11 +28,13 @@ pub struct SamplePlayer {
 impl Server {
     pub fn new() -> Server {
         Server {
-            version: 764,
-            description: Chat::from("A Minecraft Server"),
-            favicon: None,
-            enforce_secure_chat: false,
-            previews_chat: false,
+            server_status: ServerStatus {
+                version: 765,
+                description: Chat::from("A Minecraft Server"),
+                favicon: None,
+                enforce_secure_chat: false,
+                previews_chat: false,
+            },
         }
     }
 }

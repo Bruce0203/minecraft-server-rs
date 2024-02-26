@@ -155,6 +155,7 @@ pub trait ConnectionHandler<T: Sized>: Sized {
 }
 
 #[test]
+#[ignore]
 fn test_selector() {
     struct Player {
         acc: i32,

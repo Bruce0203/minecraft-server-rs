@@ -1,5 +1,3 @@
-use derivative::Derivative;
-
 use super::session_relay::SessionRelay;
 
 #[derive(Default)]
