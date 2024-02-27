@@ -74,8 +74,10 @@ impl<T> Selector<T> {
         let events_capacity = 128;
         let mut events = Events::with_capacity(events_capacity);
         loop {
+            println!("poll");
             #[warn(unused_must_use)]
             self.poll.poll(&mut events, None);
+            println!("endpoll");
             for event in events.iter() {
                 let token = event.token();
                 if token == server_token {
