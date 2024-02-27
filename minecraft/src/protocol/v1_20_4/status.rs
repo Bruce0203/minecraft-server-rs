@@ -29,7 +29,6 @@ pub struct StatusResponse<'a> {
 
 impl<'a> Encoder for StatusResponse<'a> {
     fn encode_to_write<W: Write>(&self, writer: &mut W) {
-        serde_json::to_string(self.server_status);
     }
 }
 
