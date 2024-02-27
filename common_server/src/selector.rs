@@ -2,8 +2,9 @@ use mio::{
     net::{TcpListener, TcpStream},
     Events, Interest, Poll, Token,
 };
+use serde::{Deserialize, Serialize};
 use std::{
-    io::{Read, Write},
+    io::{Read, Result, Write},
     net::SocketAddr,
 };
 
@@ -21,16 +22,15 @@ impl<T> Socket<T> {
         addr: SocketAddr,
         connection: Box<T>,
         poll: &mut Poll,
-    ) -> Socket<T> {
+    ) -> Result<Socket<T>> {
         poll.registry()
-            .register(&mut stream, Token(token), Interest::READABLE)
-            .unwrap();
-        Socket {
+            .register(&mut stream, Token(token), Interest::READABLE)?;
+        Ok(Socket {
             stream,
             token,
             addr,
             connection,
-        }
+        })
     }
 }
 
@@ -54,15 +54,18 @@ impl<T> Selector<T> {
         }
     }
 
-    pub fn start_selection_loop<T2>(
-        &mut self,
-        connection_handler: &mut T2,
-           ) where
+    pub fn close_connection(&mut self, socket: &mut Socket<T>) -> std::io::Result<()>{
+        self.poll.registry().deregister(&mut socket.stream)?;
+
+        Ok(())
+    }
+
+    pub fn start_selection_loop<T2>(&mut self, connection_handler: &mut T2)
+    where
         T2: ConnectionHandler<T>,
     {
         let server_token = Token(usize::MAX);
-        self
-            .poll
+        self.poll
             .registry()
             .register(&mut self.listener, server_token, Interest::READABLE)
             .unwrap();
@@ -71,7 +74,8 @@ impl<T> Selector<T> {
         let events_capacity = 128;
         let mut events = Events::with_capacity(events_capacity);
         loop {
-            self.poll.poll(&mut events, None).unwrap();
+            #[warn(unused_must_use)]
+            self.poll.poll(&mut events, None);
             for event in events.iter() {
                 let token = event.token();
                 if token == server_token {
@@ -99,11 +103,14 @@ impl<T> Selector<T> {
                 };
             }
             if let Some(index) = self.index_queue.pop() {
-                self.indexed_connection[index] = Some(new_socket!(index, &mut self.poll, stream));
+                if let Ok(socket) = new_socket!(index, &mut self.poll, stream) {
+                    self.indexed_connection[index] = Some(socket);
+                }
             } else {
                 let index = self.indexed_connection.len();
-                self.indexed_connection
-                    .push(Some(new_socket!(index, &mut self.poll, stream)));
+                if let Ok(socket) = new_socket!(index, &mut self.poll, stream) {
+                    self.indexed_connection.push(Some(socket));
+                }
             }
         }
     }
@@ -113,13 +120,19 @@ impl<T> Selector<T> {
         socket_server: &mut T2,
         token_index: usize,
         buf: &mut [u8],
-    ) {
-        let socket = unsafe { self.indexed_connection.get_unchecked_mut(token_index) }
-            .as_mut()
-            .unwrap();
-        let read = socket.stream.read(buf).unwrap();
+    ) -> Result<()> {
+        let socket_result =
+            unsafe { self.indexed_connection.get_unchecked_mut(token_index) }.as_mut();
+
+        if socket_result.is_none() {
+            println!("socket is none");
+            panic!();
+        }
+        let socket = socket_result.unwrap();
+
+        let read = socket.stream.read(buf)?;
         if read == 0 {
-            self.poll.registry().deregister(&mut socket.stream).unwrap();
+            self.poll.registry().deregister(&mut socket.stream)?;
             socket_server.handle_connection_closed(socket);
             self.index_queue.push(token_index);
             self.indexed_connection[token_index] = None;
@@ -127,6 +140,7 @@ impl<T> Selector<T> {
             let read_buf = &buf[0..read];
             socket_server.handle_connection_read(socket, read_buf);
         }
+        Ok(())
     }
 
     fn debug_selector(&mut self) {
@@ -187,7 +201,7 @@ fn test_selector() {
     let addr = "127.0.0.1:25565".parse().unwrap();
     start_bot_daemons(addr);
     let mut selector = Selector::bind(addr, 256);
-    let mut server = MyServer{};
+    let mut server = MyServer {};
     selector.start_selection_loop(&mut server);
 
     fn start_bot_daemons(server_addr: SocketAddr) {

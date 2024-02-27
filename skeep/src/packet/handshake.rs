@@ -38,7 +38,7 @@ impl TryFrom<BytesMut> for HandShake {
 }
 
 impl Encoder for HandShake {
-    fn encode_to_bytes(&self, bytes: &mut BytesMut) {
+    fn encode_to_write(&self, bytes: &mut BytesMut) {
         let mut writer = bytes.writer();
         writer.write_all(&i32::to_be_bytes(self.protocol_version)).unwrap();
         writer.write_all(&[size_of::<NextState>() as u8]).unwrap();
@@ -59,7 +59,7 @@ impl From<&NextState> for ConnectionState {
 }
 
 impl Encoder for NextState {
-    fn encode_to_bytes(&self, bytes: &mut BytesMut) {
+    fn encode_to_write(&self, bytes: &mut BytesMut) {
         let mut writer = bytes.writer();
         writer.write_all(&[size_of::<NextState>() as u8]).unwrap();
     }
