@@ -1,15 +1,22 @@
-use std::io::{Error, ErrorKind, Result, Write};
+use std::{
+    io::{Error, ErrorKind, Result, Write},
+    net::SocketAddr,
+};
 
 use bytes::{Buf, BufMut, BytesMut};
 use common_server::{
     encoder::Encoder,
+    packet::PacketHandler,
     selector::{ConnectionHandler, Selector, Socket},
     var_int::{VarIntRead, VarIntWrite},
 };
 
-use crate::protocol::v1_20_4::V1_20_4;
-
-use super::{packet_read_handler::PacketReadHandler, player::Player, server::Server};
+use crate::{
+    packet_read_handler::PacketReadHandler,
+    player::Player,
+    protocol::v1_20_4::{handshake::HandShake, V1_20_4},
+    server::Server,
+};
 
 impl ConnectionHandler<Player> for Server {
     fn handle_connection_accept(&mut self) -> Player {
@@ -40,8 +47,9 @@ impl Server {
                 ),
             ));
         }
+
         match socket.connection.session_relay.protocol_id {
-            0 =>  {
+            0 => {
                 V1_20_4::handle_packet_read(self, socket, value)?;
             }
             765 => {
@@ -58,10 +66,4 @@ impl Server {
     }
 }
 
-#[test]
-fn test_handshake_server() {
-    println!("Server started!");
-    let mut server = Server::new();
-    let mut selector = Selector::bind("127.0.0.1:25565".parse().unwrap(), 256);
-    selector.start_selection_loop(&mut server);
-}
+

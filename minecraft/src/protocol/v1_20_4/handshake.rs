@@ -63,11 +63,12 @@ impl TryFrom<BytesMut> for NextState {
     }
 }
 
-impl PacketHandler<Player, Server> for HandShake {
-    fn handle_packet(&self, server: &mut Server, value: &mut Socket<Player>) {
+impl PacketHandler<Server, Player> for HandShake {
+    fn handle_packet(&self, server: &mut Server, value: &mut Socket<Player>) -> std::io::Result<()> {
         println!("handshake!");
         let session_relay = &mut value.connection.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
+        Ok(())
     }
 }
