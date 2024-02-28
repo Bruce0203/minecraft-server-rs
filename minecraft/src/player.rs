@@ -1,4 +1,4 @@
-use super::session_relay::SessionRelay;
+use crate::connection::session_relay::SessionRelay;
 
 #[derive(Default)]
 pub struct Player {

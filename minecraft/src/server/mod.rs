@@ -19,8 +19,8 @@ impl Server {
                 },
                 description: Chat::from("A Minecraft Server".to_string()),
                 favicon: None,
-                enforce_secure_chat: false,
-                previews_chat: false,
+                enforce_secure_chat: true,
+                previews_chat: true,
                 players: Players {
                     max: 20,
                     online: 0,

@@ -6,7 +6,4 @@ edition = "2021"
 [dependencies]
 bytes.workspace = true
 mio.workspace = true
-backtrace = "0.3.69"
-serde_json = "1.0.114"
-serde = { version = "1.0.197", features = ["derive"] }
 

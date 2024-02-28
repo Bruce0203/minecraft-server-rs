@@ -1,20 +1,21 @@
-use std::io::{Error, Write, Result};
-use bytes::{Buf, BufMut, BytesMut};
-use common_server::encoder::PacketWriter;
+use bytes::{Buf, BytesMut};
+use common_server::packet::PacketWriter;
 use common_server::selector::Socket;
 use common_server::{encoder::Encoder, packet::PacketHandler};
+use std::io::{Error, Result, Write};
 
 use crate::player::Player;
 use crate::server::Server;
 
+#[derive(Debug)]
 pub struct PingRequest {
     payload: i64,
 }
 
-impl TryFrom<BytesMut> for PingRequest {
+impl TryFrom<&mut BytesMut> for PingRequest {
     type Error = Error;
 
-    fn try_from(mut value: BytesMut) -> Result<Self> {
+    fn try_from(value: &mut BytesMut) -> Result<Self> {
         Ok(PingRequest {
             payload: value.get_i64(),
         })
@@ -22,14 +23,11 @@ impl TryFrom<BytesMut> for PingRequest {
 }
 
 impl PacketHandler<Server, Player> for PingRequest {
-    fn handle_packet(&self, _server: &mut Server, player: &mut Socket<Player>) -> Result<()> {
-        player.stream.write_all(
-            PingResponse {
-                payload: self.payload,
-            }
-            .encode()
-            .as_mut(),
-        ).unwrap();
+    fn handle_packet(&self, _server: &mut Server, socket: &mut Socket<Player>) -> Result<()> {
+        let ping_response = PingResponse {
+            payload: self.payload,
+        };
+        ping_response.send_packet(socket)?;
         Ok(())
     }
 }
@@ -39,19 +37,14 @@ pub struct PingResponse {
 }
 
 impl PacketWriter<Player> for PingResponse {
-    fn send_packet(&self, socket: &mut Socket<Player>) -> Result<()> {
-        todo!()
+    fn get_packet_id(&self, _socket: &mut Socket<Player>) -> Result<i32> {
+        Ok(0x01)
     }
 }
 
 impl Encoder for PingResponse {
-    fn encode_to_write<W: Write>(&self, write: &mut W) {
-        write.write_all(&i64::to_be_bytes(self.payload));
-    }
-}
-
-impl PacketHandler<Server, Player> for PingResponse {
-    fn handle_packet(&self, server: &mut Server, player: &mut Socket<Player>) -> Result<()> {
-        todo!()
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_all(&i64::to_be_bytes(self.payload))?;
+        Ok(())
     }
 }

@@ -1,6 +1,6 @@
 use std::io::{Error, Result};
 
-use bytes::{Buf, BytesMut};
+use bytes::{Buf, BytesMut, Bytes};
 use common_server::{packet::PacketHandler, selector::Socket, var_string::VarStringRead};
 use uuid::Uuid;
 
@@ -11,10 +11,10 @@ pub struct LoginStart {
     player_uuid: Uuid,
 }
 
-impl TryFrom<BytesMut> for LoginStart {
+impl TryFrom<&mut BytesMut> for LoginStart {
     type Error = Error;
 
-    fn try_from(value: BytesMut) -> Result<Self> {
+    fn try_from(value: &mut BytesMut) -> Result<Self> {
         let mut reader = value.reader();
         Ok(LoginStart {
             name: reader.read_var_string::<16>()?,

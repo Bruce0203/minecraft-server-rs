@@ -1,21 +1,26 @@
-use std::io::{Result, Write};
-use std::time::Duration;
+use std::io::{Error, Result, Write};
 
-use backtrace::Backtrace;
-use bytes::{BufMut, BytesMut};
-use common_server::encoder::{Encoder, PacketWriter};
-use common_server::packet::PacketHandler;
+use bytes::BytesMut;
+use common_server::encoder::Encoder;
+use common_server::packet::{PacketHandler, PacketWriter};
 use common_server::selector::Socket;
-use common_server::var_int::VarIntWrite;
 use common_server::var_string::VarStringWrite;
-use json::{object, JsonValue};
+use json::JsonValue;
 
-use crate::chat::Chat;
 use crate::player::Player;
 use crate::server::server_status::ServerStatus;
 use crate::server::Server;
 
+#[derive(Debug)]
 pub struct StatusRequest {}
+
+impl TryFrom<&mut BytesMut> for StatusRequest {
+    type Error = Error;
+
+    fn try_from(_value: &mut BytesMut) -> Result<Self> {
+        Ok(StatusRequest {})
+    }
+}
 
 impl StatusRequest {
     pub fn new() -> StatusRequest {
@@ -28,26 +33,27 @@ pub struct StatusResponse<'a> {
 }
 
 impl<'a> Encoder for StatusResponse<'a> {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        let server_status_data: &JsonValue = &self.server_status.into();
+        writer.write_var_string(server_status_data.dump().as_str())?;
+        Ok(())
     }
 }
 
 impl<'a> PacketWriter<Player> for StatusResponse<'a> {
-    fn send_packet(&self, socket: &mut Socket<Player>) -> Result<()> {
-        let payload = self.encode();
-        socket.stream.write_all(&[0x00])?;
-        socket.stream.write_var_i32(payload.len() as i32)?;
-        socket.stream.write_all(&payload)?;
-        Ok(())
+    fn get_packet_id(&self, socket: &mut Socket<Player>) -> Result<i32> {
+        Ok(0x00)
     }
 }
 
 impl PacketHandler<Server, Player> for StatusRequest {
-    fn handle_packet(&self, server: &mut Server, player: &mut Socket<Player>) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, socket: &mut Socket<Player>) -> Result<()> {
+        println!("{:#?}", self);
         let status_response = StatusResponse {
             server_status: &server.server_status,
         };
-        status_response.send_packet(player)?;
+        status_response.send_packet(socket)?;
         Ok(())
     }
 }
+

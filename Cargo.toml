@@ -10,9 +10,8 @@ mio = { version = "0.8.10", features = ["os-poll", "net"] }
 uuid = { version = "1.7.0", features = ["v4", "fast-rng", "macro-diagnostics"] }
 derivative = "2.2.0"
 derive_more = "0.99.17"
-
-[dependencies]
 bitflags = "2.4.2"
 
 [workspace]
-members = ["common_server",  "minecraft", "skeep"]
+members = ["common_server", "minecraft"]
+
