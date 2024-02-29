@@ -1,10 +1,18 @@
 use std::io::{Error, Result};
 
-use bytes::{Buf, BytesMut, Bytes};
+use bytes::{Buf, Bytes, BytesMut};
 use common_server::{packet::PacketHandler, selector::Socket, var_string::VarStringRead};
 use uuid::Uuid;
 
-use crate::{player::Player, server::Server, protocol::v1_20_4::{set_compression::{self, SetCompression}, login_success::{self, LoginSuccess}}, connection::packet_writer::PacketWriter};
+use crate::{
+    connection::packet_writer::PacketWriter,
+    player::Player,
+    protocol::v1_20_4::{
+        login_success::{self, LoginSuccess},
+        set_compression::{self, SetCompression},
+    },
+    server::Server,
+};
 
 pub struct LoginStart {
     name: String,
@@ -29,13 +37,13 @@ impl PacketHandler<Server, Player> for LoginStart {
             "LoginStart(name={:?}, player_uuid={:?})",
             self.name, self.player_uuid
         );
-        set_compression::set_compression(socket, 256)?;
         let login_success = LoginSuccess {
             uuid: self.player_uuid,
-            username: self.name.to_owned(), 
-            properties: Vec::new()
+            username: self.name.to_owned(),
+            properties: Vec::new(),
         };
         login_success.send_packet(socket)?;
+        //set_compression::set_compression(socket, 256)?;
         Ok(())
     }
 }

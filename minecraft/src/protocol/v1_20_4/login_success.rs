@@ -1,4 +1,6 @@
-use common_server::{array::VarIntSizedVecWrite, var_string::VarStringWrite, encoding::Encoder};
+use std::io::Result;
+
+use common_server::{array::VarIntSizedVecWrite, encoding::Encoder, var_string::VarStringWrite};
 use uuid::Uuid;
 
 use crate::{connection::packet_writer::PacketWriter, prelude::Player};
@@ -17,7 +19,7 @@ pub struct LoginProperty {
 }
 
 impl Encoder for LoginSuccess {
-    fn encode_to_write<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+    fn encode_to_write<W: std::io::Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_all(&self.uuid.into_bytes())?;
         writer.write_var_string(self.username.as_str())?;
         writer.write_var_int_sized_vec(&self.properties)?;
@@ -26,16 +28,13 @@ impl Encoder for LoginSuccess {
 }
 
 impl PacketWriter for LoginSuccess {
-    fn get_packet_id(
-        &self,
-        socket: &mut Player,
-    ) -> std::io::Result<i32> {
+    fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x02)
     }
 }
 
 impl Encoder for LoginProperty {
-    fn encode_to_write<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+    fn encode_to_write<W: std::io::Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_var_string(self.name.as_str())?;
         writer.write_var_string(self.value.as_str())?;
         writer.write_all(&[self.is_signed as u8])?;

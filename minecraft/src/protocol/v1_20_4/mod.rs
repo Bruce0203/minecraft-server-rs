@@ -3,7 +3,7 @@ use std::io::{Error, ErrorKind, Result};
 use crate::{
     connection::{packet_read_handler::PacketReadHandler, session_relay::ConnectionState},
     player::Player,
-    server::Server,
+    server::Server, protocol::v1_20_4::{login_acknowledged::LoginAcknowledged, plugin_message::PluginMessage},
 };
 
 use self::{
@@ -12,6 +12,8 @@ use self::{
 use bytes::{Buf, BytesMut};
 use common_server::{packet::PacketHandler, selector::Socket, var_int::VarIntRead};
 
+pub mod login_acknowledged;
+pub mod plugin_message;
 pub mod login_success;
 pub mod handshake;
 pub mod login_start;
@@ -45,6 +47,8 @@ impl<'server> PacketReadHandler<'server> for V1_20_4 {
             (ConnectionState::Status, 1) => {
                 PingRequest::try_from(bytes)?.handle_packet(server, player)?
             }
+            (ConnectionState::Login, 3) => LoginAcknowledged::try_from(bytes)?.handle_packet(server, player)?,
+            (ConnectionState::Confgiuration, 0x01) => PluginMessage::try_from(bytes)?.handle_packet(server, player)?,
             _ => {
                 return Err(Error::new(
                     ErrorKind::InvalidInput,

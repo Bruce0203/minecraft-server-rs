@@ -66,7 +66,6 @@ impl<'server> PacketHandler<Server, Player> for HandShake {
         server: &mut Server,
         value: &mut Player,
     ) -> std::io::Result<()> {
-        println!("{:?}", self);
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;

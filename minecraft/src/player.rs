@@ -28,7 +28,7 @@ impl Socket for Player {
         self.addr
     }
 
-    fn get_wirte_buffer(&mut self) -> &mut BytesMut {
+    fn get_write_buf(&mut self) -> &mut BytesMut {
         &mut self.write_buffer
     }
 }

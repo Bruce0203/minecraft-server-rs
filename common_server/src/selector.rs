@@ -1,4 +1,4 @@
-use bytes::BytesMut;
+use bytes::{BufMut, BytesMut};
 use mio::{
     net::{TcpListener, TcpStream},
     Events, Interest, Poll, Token,
@@ -9,6 +9,8 @@ use std::{
     time::Duration,
 };
 
+use crate::var_int::VarIntWrite;
+
 pub trait Socket: Sized {
     type Server: ConnectionHandler<Self>;
 
@@ -18,7 +20,7 @@ pub trait Socket: Sized {
 
     fn addr(&self) -> SocketAddr;
 
-    fn get_wirte_buffer(&mut self) -> &mut BytesMut;
+    fn get_write_buf(&mut self) -> &mut BytesMut;
 }
 
 pub struct ConnectionPool<Player: Socket> {
@@ -153,7 +155,7 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                                 connection_pool.indexed_connection[token_index] = None;
                                 continue;
                             }
-                            if !player.get_wirte_buffer().is_empty() {
+                            if !player.get_write_buf().is_empty() {
                                 poll.registry()
                                     .reregister(
                                         player.stream(),
@@ -165,13 +167,12 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                         }
                     } else if event.is_writable() {
                         let player = connection_pool.get_socket(token_index);
-                        let mut write_buffer = player.get_wirte_buffer().clone();
+                        let mut write_buf = player.get_write_buf().clone();
                         let stream = player.stream();
                         poll.registry()
                             .reregister(stream, token, Interest::READABLE)
                             .expect("cannot reregister socket");
-                        if let Err(_) = stream.write_all(&write_buffer) {
-                            println!("WriteError");
+                        if let Err(_) = stream.write_all(&write_buf) {
                             poll.registry()
                                 .deregister(player.stream())
                                 .expect("cannot deregister socket");
@@ -180,7 +181,7 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                             connection_pool.indexed_connection[token_index] = None;
                             continue;
                         }
-                        write_buffer.clear();
+                        write_buf.clear();
                     }
                 }
             }
