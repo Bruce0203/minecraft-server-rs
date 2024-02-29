@@ -63,8 +63,8 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
         connection_handler: Server,
     ) -> Selector<Player, Server> {
         Selector {
-            listener: TcpListener::bind(addr).unwrap(),
-            poll: Poll::new().unwrap(),
+            listener: TcpListener::bind(addr).expect("Cannot start server"),
+            poll: Poll::new().expect("cannot create poll"),
             connection_pool: ConnectionPool {
                 indexed_connection: Vec::with_capacity(connection_pool_size),
                 index_queue: Vec::with_capacity(connection_pool_size),
@@ -81,7 +81,7 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
         let connection_pool = &mut self.connection_pool;
         poll.registry()
             .register(listener, server_token, Interest::READABLE)
-            .unwrap();
+            .expect("Cannot reigster server to poll");
         const MAX_READ_BUFFER_SIZE: usize = 10000;
         let buf = &mut [0u8; MAX_READ_BUFFER_SIZE];
         let events_capacity = 128;
@@ -122,7 +122,9 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                         let stream = player.stream();
                         let read_result = stream.read(buf);
                         if read_result.is_err() {
-                            poll.registry().deregister(player.stream()).unwrap();
+                            poll.registry()
+                                .deregister(player.stream())
+                                .expect("cannot deregister socket");
                             connection_handler.handle_connection_closed(player);
                             connection_pool.index_queue.push(token_index);
                             connection_pool.indexed_connection[token_index] = None;
@@ -130,16 +132,27 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                         }
                         let read = read_result.unwrap();
                         if read == 0 {
-                            poll.registry().deregister(player.stream()).unwrap();
+                            poll.registry()
+                                .deregister(player.stream())
+                                .expect("cannot deregister socket");
                             connection_handler.handle_connection_closed(player);
                             connection_pool.index_queue.push(token_index);
                             connection_pool.indexed_connection[token_index] = None;
                             continue;
                         } else {
                             let read_buf = &buf[0..read];
-                            connection_handler
-                                .handle_connection_read(player, read_buf)
-                                .unwrap();
+                            if let Err(err) =
+                                connection_handler.handle_connection_read(player, read_buf)
+                            {
+                                println!("Read handle error: {}", err);
+                                poll.registry()
+                                    .deregister(player.stream())
+                                    .expect("cannot deregister socket");
+                                connection_handler.handle_connection_closed(player);
+                                connection_pool.index_queue.push(token_index);
+                                connection_pool.indexed_connection[token_index] = None;
+                                continue;
+                            }
                             if !player.get_wirte_buffer().is_empty() {
                                 poll.registry()
                                     .reregister(
@@ -147,7 +160,7 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                                         token,
                                         Interest::READABLE | Interest::WRITABLE,
                                     )
-                                    .unwrap();
+                                    .expect("cannot reregister socket");
                             }
                         }
                     } else if event.is_writable() {
@@ -156,8 +169,17 @@ impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server>
                         let stream = player.stream();
                         poll.registry()
                             .reregister(stream, token, Interest::READABLE)
-                            .unwrap();
-                        if let Ok(_) = stream.write_all(&write_buffer) {}
+                            .expect("cannot reregister socket");
+                        if let Err(_) = stream.write_all(&write_buffer) {
+                            println!("WriteError");
+                            poll.registry()
+                                .deregister(player.stream())
+                                .expect("cannot deregister socket");
+                            connection_handler.handle_connection_closed(player);
+                            connection_pool.index_queue.push(token_index);
+                            connection_pool.indexed_connection[token_index] = None;
+                            continue;
+                        }
                         write_buffer.clear();
                     }
                 }
