@@ -60,14 +60,14 @@ impl TryFrom<&mut BytesMut> for NextState {
     }
 }
 
-impl PacketHandler<Server, Player> for HandShake {
+impl<'server> PacketHandler<Server, Player> for HandShake {
     fn handle_packet(
         &self,
         server: &mut Server,
-        value: &mut Socket<Player>,
+        value: &mut Player,
     ) -> std::io::Result<()> {
         println!("{:?}", self);
-        let session_relay = &mut value.connection.session_relay;
+        let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
         Ok(())

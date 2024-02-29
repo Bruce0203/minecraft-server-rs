@@ -1,243 +1,167 @@
+use bytes::BytesMut;
 use mio::{
     net::{TcpListener, TcpStream},
     Events, Interest, Poll, Token,
 };
 use std::{
-    io::{Read, Result},
+    io::{Read, Result, Write},
     net::SocketAddr,
     time::Duration,
 };
 
-pub struct Socket<T> {
-    pub stream: TcpStream,
-    pub token: usize,
-    pub addr: SocketAddr,
-    pub connection: Box<T>,
+pub trait Socket: Sized {
+    type Server: ConnectionHandler<Self>;
+
+    fn stream(&mut self) -> &mut TcpStream;
+
+    fn token(&self) -> Token;
+
+    fn addr(&self) -> SocketAddr;
+
+    fn get_wirte_buffer(&mut self) -> &mut BytesMut;
 }
 
-impl<T> Socket<T> {
-    fn new_and_register(
-        mut stream: TcpStream,
-        token: usize,
+pub struct ConnectionPool<Player: Socket> {
+    pub indexed_connection: Vec<Option<Player>>,
+    pub index_queue: Vec<usize>,
+}
+
+impl<Player: Socket> ConnectionPool<Player> {
+    fn get_socket(&mut self, token_index: usize) -> &mut Player {
+        unsafe { self.indexed_connection.get_unchecked_mut(token_index) }
+            .as_mut()
+            .expect("socket is none")
+    }
+}
+
+pub trait ConnectionHandler<Player: Socket>: Sized {
+    fn handle_connection_accept(
+        &mut self,
+        stream: TcpStream,
+        token: Token,
         addr: SocketAddr,
-        connection: Box<T>,
-        poll: &mut Poll,
-    ) -> Result<Socket<T>> {
-        poll.registry()
-            .register(&mut stream, Token(token), Interest::READABLE)?;
-        Ok(Socket {
-            stream,
-            token,
-            addr,
-            connection,
-        })
-    }
-}
+    ) -> Player;
 
-type IndexQueue = Vec<usize>;
-type IndexedConnections<T> = Vec<Option<Socket<T>>>;
+    fn handle_connection_read(&mut self, socket: &mut Player, buf: &[u8]) -> Result<()>;
 
-pub struct Selector<'a, T, T2: ConnectionHandler<T>> {
-    pub listener: TcpListener,
-    poll: Poll,
-    indexed_connection: IndexedConnections<T>,
-    index_queue: IndexQueue,
-    connection_handler: &'a mut T2,
-}
+    fn handle_connection_closed(&mut self, socket: &mut Player);
 
-impl<'a, T, T2: ConnectionHandler<T>> Selector<'a, T, T2> {
-    pub fn bind(
-        addr: SocketAddr,
-        connection_handler: &mut T2,
-        max_connection_pool: usize,
-    ) -> Selector<T, T2> {
-        Selector {
-            listener: TcpListener::bind(addr).unwrap(),
-            poll: Poll::new().unwrap(),
-            indexed_connection: IndexedConnections::with_capacity(max_connection_pool),
-            index_queue: IndexQueue::with_capacity(max_connection_pool),
-            connection_handler,
-        }
-    }
-
-    pub fn close_connection(&mut self, socket: &mut Socket<T>) -> std::io::Result<()> {
-        self.poll.registry().deregister(&mut socket.stream)?;
-        self.connection_handler.handle_connection_closed(socket);
-        self.index_queue.push(socket.token);
-        self.indexed_connection[socket.token] = None;
-        Ok(())
-    }
-
-    pub fn start_selection_loop(&mut self, timeout: Option<Duration>) {
-        let server_token = Token(usize::MAX);
-        self.poll
-            .registry()
-            .register(&mut self.listener, server_token, Interest::READABLE)
-            .unwrap();
-        const MAX_READ_BUFFER_SIZE: usize = 10000;
-        let mut buf = [0u8; MAX_READ_BUFFER_SIZE];
-        let events_capacity = 128;
-        let mut events = Events::with_capacity(events_capacity);
-        loop {
-            #[warn(unused_must_use)]
-            if let Err(_) = self.poll.poll(&mut events, timeout) {
-                continue;
-            }
-            self.connection_handler.handle_update();
-            for event in events.iter() {
-                let token = event.token();
-                if token == server_token {
-                    self.accept_socket();
-                } else {
-                    let token_index = token.0;
-                    if let Err(_) = self.handle_socket_read(token_index, &mut buf) {
-                    }
-                }
-            }
-            self.debug_selector();
-        }
-    }
-
-    fn accept_socket(&mut self) {
-        if let Ok((stream, addr)) = self.listener.accept() {
-            macro_rules! new_socket {
-                ($index:expr, $poll:expr, $stream:expr) => {
-                    Socket::<T>::new_and_register(
-                        $stream,
-                        $index,
-                        addr,
-                        Box::new(self.connection_handler.handle_connection_accept()),
-                        $poll,
-                    )
-                };
-            }
-            if let Some(index) = self.index_queue.pop() {
-                if let Ok(socket) = new_socket!(index, &mut self.poll, stream) {
-                    self.indexed_connection[index] = Some(socket);
-                }
-            } else {
-                let index = self.indexed_connection.len();
-                if let Ok(socket) = new_socket!(index, &mut self.poll, stream) {
-                    self.indexed_connection.push(Some(socket));
-                }
-            }
-        }
-    }
-
-    fn handle_socket_read(&mut self, token_index: usize, buf: &mut [u8]) -> Result<()> {
-        let socket_result =
-            unsafe { (self.indexed_connection).get_unchecked_mut(token_index) }.as_mut();
-
-        if socket_result.is_none() {
-            println!("socket is none");
-            panic!();
-        }
-
-        let socket = socket_result.unwrap();
-        let read = socket.stream.read(buf)?;
-        if read == 0 {
-            self.poll.registry().deregister(&mut socket.stream)?;
-            self.connection_handler.handle_connection_closed(socket);
-            self.index_queue.push(token_index);
-            self.indexed_connection[token_index] = None;
-        } else {
-            let read_buf = &buf[0..read];
-            self.connection_handler
-                .handle_connection_read(socket, read_buf)?;
-        }
-        Ok(())
-    }
-
-    fn debug_selector(&mut self) {
-        return;
-        println!(
-            "{:#?}",
-            self.indexed_connection
-                .iter()
-                .map(|mut conn| {
-                    if let Some(conn) = conn.as_ref() {
-                        conn.addr.to_string()
-                    } else {
-                        "none".to_string()
-                    }
-                })
-                .fold(String::new(), |acc, elem| acc + &elem + ", ")
-                .to_string()
-        );
-    }
-}
-
-pub trait ConnectionHandler<T: Sized>: Sized {
-    fn handle_connection_accept(&mut self) -> T;
-    fn handle_connection_read(&mut self, socket: &mut Socket<T>, buf: &[u8]) -> Result<()>;
-    fn handle_connection_closed(&mut self, socket: &mut Socket<T>);
     fn handle_update(&mut self);
 }
 
-#[test]
-#[ignore]
-fn test_selector() {
-    struct Player {
-        acc: i32,
-    }
+pub struct Selector<Player: Socket, Server: ConnectionHandler<Player>> {
+    listener: TcpListener,
+    poll: Poll,
+    connection_pool: ConnectionPool<Player>,
+    connection_handler: Box<Server>,
+}
 
-    impl Default for Player {
-        fn default() -> Self {
-            Self { acc: 0 }
+impl<Player: Socket, Server: ConnectionHandler<Player>> Selector<Player, Server> {
+    pub fn new(
+        addr: SocketAddr,
+        connection_pool_size: usize,
+        connection_handler: Server,
+    ) -> Selector<Player, Server> {
+        Selector {
+            listener: TcpListener::bind(addr).unwrap(),
+            poll: Poll::new().unwrap(),
+            connection_pool: ConnectionPool {
+                indexed_connection: Vec::with_capacity(connection_pool_size),
+                index_queue: Vec::with_capacity(connection_pool_size),
+            },
+            connection_handler: Box::new(connection_handler),
         }
     }
 
-    struct MyServer {}
-
-    impl ConnectionHandler<Player> for MyServer {
-        fn handle_connection_accept(&mut self) -> Player {
-            println!("socket accepted!");
-            Player::default()
-        }
-
-        fn handle_connection_read(
-            &mut self,
-            socket: &mut Socket<Player>,
-            buf: &[u8],
-        ) -> Result<()> {
-            socket.connection.acc += buf[0] as i32;
-            Ok(())
-        }
-
-        fn handle_connection_closed(&mut self, socket: &mut Socket<Player>) {
-            println!("socket closed!");
-        }
-
-        fn handle_update(&mut self) {}
-    }
-
-    let addr = "127.0.0.1:25565".parse().unwrap();
-    start_bot_daemons(addr);
-    let mut server = MyServer {};
-    let mut selector = Selector::bind(addr, &mut server, 256);
-    selector.start_selection_loop(None);
-
-    fn start_bot_daemons(server_addr: SocketAddr) {
-        use std::{thread, time::Duration};
-
-        thread::sleep(Duration::from_millis(500));
-        thread::spawn(move || {
-            println!("bot started!");
-            let mut i = 0;
-            let mut vec = Vec::<std::net::TcpStream>::new();
-            while i != 11 {
-                if let Ok(mut client) = std::net::TcpStream::connect(server_addr) {
-                    for i in 0..1 {
-                        std::io::Write::write_all(&mut client, &[i, i, i]).unwrap();
+    pub fn start_selection_loop(mut self, timeout: Option<Duration>) {
+        let server_token = Token(usize::MAX);
+        let poll = &mut self.poll;
+        let listener = &mut self.listener;
+        let connection_handler = &mut self.connection_handler;
+        let connection_pool = &mut self.connection_pool;
+        poll.registry()
+            .register(listener, server_token, Interest::READABLE)
+            .unwrap();
+        const MAX_READ_BUFFER_SIZE: usize = 10000;
+        let buf = &mut [0u8; MAX_READ_BUFFER_SIZE];
+        let events_capacity = 128;
+        let events = &mut Events::with_capacity(events_capacity);
+        loop {
+            #[warn(unused_must_use)]
+            if let Err(_) = poll.poll(events, timeout) {
+                continue;
+            }
+            connection_handler.handle_update();
+            for event in events.iter() {
+                let token = event.token();
+                if token == server_token {
+                    if let Ok((stream, addr)) = listener.accept() {
+                        if let Some(index) = connection_pool.index_queue.pop() {
+                            let token = Token(index);
+                            let mut connection =
+                                connection_handler.handle_connection_accept(stream, token, addr);
+                            poll.registry()
+                                .register(connection.stream(), Token(index), Interest::READABLE)
+                                .expect("poll register");
+                            connection_pool.indexed_connection[index] = Some(connection);
+                        } else {
+                            let index = connection_pool.indexed_connection.len();
+                            let token = Token(index);
+                            let mut connection =
+                                connection_handler.handle_connection_accept(stream, token, addr);
+                            poll.registry()
+                                .register(connection.stream(), Token(index), Interest::READABLE)
+                                .expect("poll register");
+                            connection_pool.indexed_connection.push(Some(connection));
+                        }
                     }
-                    vec.push(client);
-                    i += 1;
-                };
+                } else {
+                    let token_index = token.0;
+                    if event.is_readable() {
+                        let player = connection_pool.get_socket(token_index);
+                        let stream = player.stream();
+                        let read_result = stream.read(buf);
+                        if read_result.is_err() {
+                            poll.registry().deregister(player.stream()).unwrap();
+                            connection_handler.handle_connection_closed(player);
+                            connection_pool.index_queue.push(token_index);
+                            connection_pool.indexed_connection[token_index] = None;
+                            continue;
+                        }
+                        let read = read_result.unwrap();
+                        if read == 0 {
+                            poll.registry().deregister(player.stream()).unwrap();
+                            connection_handler.handle_connection_closed(player);
+                            connection_pool.index_queue.push(token_index);
+                            connection_pool.indexed_connection[token_index] = None;
+                            continue;
+                        } else {
+                            let read_buf = &buf[0..read];
+                            connection_handler
+                                .handle_connection_read(player, read_buf)
+                                .unwrap();
+                            if !player.get_wirte_buffer().is_empty() {
+                                poll.registry()
+                                    .reregister(
+                                        player.stream(),
+                                        token,
+                                        Interest::READABLE | Interest::WRITABLE,
+                                    )
+                                    .unwrap();
+                            }
+                        }
+                    } else if event.is_writable() {
+                        let player = connection_pool.get_socket(token_index);
+                        let mut write_buffer = player.get_wirte_buffer().clone();
+                        let stream = player.stream();
+                        poll.registry()
+                            .reregister(stream, token, Interest::READABLE)
+                            .unwrap();
+                        if let Ok(_) = stream.write_all(&write_buffer) {}
+                        write_buffer.clear();
+                    }
+                }
             }
-            for mut client in vec {
-                std::io::Write::flush(&mut client).unwrap();
-            }
-            thread::sleep(Duration::from_secs(1000));
-        });
+        }
     }
 }

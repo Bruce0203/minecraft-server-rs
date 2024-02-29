@@ -1,7 +1,9 @@
+use std::io::Read;
 use std::io::Result;
 use std::io::Write;
 
-use bytes::{BufMut, BytesMut};
+use bytes::BufMut;
+use bytes::BytesMut;
 
 pub trait Encoder {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()>;
@@ -13,4 +15,6 @@ pub trait Encoder {
     }
 }
 
-
+pub trait Decoder: Sized {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self>;
+}

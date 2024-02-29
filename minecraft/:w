@@ -1,0 +1,153 @@
+use bytes::BytesMut;
+use mio::{
+    net::{TcpListener, TcpStream},
+    Events, Interest, Poll, Token,
+};
+use std::{
+    cell::RefCell,
+    io::{Read, Result, Write},
+    net::SocketAddr,
+    ops::DerefMut,
+    rc::Rc,
+    time::Duration,
+};
+
+pub trait Socket: Sized {
+    type Server: ConnectionHandler<Self>;
+
+    fn stream(&mut self) -> &mut TcpStream;
+
+    fn token(&self) -> Token;
+
+    fn addr(&self) -> SocketAddr;
+
+    fn get_wirte_buffer(&mut self) -> &mut BytesMut;
+}
+
+pub struct ConnectionPool<Player: Socket> {
+    pub indexed_connection: Vec<Option<Player>>,
+    pub index_queue: Vec<usize>,
+}
+
+impl<Player: Socket> ConnectionPool<Player> {
+    fn get_socket(&mut self, token_index: usize) -> &mut Player {
+        unsafe { self.indexed_connection.get_unchecked_mut(token_index) }
+            .as_mut()
+            .expect("socket is none")
+    }
+}
+
+pub trait ConnectionHandler<Player: Socket>: Sized {
+    fn handle_connection_accept(
+        server: Rc<RefCell<Self>>,
+        streav: TcpStream,
+        token: Token,
+        addr: SocketAddr,
+    ) -> Player;
+
+    fn handle_connection_read(&mut self, socket: &mut Player, buf: &[u8]) -> Result<()>;
+
+    fn handle_connection_closed(&mut self, socket: &mut Player);
+
+    fn handle_update(&mut self);
+
+    fn get_connection_pool(&mut self) -> &mut ConnectionPool<Player>;
+
+    fn get_connection_pool_and_self(&mut self) -> (&mut ConnectionPool<Player>, &mut Self);
+
+    fn get_poll_mut(&mut self) -> &mut Poll;
+
+    fn get_poll(&self) -> &Poll;
+
+    fn get_poll_and_listener(&mut self) -> (&mut Poll, &mut TcpListener);
+
+    fn get_listener(&mut self) -> &mut TcpListener;
+
+    fn start_selection_loop(mut self, timeout: Option<Duration>) {
+        let server_token = Token(usize::MAX);
+        let server_rc = Rc::new(RefCell::new(self));
+        let server_rc1 = Rc::clone(&server_rc);
+        let server = &mut *server_rc1.borrow_mut();
+        let (mut poll, mut listener) = server.get_poll_and_listener();
+        poll.registry()
+            .register(listener, server_token, Interest::READABLE)
+            .unwrap();
+        const MAX_READ_BUFFER_SIZE: usize = 10000;
+        let mut buf = [0u8; MAX_READ_BUFFER_SIZE];
+        let events_capacity = 128;
+        let mut events = Events::with_capacity(events_capacity);
+        loop {
+            #[warn(unused_must_use)]
+            if let Err(_) = server.get_poll_mut().poll(&mut events, timeout) {
+                continue;
+            }
+            server.handle_update();
+            for event in events.iter() {
+                let token = event.token();
+                if token == server_token {
+                    server.accept_socket(Rc::clone(&server_rc));
+                } else {
+                    let token_index = token.0;
+                    if event.is_readable() {
+                        if let Err(_) = server.socket_read(token_index, &mut buf) {}
+                    } else if event.is_writable() {
+                        let player = server.get_connection_pool().get_socket(token_index);
+                        let write_buffer = player.get_wirte_buffer().clone();
+                        if let Err(_) = player.stream().write_all(&write_buffer) {}
+                    }
+                }
+            }
+        }
+    }
+
+    fn accept_socket(&mut self, server_rc: Rc<RefCell<Self>>) {
+        if let Ok((mut stream, addr)) = self.get_listener().accept() {
+            if let Some(index) = self.get_connection_pool().index_queue.pop() {
+                let token = Token(index);
+                let server = &mut *server_rc.borrow_mut();
+                let mut connection =
+                    Self::handle_connection_accept(server_rc.clone(), stream, token, addr);
+                self.get_poll()
+                    .registry()
+                    .register(connection.stream(), Token(index), Interest::READABLE)
+                    .expect("poll register");
+                self.get_connection_pool().indexed_connection[index] = Some(connection);
+            } else {
+                let index = self.get_connection_pool().indexed_connection.len();
+                let token = Token(index);
+                let mut connection =
+                    Self::handle_connection_accept(server_rc.clone(), stream, token, addr);
+                self.get_poll()
+                    .registry()
+                    .register(connection.stream(), Token(index), Interest::READABLE)
+                    .expect("poll register");
+                self.get_connection_pool()
+                    .indexed_connection
+                    .push(Some(connection));
+            }
+        }
+    }
+
+    fn close_connection(&mut self, socket: &mut Player) -> Result<()> {
+        self.get_poll().registry().deregister(socket.stream())?;
+        self.handle_connection_closed(socket);
+        self.get_connection_pool()
+            .index_queue
+            .push(socket.token().0);
+        self.get_connection_pool().indexed_connection[socket.token().0] = None;
+        Ok(())
+    }
+
+    fn socket_read(&mut self, token_index: usize, buf: &mut [u8]) -> Result<()> {
+        let player = self.get_connection_pool().get_socket(token_index);
+        let stream = player.stream();
+        let read = stream.read(buf)?;
+        if read == 0 {
+            self.close_connection(player)?;
+        } else {
+            let read_buf = &buf[0..read];
+            self.handle_connection_read(player, read_buf)?;
+        }
+        Ok(())
+    }
+}

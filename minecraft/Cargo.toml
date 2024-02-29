@@ -12,4 +12,4 @@ uuid = { workspace = true, features = ["serde"] }
 derive_more.workspace = true
 derivative.workspace = true
 bitflags.workspace = true 
-
+flate2.workspace = true

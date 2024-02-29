@@ -1,9 +1,10 @@
 use bytes::{Buf, BytesMut};
-use common_server::packet::PacketWriter;
+use common_server::encoding::Encoder;
+use common_server::packet::PacketHandler;
 use common_server::selector::Socket;
-use common_server::{encoder::Encoder, packet::PacketHandler};
 use std::io::{Error, Result, Write};
 
+use crate::connection::packet_writer::PacketWriter;
 use crate::player::Player;
 use crate::server::Server;
 
@@ -23,7 +24,7 @@ impl TryFrom<&mut BytesMut> for PingRequest {
 }
 
 impl PacketHandler<Server, Player> for PingRequest {
-    fn handle_packet(&self, _server: &mut Server, socket: &mut Socket<Player>) -> Result<()> {
+    fn handle_packet(&self, _server: &mut Server, socket: &mut Player) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };
@@ -36,8 +37,8 @@ pub struct PingResponse {
     payload: i64,
 }
 
-impl PacketWriter<Player> for PingResponse {
-    fn get_packet_id(&self, _socket: &mut Socket<Player>) -> Result<i32> {
+impl PacketWriter for PingResponse {
+    fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x01)
     }
 }
