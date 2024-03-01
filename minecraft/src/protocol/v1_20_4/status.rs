@@ -49,7 +49,6 @@ impl<'a> Encoder for StatusResponse<'a> {
 
 impl PacketHandler<Server, Player> for StatusRequest {
     fn handle_packet(&self, server: &mut Server, socket: &mut Player) -> Result<()> {
-        println!("{:#?}", self);
         let status_response = StatusResponse {
             server_status: &server.server_status,
         };

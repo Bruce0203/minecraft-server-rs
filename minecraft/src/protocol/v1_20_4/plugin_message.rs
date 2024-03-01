@@ -1,9 +1,9 @@
 use std::io::{Error, Result};
 
 use bytes::{Buf, Bytes, BytesMut};
-use common_server::{encoding::Decoder, var_string::VarStringRead, packet::PacketHandler};
+use common_server::{encoding::Decoder, packet::PacketHandler, var_string::VarStringRead};
 
-use crate::{server::Server, prelude::Player};
+use crate::{prelude::Player, server::Server};
 
 #[derive(Debug)]
 pub struct PluginMessage {
@@ -15,15 +15,15 @@ impl TryFrom<&mut BytesMut> for PluginMessage {
     type Error = Error;
 
     fn try_from(value: &mut BytesMut) -> Result<Self> {
-        Ok(PluginMessage {
-            channel: value.reader().read_var_string::<32767>()?,
-            data: value.clone().freeze(),
-        })
+        let channel = value.reader().read_var_string::<32767>()?;
+        let data = value.clone().freeze();
+        value.clear();
+        Ok(PluginMessage { channel, data })
     }
 }
 
 impl PacketHandler<Server, Player> for PluginMessage {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+    fn handle_packet(&self, _server: &mut Server, _player: &mut Player) -> Result<()> {
         Ok(())
     }
 }

@@ -42,8 +42,8 @@ impl PacketHandler<Server, Player> for LoginStart {
             username: self.name.to_owned(),
             properties: Vec::new(),
         };
-        login_success.send_packet(socket)?;
         //set_compression::set_compression(socket, 256)?;
+        login_success.send_packet(socket)?;
         Ok(())
     }
 }

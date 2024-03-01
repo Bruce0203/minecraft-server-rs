@@ -1,7 +1,4 @@
-use std::{
-    fmt::write,
-    io::{Result, Write},
-};
+use std::io::{Result, Write};
 
 use bytes::{BufMut, BytesMut};
 use common_server::{encoding::Encoder, selector::Socket, var_int::VarIntWrite};
@@ -46,7 +43,6 @@ pub trait PacketWriter: Sized + Encoder {
             }
         }
         let result = result_buf_writer.into_inner();
-        println!("{:?}", &result.to_vec());
         player.stream().write_all(&result)?;
         Ok(())
     }
