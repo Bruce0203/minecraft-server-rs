@@ -12,7 +12,7 @@ use common_server::{
     var_string::VarStringRead,
 };
 
-use crate::{prelude::Player, server::Server};
+use crate::{server::Server, connection::player::Player};
 
 #[derive(Debug)]
 pub struct ClientInformation {

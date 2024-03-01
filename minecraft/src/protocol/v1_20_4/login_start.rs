@@ -5,8 +5,7 @@ use common_server::{packet::PacketHandler, selector::Socket, var_string::VarStri
 use uuid::Uuid;
 
 use crate::{
-    connection::packet_writer::PacketWriter,
-    player::Player,
+    connection::{packet_writer::PacketWriter, player::Player},
     protocol::v1_20_4::{
         login_success::{self, LoginSuccess},
         set_compression::{self, SetCompression},

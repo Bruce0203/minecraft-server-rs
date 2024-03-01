@@ -3,8 +3,7 @@ use self::{
     ping::PingRequest, status::StatusRequest, finish_configuration::FinishConfiguration,
 };
 use crate::{
-    connection::{packet_read_handler::PacketReadHandler, session_relay::ConnectionState},
-    player::Player,
+    connection::{session_relay::ConnectionState, PacketReadHandler, player::Player},
     protocol::v1_20_4::{login_acknowledged::LoginAcknowledged, plugin_message::PluginMessage},
     server::Server,
 };
@@ -25,7 +24,7 @@ pub mod status;
 
 pub struct V1_20_4;
 
-impl<'server> PacketReadHandler<'server> for V1_20_4 {
+impl PacketReadHandler for V1_20_4 {
     fn handle_packet_read(
         server: &mut Server,
         player: &mut Player,

@@ -1,36 +1,14 @@
+pub mod chat;
 pub mod server_status;
-use std::{
-    cell::RefCell,
-    io::{Error, ErrorKind, Result},
-    net::SocketAddr,
-    ops::Deref,
-    rc::Rc,
-};
 
-use bytes::{Buf, BytesMut};
-use common_server::{
-    selector::{self, ConnectionHandler, ConnectionPool},
-    var_int::VarIntRead,
-};
-use mio::{net::TcpListener, Poll, Registry};
-use uuid::Uuid;
-
-use crate::{
-    connection::{PacketReadHandler, SessionRelay},
-    prelude::Player,
-    protocol::v1_20_4::V1_20_4,
-};
-
-use self::server_status::{Players, SamplePlayers, ServerStatus, ServerVersion};
-
-use super::chat::Chat;
+use self::{server_status::{Players, SamplePlayers, ServerStatus, ServerVersion}, chat::Chat};
 
 pub struct Server {
     pub server_status: ServerStatus,
 }
 
 impl Server {
-    pub fn new(addr: SocketAddr) -> Server {
+    pub fn new() -> Server {
         Server {
             server_status: ServerStatus {
                 version: ServerVersion {

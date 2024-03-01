@@ -3,7 +3,7 @@ use std::io::{Error, Result};
 use bytes::BytesMut;
 use common_server::packet::PacketHandler;
 
-use crate::{prelude::Player, server::Server, connection::{ConnectionState, packet_writer::PacketWriter}};
+use crate::{server::Server, connection::{ConnectionState, packet_writer::PacketWriter, player::Player}};
 
 use super::finish_configuration::{self, FinishConfiguration};
 

@@ -4,7 +4,7 @@ use bytes::{BufMut, BytesMut};
 use common_server::{encoding::Encoder, selector::Socket, var_int::VarIntWrite};
 use flate2::{write::ZlibEncoder, Compression};
 
-use crate::prelude::Player;
+use super::player::Player;
 
 pub trait PacketWriter: Sized + Encoder {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32>;

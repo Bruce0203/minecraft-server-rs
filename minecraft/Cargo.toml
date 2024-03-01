@@ -8,7 +8,7 @@ common_server = { path = "../common_server" }
 bytes.workspace = true
 json.workspace = true
 mio.workspace = true
-uuid = { workspace = true, features = ["serde"] }
+uuid.workspace = true
 derive_more.workspace = true
 derivative.workspace = true
 bitflags.workspace = true 

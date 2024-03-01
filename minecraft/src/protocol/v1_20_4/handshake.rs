@@ -4,7 +4,7 @@ use common_server::{
 };
 use std::io::{Error, ErrorKind};
 
-use crate::{connection::session_relay::ConnectionState, player::Player, server::Server};
+use crate::{connection::{session_relay::ConnectionState, player::Player}, server::Server};
 
 #[derive(Debug)]
 pub struct HandShake {

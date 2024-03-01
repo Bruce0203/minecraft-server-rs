@@ -3,7 +3,8 @@ use std::io::{Result, Write};
 use common_server::encoding::Encoder;
 use common_server::var_int::VarIntWrite;
 
-use crate::{connection::packet_writer::PacketWriter, prelude::Player};
+use crate::connection::packet_writer::PacketWriter;
+use crate::connection::player::Player;
 
 pub struct SetCompression {
     pub compression_threshold: i32,

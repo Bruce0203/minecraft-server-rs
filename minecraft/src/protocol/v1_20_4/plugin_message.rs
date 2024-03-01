@@ -3,7 +3,7 @@ use std::io::{Error, Result};
 use bytes::{Buf, Bytes, BytesMut};
 use common_server::{encoding::Decoder, packet::PacketHandler, var_string::VarStringRead};
 
-use crate::{prelude::Player, server::Server};
+use crate::{server::Server, connection::player::Player};
 
 #[derive(Debug)]
 pub struct PluginMessage {

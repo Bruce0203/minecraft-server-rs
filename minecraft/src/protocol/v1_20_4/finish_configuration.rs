@@ -3,7 +3,7 @@ use std::io::{Error, Result, Write};
 use bytes::BytesMut;
 use common_server::{packet::PacketHandler, encoding::Encoder};
 
-use crate::{server::Server, prelude::Player, connection::{packet_writer::PacketWriter, ConnectionState}};
+use crate::{server::Server, connection::{player::Player, ConnectionState, packet_writer::PacketWriter}};
 
 pub struct FinishConfiguration {}
 

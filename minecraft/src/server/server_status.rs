@@ -3,7 +3,7 @@ use std::ops::Deref;
 use json::JsonValue;
 use uuid::Uuid;
 
-use crate::chat::Chat;
+use super::chat::Chat;
 
 pub struct ServerStatus {
     pub version: ServerVersion,

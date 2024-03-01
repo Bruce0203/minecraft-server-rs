@@ -5,7 +5,7 @@ use common_server::selector::Socket;
 use std::io::{Error, Result, Write};
 
 use crate::connection::packet_writer::PacketWriter;
-use crate::player::Player;
+use crate::connection::player::Player;
 use crate::server::Server;
 
 #[derive(Debug)]

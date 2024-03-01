@@ -8,7 +8,7 @@ use common_server::var_string::VarStringWrite;
 use json::JsonValue;
 
 use crate::connection::packet_writer::PacketWriter;
-use crate::player::Player;
+use crate::connection::player::Player;
 use crate::server::server_status::ServerStatus;
 use crate::server::Server;
 
