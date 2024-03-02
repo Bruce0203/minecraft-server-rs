@@ -1,8 +1,5 @@
 use crate::var_int::{VarIntRead, VarIntWrite};
-use std::{
-    fmt::write,
-    io::{Error, ErrorKind, Result},
-};
+use std::io::{Error, ErrorKind, Result};
 
 pub trait VarStringRead {
     fn read_var_string<const MAX_LENGTH: usize>(&mut self) -> Result<String>;

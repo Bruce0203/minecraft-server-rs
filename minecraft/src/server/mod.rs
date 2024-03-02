@@ -1,5 +1,8 @@
+pub mod position;
+pub mod game_mode;
 pub mod chat;
 pub mod server_status;
+pub mod particle;
 
 use self::{server_status::{Players, SamplePlayers, ServerStatus, ServerVersion}, chat::Chat};
 

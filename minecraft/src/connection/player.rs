@@ -1,6 +1,5 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, io::{Write, Cursor}};
 
-use bytes::BytesMut;
 use common_server::selector::Socket;
 use mio::{net::TcpStream, Token};
 
@@ -11,7 +10,7 @@ pub struct Player {
     pub token: Token,
     pub addr: SocketAddr,
     pub session_relay: SessionRelay,
-    pub write_buffer: BytesMut,
+    pub write_buffer: Cursor<Vec<u8>>,
 }
 
 impl Socket for Player {
@@ -28,7 +27,12 @@ impl Socket for Player {
         self.addr
     }
 
-    fn get_write_buf(&mut self) -> &mut BytesMut {
+    fn get_write_buf(&mut self) -> &mut Cursor<Vec<u8>> {
         &mut self.write_buffer
+    }
+
+    fn write_buf_to_stream(&mut self) -> std::io::Result<()> {
+        self.stream.write_all(self.write_buffer.get_ref())?;
+        Ok(())
     }
 }

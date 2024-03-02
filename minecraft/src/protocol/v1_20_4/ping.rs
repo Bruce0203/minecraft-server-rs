@@ -1,8 +1,7 @@
-use bytes::{Buf, BytesMut};
 use common_server::encoding::Encoder;
 use common_server::packet::PacketHandler;
-use common_server::selector::Socket;
-use std::io::{Error, Result, Write};
+use common_server::primitives::I64Read;
+use std::io::{Error, Result, Write, Cursor};
 
 use crate::connection::packet_writer::PacketWriter;
 use crate::connection::player::Player;
@@ -13,12 +12,12 @@ pub struct PingRequest {
     payload: i64,
 }
 
-impl TryFrom<&mut BytesMut> for PingRequest {
+impl TryFrom<&mut Cursor<Vec<u8>>> for PingRequest {
     type Error = Error;
 
-    fn try_from(value: &mut BytesMut) -> Result<Self> {
+    fn try_from(value: &mut Cursor<Vec<u8>>) -> Result<Self> {
         Ok(PingRequest {
-            payload: value.get_i64(),
+            payload: value.read_i64()?,
         })
     }
 }

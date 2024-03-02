@@ -1,18 +1,15 @@
-use std::{
-    io::{Error, Read, Result, Write},
-    ops::Deref,
-};
+use std::io::{Cursor, Error, Read, Result, Write};
 
 use bitflags::{bitflags, Flags};
-use bytes::{Buf, BytesMut};
 use common_server::{
-    encoding::{Decoder, Encoder},
+    encoding::Decoder,
     packet::PacketHandler,
+    primitives::{BoolRead, I8Read, U8Read},
     var_int::VarIntRead,
     var_string::VarStringRead,
 };
 
-use crate::{server::Server, connection::player::Player};
+use crate::{connection::player::Player, server::Server};
 
 #[derive(Debug)]
 pub struct ClientInformation {
@@ -26,19 +23,19 @@ pub struct ClientInformation {
     allow_server_listings: bool,
 }
 
-impl TryFrom<&mut BytesMut> for ClientInformation {
+impl TryFrom<&mut Cursor<Vec<u8>>> for ClientInformation {
     type Error = Error;
 
-    fn try_from(value: &mut BytesMut) -> Result<Self> {
+    fn try_from(value: &mut Cursor<Vec<u8>>) -> Result<Self> {
         Ok(ClientInformation {
-            locale: value.reader().read_var_string::<16>()?,
-            view_distance: value.get_i8(),
-            chat_mode: ChatMode::decode_from_read(&mut value.reader())?,
-            chat_colors: unsafe { std::mem::transmute(value.get_u8()) },
-            display_skin_parts: DisplaySkinParts::from_bits_truncate(value.get_u8()),
-            main_hand: MainHand::decode_from_read(&mut value.reader())?,
-            enable_text_filtering: unsafe { std::mem::transmute(value.get_u8()) },
-            allow_server_listings: unsafe { std::mem::transmute(value.get_u8()) },
+            locale: value.read_var_string::<16>()?,
+            view_distance: value.read_i8()?,
+            chat_mode: ChatMode::decode_from_read(value)?,
+            chat_colors: value.read_bool()?,
+            display_skin_parts: DisplaySkinParts::from_bits_truncate(value.read_u8()?),
+            main_hand: MainHand::decode_from_read(value)?,
+            enable_text_filtering: value.read_bool()?,
+            allow_server_listings: value.read_bool()?,
         })
     }
 }
@@ -102,7 +99,6 @@ impl Decoder for MainHand {
 
 impl PacketHandler<Server, Player> for ClientInformation {
     fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
-        println!("{:#?}", self);
         Ok(())
     }
 }

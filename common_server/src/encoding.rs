@@ -1,17 +1,15 @@
+use std::io::Cursor;
 use std::io::Read;
 use std::io::Result;
 use std::io::Write;
 
-use bytes::BufMut;
-use bytes::BytesMut;
-
 pub trait Encoder {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()>;
 
-    fn encode(&self) -> Result<BytesMut> {
-        let mut bytes = BytesMut::new().writer();
+    fn encode(&self) -> Result<Cursor<Vec<u8>>> {
+        let mut bytes = Cursor::new(Vec::new());
         self.encode_to_write(&mut bytes)?;
-        Ok(bytes.into_inner())
+        Ok(bytes)
     }
 }
 

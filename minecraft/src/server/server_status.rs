@@ -1,10 +1,9 @@
-use std::ops::Deref;
-
-use json::JsonValue;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::chat::Chat;
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ServerStatus {
     pub version: ServerVersion,
     pub description: Chat,
@@ -14,20 +13,20 @@ pub struct ServerStatus {
     pub players: Players,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ServerVersion {
     pub name: String,
     pub protocol: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Players {
     pub max: i32,
     pub online: i32,
     pub sample: SamplePlayers,
 }
 
-#[derive(derive_more::Deref, Debug)]
+#[derive(derive_more::Deref, Debug, Serialize, Deserialize)]
 pub struct SamplePlayers(pub Vec<SamplePlayer>);
 
 impl SamplePlayers {
@@ -36,63 +35,29 @@ impl SamplePlayers {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SamplePlayer {
     name: String,
     id: Uuid,
 }
 
-impl From<&ServerStatus> for JsonValue {
-    fn from(value: &ServerStatus) -> Self {
-        let mut data = json::JsonValue::new_object();
-        data["version"] = (&value.version).into();
-        data["players"] = (&value.players).into();
-        let chat_data: JsonValue = Into::into(&value.description);
-        data["description"] = chat_data;
-        if let Some(favicon) = &value.favicon {
-            data["favicon"] = favicon.as_str().into();
-        }
-        data["enforceSecureChat"] = value.enforce_secure_chat.into();
-        data["previewsChat"] = value.previews_chat.into();
-        data
-    }
-}
-
-impl From<&ServerVersion> for JsonValue {
-    fn from(value: &ServerVersion) -> Self {
-        let mut data = json::JsonValue::new_object();
-        data["name"] = value.name.as_str().into();
-        data["protocol"] = value.protocol.into();
-        data
-    }
-}
-
-impl From<&Players> for JsonValue {
-    fn from(value: &Players) -> Self {
-        let mut data = json::JsonValue::new_object();
-        data["max"] = value.max.into();
-        data["online"] = value.online.into();
-        data["sample"] = (&value.sample).into();
-        data
-    }
-}
-
-impl From<&SamplePlayers> for JsonValue {
-    fn from(value: &SamplePlayers) -> Self {
-        let mut data = json::JsonValue::new_array();
-        for sample_player in value.iter() {
-            let sample_player_data: JsonValue = sample_player.into();
-            data.push(sample_player_data);
-        }
-        data
-    }
-}
-
-impl From<&SamplePlayer> for JsonValue {
-    fn from(value: &SamplePlayer) -> Self {
-        let mut data = json::JsonValue::new_object();
-        data["id"] = value.id.to_string().as_str().into();
-        data["name"] = value.name.as_str().into();
-        data
-    }
+#[test]
+fn serde_ser_server_status() {
+    let model = ServerStatus {
+        version: ServerVersion {
+            name: "1.20.4".to_string(),
+            protocol: 765,
+        },
+        description: Chat::from("A Minecraft Server".to_string()),
+        favicon: None,
+        enforce_secure_chat: true,
+        previews_chat: true,
+        players: Players {
+            max: 20,
+            online: 0,
+            sample: SamplePlayers::new(),
+        },
+    };
+    let result = serde_json::to_string(&model).unwrap();
+    println!("{}", result);
 }

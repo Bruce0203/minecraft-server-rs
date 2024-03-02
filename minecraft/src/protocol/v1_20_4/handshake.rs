@@ -1,10 +1,10 @@
-use bytes::{Buf, BytesMut};
-use common_server::{
-    packet::PacketHandler, selector::Socket, var_int::VarIntRead, var_string::VarStringRead,
-};
-use std::io::{Error, ErrorKind};
+use common_server::{packet::PacketHandler, var_int::VarIntRead, var_string::VarStringRead, primitives::U16Read};
+use std::io::{Cursor, Error, ErrorKind};
 
-use crate::{connection::{session_relay::ConnectionState, player::Player}, server::Server};
+use crate::{
+    connection::{player::Player, session_relay::ConnectionState},
+    server::Server,
+};
 
 #[derive(Debug)]
 pub struct HandShake {
@@ -14,15 +14,14 @@ pub struct HandShake {
     next_state: NextState,
 }
 
-impl TryFrom<&mut BytesMut> for HandShake {
+impl TryFrom<&mut Cursor<Vec<u8>>> for HandShake {
     type Error = Error;
 
-    fn try_from(mut value: &mut BytesMut) -> std::result::Result<Self, Self::Error> {
-        let mut reader = value.reader();
+    fn try_from(mut value: &mut Cursor<Vec<u8>>) -> std::result::Result<Self, Self::Error> {
         Ok(HandShake {
-            protocol_version: reader.read_var_i32()?,
-            server_address: reader.read_var_string::<255>()?,
-            server_port: reader.into_inner().get_u16(),
+            protocol_version: value.read_var_i32()?,
+            server_address: value.read_var_string::<255>()?,
+            server_port: value.read_u16()?,
             next_state: NextState::try_from(value)?,
         })
     }
@@ -43,11 +42,11 @@ impl From<&NextState> for ConnectionState {
     }
 }
 
-impl TryFrom<&mut BytesMut> for NextState {
+impl TryFrom<&mut Cursor<Vec<u8>>> for NextState {
     type Error = Error;
 
-    fn try_from(value: &mut BytesMut) -> std::result::Result<Self, Self::Error> {
-        Ok(match value.reader().read_var_i32()? {
+    fn try_from(value: &mut Cursor<Vec<u8>>) -> std::result::Result<Self, Self::Error> {
+        Ok(match value.read_var_i32()? {
             1 => NextState::Status,
             2 => NextState::Login,
             n => {
@@ -61,14 +60,11 @@ impl TryFrom<&mut BytesMut> for NextState {
 }
 
 impl<'server> PacketHandler<Server, Player> for HandShake {
-    fn handle_packet(
-        &self,
-        server: &mut Server,
-        value: &mut Player,
-    ) -> std::io::Result<()> {
+    fn handle_packet(&self, server: &mut Server, value: &mut Player) -> std::io::Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
+        println!("HandShake");
         Ok(())
     }
 }

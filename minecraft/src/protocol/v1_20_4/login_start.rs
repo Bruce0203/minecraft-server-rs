@@ -1,16 +1,13 @@
-use std::io::{Error, Result};
+use std::io::{Cursor, Error, Result};
 
-use bytes::{Buf, Bytes, BytesMut};
-use common_server::{packet::PacketHandler, selector::Socket, var_string::VarStringRead};
+use common_server::packet::PacketHandler;
+use common_server::primitives::U128Read;
+use common_server::var_string::VarStringRead;
 use uuid::Uuid;
 
+use crate::connection::packet_writer::PacketWriter;
 use crate::{
-    connection::{packet_writer::PacketWriter, player::Player},
-    protocol::v1_20_4::{
-        login_success::{self, LoginSuccess},
-        set_compression::{self, SetCompression},
-    },
-    server::Server,
+    connection::player::Player, protocol::v1_20_4::login_success::LoginSuccess, server::Server,
 };
 
 pub struct LoginStart {
@@ -18,14 +15,13 @@ pub struct LoginStart {
     player_uuid: Uuid,
 }
 
-impl TryFrom<&mut BytesMut> for LoginStart {
+impl TryFrom<&mut Cursor<Vec<u8>>> for LoginStart {
     type Error = Error;
 
-    fn try_from(value: &mut BytesMut) -> Result<Self> {
-        let mut reader = value.reader();
+    fn try_from(value: &mut Cursor<Vec<u8>>) -> Result<Self> {
         Ok(LoginStart {
-            name: reader.read_var_string::<16>()?,
-            player_uuid: Uuid::from_u128(reader.into_inner().get_u128()),
+            name: value.read_var_string::<16>()?,
+            player_uuid: Uuid::from_u128(value.read_u128()?),
         })
     }
 }
