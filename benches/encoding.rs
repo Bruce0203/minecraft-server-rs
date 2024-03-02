@@ -1,8 +1,9 @@
-use std::str::Bytes;
-
 use common_server::encoding::Encoder;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use minecraft::protocol::v1_20_4::registry::{RegistryData, Registry, RegistryEntry, ChatType, Decoration, Biome, Effects, DimensionType, MonsterSpawnLightLevel, IntegerDistribution};
+use criterion::{criterion_group, criterion_main, Criterion};
+use minecraft::protocol::v1_20_4::registry::{
+    Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
+    MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
+};
 
 fn encode_registry() {
     let registry_data = RegistryData {
