@@ -3,7 +3,7 @@ use std::io::{
     Result,
 };
 
-use mc_io::{
+use crate::io::{
     encoding::{Decoder, Encoder},
     primitives::I64Read,
 };

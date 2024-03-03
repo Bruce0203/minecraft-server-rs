@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use bitflags::bitflags;
-use mc_io::{encoding::Encoder, nbt::NbtNetworkWrite};
+use crate::io::{encoding::Encoder, nbt::NbtNetworkWrite};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 #[derive(Debug, Clone)]

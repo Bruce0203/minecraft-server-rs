@@ -3,7 +3,7 @@ use std::io::{
     Error, Result,
 };
 
-use mc_io::{encoding::{Encoder, Decoder}, var_int::{VarIntRead, VarIntWrite}};
+use crate::io::{encoding::{Encoder, Decoder}, var_int::{VarIntRead, VarIntWrite}};
 
 pub enum GameMode {
     Survival,
@@ -40,3 +40,4 @@ impl Decoder for GameMode {
         })
     }
 }
+
