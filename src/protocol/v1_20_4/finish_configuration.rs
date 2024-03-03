@@ -1,16 +1,17 @@
 use std::io::{Cursor, Error, Result, Write};
 
-use mc_io::{encoding::Encoder, identifier::ToIdentifier};
+use mc_io::{encoding::Encoder, identifier::ToIdentifier, nbt::{NbtNetworkWrite, NbtNetworkRead}};
 
 use crate::{
     connection::prelude::{ConnectionState, PacketHandler, PacketWriter},
     protocol::v1_20_4::{
         login_play::LoginPlay,
         player_abilities::{PlayerAbilities, PlayerAbility},
+        server_data::ServerData,
         set_default_position::SetDefaultPosition,
-        set_held_item::SetHeldItem, server_data::ServerData,
+        set_held_item::SetHeldItem,
     },
-    server::prelude::*,
+    server::{self, prelude::*},
 };
 
 pub struct FinishConfiguration {}
@@ -30,7 +31,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for FinishConfiguration {
 }
 
 impl PacketHandler<Server, Player> for FinishConfiguration {
-    fn handle_packet(&self, _server: &mut Server, player: &mut Player) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
         println!("configuration finished");
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
@@ -66,11 +67,12 @@ impl PacketHandler<Server, Player> for FinishConfiguration {
             angle: 0.0,
         }
         .send_packet(player)?;
-        ServerData {
-            message_of_the_day: "MC sv".to_string(),
+        let server_data = ServerData {
+            message_of_the_day: server.server_status.description.clone(),
             icon: None,
             enforce_secure_chat: true,
-        }.send_packet(player)?;
+        };
+        server_data.send_packet(player)?;
         Ok(())
     }
 }

@@ -1,18 +1,23 @@
+use std::io::Cursor;
+
 use mc_io::{
-    encoding::Encoder, primitives::WriteBool, var_int::VarIntWrite, var_string::VarStringWrite,
+    encoding::Encoder, primitives::WriteBool, var_int::VarIntWrite, var_string::VarStringWrite, nbt::NbtNetworkWrite,
 };
 
-use crate::connection::prelude::PacketWriter;
+use crate::{
+    connection::prelude::PacketWriter,
+    server::{chat::ChatNbtWrite, prelude::Chat},
+};
 
 pub struct ServerData {
-    pub message_of_the_day: String,
+    pub message_of_the_day: Chat,
     pub icon: Option<Vec<u8>>,
     pub enforce_secure_chat: bool,
 }
 
 impl Encoder for ServerData {
     fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_var_string(self.message_of_the_day.as_str())?;
+        writer.write_network_nbt(&self.message_of_the_day)?;
         if let Some(icon) = &self.icon {
             writer.write_bool(true)?;
             writer.write_var_i32(icon.len() as i32)?;
@@ -20,6 +25,7 @@ impl Encoder for ServerData {
         } else {
             writer.write_bool(false)?;
         }
+        writer.write_bool(self.enforce_secure_chat)?;
         Ok(())
     }
 }

@@ -339,11 +339,13 @@ checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
 name = "mc_io"
-version = "0.1.11"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9024103e77177830b8b50fc0a7a15ecf5863bc0ae02852b979a58427be2effa5"
+checksum = "5fd550a3e0cddac8cefce4f3068b1340b654b9ca8d892460a7505736bfebe6b1"
 dependencies = [
  "derive_more",
+ "hematite-nbt",
+ "serde",
 ]
 
 [[package]]

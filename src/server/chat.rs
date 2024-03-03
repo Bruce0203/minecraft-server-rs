@@ -1,9 +1,10 @@
 use std::ops::Deref;
 
 use bitflags::bitflags;
+use mc_io::{encoding::Encoder, nbt::NbtNetworkWrite};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Chat {
     Text {
         text: String,
@@ -57,20 +58,20 @@ impl From<String> for Chat {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum ChatNbtType {
     Block(String),
     Entity(String),
     Storage(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Score {
     name: String,
     objective: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ChatStyle {
     color: Option<String>,
     styles: Styles,
@@ -92,7 +93,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ClickEvent {
     OpenUrl(String),
     RunCommand(String),
@@ -101,7 +102,7 @@ pub enum ClickEvent {
     CopyToClipboard(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum HoverEvent {
     ShowText(Box<Chat>),
     ShowItem {
@@ -307,7 +308,23 @@ impl Serialize for ChatStyle {
 impl<'de> Deserialize<'de> for ChatStyle {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de> {
+        D: serde::Deserializer<'de>,
+    {
         todo!()
+    }
+}
+
+pub trait ChatNbtWrite {
+    fn write_nbt_chat(&mut self, value: &Chat) -> std::io::Result<()>;
+}
+
+pub trait ChatNbtRead {
+    fn read_nbt_chat(&mut self) -> std::io::Result<Chat>;
+}
+
+impl<W: std::io::Write> ChatNbtWrite for W {
+    fn write_nbt_chat(&mut self, value: &Chat) -> std::io::Result<()> {
+        self.write_network_nbt(value)?;
+        Ok(())
     }
 }
