@@ -3,11 +3,9 @@ use std::io::{Cursor, Error, Result, Write};
 use mc_io::encoding::Encoder;
 use mc_io::var_string::VarStringWrite;
 
-use crate::connection::packet_handler::PacketHandler;
-use crate::connection::packet_writer::PacketWriter;
-use crate::connection::player::Player;
+use crate::connection::prelude::{PacketWriter, PacketHandler};
+use crate::server::prelude::{Player, Server};
 use crate::server::server_status::ServerStatus;
-use crate::server::Server;
 
 #[derive(Debug)]
 pub struct StatusRequest {}

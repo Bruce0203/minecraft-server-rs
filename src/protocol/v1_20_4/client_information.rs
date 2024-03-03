@@ -2,7 +2,7 @@ use bitflags::bitflags;
 use mc_io::{encoding::Decoder, var_int::VarIntRead, var_string::VarStringRead, primitives::{I8Read, BoolRead, U8Read}};
 use std::io::{Cursor, Error, Read, Result};
 
-use crate::{connection::{player::Player, packet_handler::PacketHandler}, server::Server};
+use crate::{server::prelude::{Server, Player}, connection::prelude::PacketHandler};
 
 #[derive(Debug)]
 pub struct ClientInformation {

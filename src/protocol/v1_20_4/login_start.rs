@@ -4,11 +4,10 @@ use mc_io::primitives::U128Read;
 use mc_io::var_string::VarStringRead;
 use uuid::Uuid;
 
-use crate::connection::packet_handler::PacketHandler;
-use crate::connection::packet_writer::PacketWriter;
-use crate::{
-    connection::player::Player, protocol::v1_20_4::login_success::LoginSuccess, server::Server,
-};
+use crate::connection::prelude::{PacketHandler, PacketWriter};
+use crate::protocol::v1_20_4::login_success::LoginSuccess;
+use crate::protocol::v1_20_4::set_compression;
+use crate::server::prelude::{Server, Player};
 
 pub struct LoginStart {
     name: String,
@@ -37,7 +36,7 @@ impl PacketHandler<Server, Player> for LoginStart {
             username: self.name.to_owned(),
             properties: Vec::new(),
         };
-        //set_compression::set_compression(socket, 256)?;
+        //set_compression::set_compression(socket, 20)?;
         login_success.send_packet(socket)?;
         Ok(())
     }

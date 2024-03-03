@@ -3,7 +3,10 @@ use std::io::{
     Result,
 };
 
-use mc_io::{encoding::{Encoder, Decoder}, primitives::I64Read};
+use mc_io::{
+    encoding::{Decoder, Encoder},
+    primitives::I64Read,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Position {
@@ -31,9 +34,9 @@ impl Decoder for Position {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         let long = reader.read_i64()?;
         Ok(Position {
-            x: (long >> 38) as i64,
-            y: (long << 52 >> 52) as i64,
-            z: (long << 26 >> 38) as i64,
+            x: (long >> 38),
+            y: (long << 52 >> 52),
+            z: (long << 26 >> 38),
         })
     }
 }
@@ -42,6 +45,22 @@ impl Decoder for Position {
 fn position_encoding() {
     let pos = Position::new(1, 5, 3);
     let mut encoded = pos.encode().unwrap();
+    encoded.set_position(0);
     let decoded = Position::decode_from_read(&mut encoded).unwrap();
     assert_eq!(decoded, pos);
+}
+
+#[derive(derive_more::Deref)]
+pub struct Angle(pub u8);
+
+pub struct FloatRotation {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+pub struct DoubleRotation {
+    x: f64,
+    y: f64,
+    z: f64,
 }

@@ -1,11 +1,7 @@
 use std::io::{Cursor, Error, Result};
 
-use crate::connection::packet_handler::PacketHandler;
-use crate::connection::packet_writer::PacketWriter;
-use crate::{
-    connection::{player::Player, ConnectionState},
-    server::Server,
-};
+use crate::connection::prelude::{ConnectionState, PacketHandler, PacketWriter};
+use crate::server::prelude::{Server, Player};
 
 use super::{
     feature_flags::FeatureFlags,

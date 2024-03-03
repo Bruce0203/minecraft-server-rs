@@ -1,9 +1,10 @@
 use std::io::{Result, Write};
 
-use crate::connection::packet_writer::PacketWriter;
-use crate::connection::player::Player;
 use mc_io::encoding::Encoder;
 use mc_io::var_int::VarIntWrite;
+
+use crate::connection::prelude::PacketWriter;
+use crate::server::prelude::Player;
 
 pub struct SetCompression {
     pub compression_threshold: i32,

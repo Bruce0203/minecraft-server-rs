@@ -1,10 +1,12 @@
+use std::io::{prelude::{Write, Read}, Result};
+
 use bitflags::bitflags;
 use mc_io::{
     encoding::{Decoder, Encoder},
     primitives::{F32Read, F32Write, U8Read, U8Write},
 };
 
-use crate::connection::packet_writer::PacketWriter;
+use crate::{connection::prelude::PacketWriter, server::prelude::Player};
 
 pub struct PlayerAbilities {
     pub flags: PlayerAbility,
@@ -24,7 +26,7 @@ bitflags! {
 }
 
 impl Encoder for PlayerAbilities {
-    fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_u8(self.flags.0 .0)?;
         writer.write_f32(self.flying_speed)?;
         writer.write_f32(self.field_of_view_modifier)?;
@@ -33,7 +35,7 @@ impl Encoder for PlayerAbilities {
 }
 
 impl Decoder for PlayerAbilities {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> std::io::Result<Self> {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(PlayerAbilities {
             flags: PlayerAbility::from_bits_truncate(reader.read_u8()?),
             flying_speed: reader.read_f32()?,
@@ -43,7 +45,7 @@ impl Decoder for PlayerAbilities {
 }
 
 impl PacketWriter for PlayerAbilities {
-    fn get_packet_id(&self, player: &mut crate::connection::player::Player) -> std::io::Result<i32> {
+    fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x36)
     }
 }

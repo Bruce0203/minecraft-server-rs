@@ -3,7 +3,7 @@ use std::io::{Result, Write};
 use mc_io::{encoding::Encoder, var_string::VarStringWrite, primitives::WriteBool, array::VarIntSizedVecWrite};
 use uuid::Uuid;
 
-use crate::connection::{packet_writer::PacketWriter, player::Player};
+use crate::{connection::prelude::PacketWriter, server::prelude::Player};
 
 pub struct LoginSuccess {
     pub uuid: Uuid,

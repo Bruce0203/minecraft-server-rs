@@ -2,10 +2,11 @@ use std::io::{prelude::Write, Cursor, Error, Result};
 
 use mc_io::{
     array::{VarIntSizedVecRead, VarIntSizedVecWrite},
-    encoding::Encoder, identifier::Identifier,
+    encoding::Encoder,
+    identifier::Identifier,
 };
 
-use crate::connection::{packet_writer::PacketWriter, player::Player};
+use crate::{connection::prelude::PacketWriter, server::prelude::Player};
 
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,

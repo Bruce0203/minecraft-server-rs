@@ -1,40 +1,33 @@
-use std::io::{Cursor, Error, ErrorKind, Read, Write};
+use std::{
+    io::{Cursor, Error, ErrorKind, Read, Write},
+    ops::Deref,
+};
 
 use flate2::write::ZlibDecoder;
-use mc_io::var_int::VarIntRead;
-use serde::de::value;
+use mc_io::var_int::{self, VarIntRead};
 
-use super::SessionRelay;
+use super::prelude::SessionRelay;
 
 pub(super) fn read_packet_id_and_payload(
-    value: &mut Cursor<Vec<u8>>,
+    value: &[u8],
     session_relay: &mut SessionRelay,
 ) -> std::io::Result<Cursor<Vec<u8>>> {
-    let packet_len = value.read_var_i32()?;
-    let mut buf = Vec::with_capacity(packet_len as usize);
-    value.take(packet_len as u64).read_to_end(&mut buf)?;
-    let mut value = Cursor::new(buf);
-    let packet_body_len = value.get_ref().len() - value.position() as usize;
-    if packet_body_len < packet_len as usize {
-        return Err(Error::new(
-            ErrorKind::InvalidInput,
-            "actual packet length is short than enough",
-        ));
-    }
+    println!("readstart");
     let compression_threshold = session_relay.compression_threshold;
     if compression_threshold == -1 {
-        return Ok(value);
+        println!("readend");
+        return Ok(Cursor::new(value.to_vec()));
     } else {
-        let decompressed_len = value.read_var_i32()?;
-        if compression_threshold as usize > packet_body_len {
-            Ok(value)
+        let (decompressed_len, read_len) = var_int::read_var_i32_fast(value)?;
+        println!("{:?}", value);
+        if compression_threshold > decompressed_len {
+            Ok(Cursor::new(value.to_vec()))
         } else {
-            println!("start decompressing");
-            println!("{}", decompressed_len);
-            let decompressed_bytes = Cursor::new(Vec::new());
-            let mut d = ZlibDecoder::new(decompressed_bytes);
-            d.write_all(value.get_ref())?;
+            let mut d = ZlibDecoder::new(Cursor::new(Vec::new()));
+            println!("{:?}", &value[read_len..]);
+            d.write_all(&value[read_len..])?;
             let finish = d.finish()?;
+            println!("readend");
             Ok(finish)
         }
     }

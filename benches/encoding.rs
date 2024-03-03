@@ -1,6 +1,6 @@
-use common_server::encoding::Encoder;
 use criterion::{criterion_group, criterion_main, Criterion};
-use minecraft::protocol::v1_20_4::registry::{
+use mc_io::encoding::Encoder;
+use server_workspace::protocol::v1_20_4::registry::{
     Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
     MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
 };

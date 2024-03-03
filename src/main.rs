@@ -1,4 +1,4 @@
-use server_workspace::server::Server;
+use server_workspace::server::server::Server;
 use socket_selector::Selector;
 
 fn main() {

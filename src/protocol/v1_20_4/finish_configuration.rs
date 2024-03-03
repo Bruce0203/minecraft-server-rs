@@ -3,14 +3,14 @@ use std::io::{Cursor, Error, Result, Write};
 use mc_io::{encoding::Encoder, identifier::ToIdentifier};
 
 use crate::{
-    connection::{
-        packet_handler::PacketHandler, packet_writer::PacketWriter, player::Player, ConnectionState,
-    },
+    connection::prelude::{ConnectionState, PacketHandler, PacketWriter},
     protocol::v1_20_4::{
         login_play::LoginPlay,
         player_abilities::{PlayerAbilities, PlayerAbility},
+        set_default_position::SetDefaultPosition,
+        set_held_item::SetHeldItem, server_data::ServerData,
     },
-    server::{game_mode::GameMode, Server},
+    server::prelude::*,
 };
 
 pub struct FinishConfiguration {}
@@ -56,10 +56,21 @@ impl PacketHandler<Server, Player> for FinishConfiguration {
         login_play.send_packet(player)?;
         let player_abilities = PlayerAbilities {
             flags: PlayerAbility::Flying,
-            flying_speed: 0.2,
+            flying_speed: 0.5,
             field_of_view_modifier: 0.1,
         };
         player_abilities.send_packet(player)?;
+        SetHeldItem { slot: 0 }.send_packet(player)?;
+        SetDefaultPosition {
+            location: Position::new(0, 0, 0),
+            angle: 0.0,
+        }
+        .send_packet(player)?;
+        ServerData {
+            message_of_the_day: "MC sv".to_string(),
+            icon: None,
+            enforce_secure_chat: true,
+        }.send_packet(player)?;
         Ok(())
     }
 }

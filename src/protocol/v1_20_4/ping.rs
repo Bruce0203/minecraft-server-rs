@@ -3,10 +3,7 @@ use std::io::{Error, Result, Write, Cursor};
 use mc_io::encoding::Encoder;
 use mc_io::primitives::I64Read;
 
-use crate::connection::packet_handler::PacketHandler;
-use crate::connection::packet_writer::PacketWriter;
-use crate::connection::player::Player;
-use crate::server::Server;
+use crate::{server::prelude::{Server, Player}, connection::prelude::{PacketHandler, PacketWriter}};
 
 #[derive(Debug)]
 pub struct PingRequest {

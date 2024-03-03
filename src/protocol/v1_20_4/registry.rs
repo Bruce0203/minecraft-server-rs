@@ -3,10 +3,7 @@ use std::io::{Result, Write, Cursor};
 use mc_io::encoding::Encoder;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    connection::{packet_writer::PacketWriter, player::Player},
-    server::{chat::ChatStyle, particle},
-};
+use crate::{server::{chat::ChatStyle, prelude::{Player, self}}, connection::prelude::PacketWriter};
 
 #[derive(Serialize, Deserialize)]
 pub struct RegistryData {
@@ -135,7 +132,7 @@ pub struct Particle {
 #[derive(Serialize, Deserialize)]
 pub struct ParticleOptions {
     pub name: String,
-    pub value: particle::Particle,
+    pub value: prelude::particle::Particle,
 }
 
 #[derive(Serialize, Deserialize)]

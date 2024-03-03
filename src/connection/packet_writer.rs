@@ -4,7 +4,7 @@ use flate2::{write::ZlibEncoder, Compression};
 use mc_io::{encoding::Encoder, var_int::VarIntWrite};
 use socket_selector::Socket;
 
-use super::player::Player;
+use crate::server::prelude::Player;
 
 pub trait PacketWriter: Sized + Encoder {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32>;
@@ -13,7 +13,8 @@ pub trait PacketWriter: Sized + Encoder {
         let id_and_payload_bytes = self.write_packet_id_and_payload(player)?;
         let compression_threshold = player.session_relay.compression_threshold;
 
-        let mut result_buf = Cursor::new(Vec::with_capacity(id_and_payload_bytes.get_ref().len() + 6));
+        let mut result_buf =
+            Cursor::new(Vec::with_capacity(id_and_payload_bytes.get_ref().len() + 6));
 
         let id_and_payload_bytes_len = id_and_payload_bytes.get_ref().len() as i32;
         if compression_threshold == -1 {
@@ -23,22 +24,18 @@ pub trait PacketWriter: Sized + Encoder {
                 .unwrap();
         } else {
             if compression_threshold > id_and_payload_bytes_len {
-                result_buf
-                    .write_var_i32(id_and_payload_bytes_len + 1)
-                    .unwrap();
-                result_buf.write_all(&[0x00]).unwrap();
-                result_buf
-                    .write_all(id_and_payload_bytes.get_ref())
-                    .unwrap();
+                result_buf.write_var_i32(id_and_payload_bytes_len + 1)?;
+                result_buf.write_all(&[0x00])?;
+                result_buf.write_all(id_and_payload_bytes.get_ref())?;
             } else {
                 let mut encoder = ZlibEncoder::new(Cursor::new(Vec::new()), Compression::default());
-                encoder.write_all(id_and_payload_bytes.get_ref()).unwrap();
+                encoder.write_all(id_and_payload_bytes.get_ref())?;
                 let compressed_bytes = encoder.finish()?;
-                result_buf
-                    .write_var_i32(compressed_bytes.get_ref().len() as i32 + 1)
-                    .unwrap();
-                result_buf.write_all(&[0x00]).unwrap();
-                result_buf.write_all(compressed_bytes.get_ref()).unwrap();
+                let mut data = Cursor::new(Vec::new());
+                data.write_var_i32(id_and_payload_bytes_len)?;
+                data.write_all(compressed_bytes.get_ref())?;
+                result_buf.write_var_i32(data.get_ref().len() as i32)?;
+                result_buf.write_all(data.get_ref())?;
             }
         }
         let result = result_buf.into_inner();

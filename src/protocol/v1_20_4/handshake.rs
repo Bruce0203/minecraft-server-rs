@@ -1,11 +1,8 @@
 use std::io::{Cursor, Error, ErrorKind};
 
-use mc_io::{var_int::VarIntRead, var_string::VarStringRead, primitives::U16Read};
+use mc_io::{primitives::U16Read, var_int::VarIntRead, var_string::VarStringRead};
 
-use crate::{
-    connection::{player::Player, session_relay::ConnectionState, packet_handler::PacketHandler},
-    server::Server,
-};
+use crate::{connection::prelude::{ConnectionState, PacketHandler}, server::prelude::{Server, Player}};
 
 #[derive(Debug)]
 pub struct HandShake {

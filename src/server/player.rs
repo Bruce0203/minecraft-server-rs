@@ -1,12 +1,11 @@
-use std::{
-    io::{Cursor, Write},
-    net::SocketAddr,
-};
+use std::net::SocketAddr;
 
 use mio::{net::TcpStream, Token};
 use socket_selector::Socket;
 
-use crate::{connection::session_relay::SessionRelay, server::Server};
+use crate::connection::prelude::SessionRelay;
+
+use super::server::Server;
 
 pub struct Player {
     pub stream: TcpStream,
