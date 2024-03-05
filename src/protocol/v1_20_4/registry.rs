@@ -1,9 +1,9 @@
 use std::io::{Result, Write, Cursor};
 
-use mc_io::encoding::Encoder;
+use crate::io::encoding::Encoder;
 use serde::{Deserialize, Serialize};
 
-use crate::{server::{chat::ChatStyle, prelude::{Player, self}}, connection::prelude::PacketWriter};
+use crate::{server::{chat::ChatStyle, prelude::{Player, self}}, protocol::prelude::PacketWriter};
 
 #[derive(Serialize, Deserialize)]
 pub struct RegistryData {

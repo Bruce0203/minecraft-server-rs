@@ -1,11 +1,11 @@
 use std::io::Cursor;
 
-use mc_io::{
+use crate::io::{
     encoding::Encoder, primitives::WriteBool, var_int::VarIntWrite, var_string::VarStringWrite, nbt::NbtNetworkWrite,
 };
 
 use crate::{
-    connection::prelude::PacketWriter,
+    protocol::prelude::PacketWriter,
     server::{chat::ChatNbtWrite, prelude::Chat},
 };
 

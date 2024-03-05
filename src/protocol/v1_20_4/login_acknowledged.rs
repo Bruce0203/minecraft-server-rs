@@ -1,6 +1,6 @@
 use std::io::{Cursor, Error, Result};
 
-use crate::connection::prelude::{ConnectionState, PacketHandler, PacketWriter};
+use crate::protocol::prelude::{ConnectionState, PacketHandler, PacketWriter};
 use crate::server::prelude::{Server, Player};
 
 use super::{
@@ -22,8 +22,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for LoginAcknowledged {
     }
 }
 
-impl PacketHandler<Server, Player> for LoginAcknowledged {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+impl PacketHandler for LoginAcknowledged {
+    fn handle_packet(&self, player: &mut Player) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
 
         let registry_data = RegistryData {

@@ -1,4 +1,4 @@
-use mc_io::{
+use crate::io::{
     array::VarIntSizedVecWrite,
     encoding::{Decoder, Encoder},
     identifier::{Identifier, ReadIdentifier},
@@ -6,7 +6,7 @@ use mc_io::{
     var_int::VarIntWrite,
 };
 
-use crate::{server::{prelude::{GameMode, Player}, coordinates::Position}, connection::prelude::PacketWriter};
+use crate::{server::{prelude::{GameMode, Player}, coordinates::Position}, protocol::prelude::PacketWriter};
 
 pub struct LoginPlay {
     pub entity_id: i32,

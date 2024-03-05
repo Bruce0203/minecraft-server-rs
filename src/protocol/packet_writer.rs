@@ -1,10 +1,8 @@
 use std::io::{Cursor, Result, Write};
 
-use flate2::{write::ZlibEncoder, Compression};
-use mc_io::{encoding::Encoder, var_int::VarIntWrite};
-use socket_selector::Socket;
-
+use crate::io::{encoding::Encoder, var_int::VarIntWrite};
 use crate::server::prelude::Player;
+use flate2::{write::ZlibEncoder, Compression};
 
 pub trait PacketWriter: Sized + Encoder {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32>;
@@ -39,7 +37,7 @@ pub trait PacketWriter: Sized + Encoder {
             }
         }
         let result = result_buf.into_inner();
-        player.get_stream().write_all(&result)?;
+        player.write_buf.write_all(&result)?;
         Ok(())
     }
 

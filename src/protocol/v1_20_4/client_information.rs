@@ -1,8 +1,8 @@
 use bitflags::bitflags;
-use mc_io::{encoding::Decoder, var_int::VarIntRead, var_string::VarStringRead, primitives::{I8Read, BoolRead, U8Read}};
+use crate::io::{encoding::Decoder, var_int::VarIntRead, var_string::VarStringRead, primitives::{I8Read, BoolRead, U8Read}};
 use std::io::{Cursor, Error, Read, Result};
 
-use crate::{server::prelude::{Server, Player}, connection::prelude::PacketHandler};
+use crate::{server::prelude::{Server, Player}, protocol::prelude::PacketHandler};
 
 #[derive(Debug)]
 pub struct ClientInformation {
@@ -90,8 +90,8 @@ impl Decoder for MainHand {
     }
 }
 
-impl PacketHandler<Server, Player> for ClientInformation {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+impl PacketHandler for ClientInformation {
+    fn handle_packet(&self, player: &mut Player) -> Result<()> {
         Ok(())
     }
 }

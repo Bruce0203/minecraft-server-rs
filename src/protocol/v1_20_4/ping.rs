@@ -1,9 +1,9 @@
 use std::io::{Error, Result, Write, Cursor};
 
-use mc_io::encoding::Encoder;
-use mc_io::primitives::I64Read;
+use crate::io::encoding::Encoder;
+use crate::io::primitives::I64Read;
 
-use crate::{server::prelude::{Server, Player}, connection::prelude::{PacketHandler, PacketWriter}};
+use crate::{server::prelude::{Server, Player}, protocol::prelude::{PacketHandler, PacketWriter}};
 
 #[derive(Debug)]
 pub struct PingRequest {
@@ -20,8 +20,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for PingRequest {
     }
 }
 
-impl PacketHandler<Server, Player> for PingRequest {
-    fn handle_packet(&self, _server: &mut Server, socket: &mut Player) -> Result<()> {
+impl PacketHandler for PingRequest {
+    fn handle_packet(&self, socket: &mut Player) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };

@@ -1,8 +1,8 @@
 use std::io::{prelude::Write, Result};
 
-use mc_io::{encoding::Encoder, primitives::F32Write};
+use crate::io::{encoding::Encoder, primitives::F32Write};
 
-use crate::{connection::prelude::PacketWriter, server::coordinates::Position};
+use crate::{protocol::prelude::PacketWriter, server::coordinates::Position};
 
 pub struct SetDefaultPosition {
     pub location: Position,

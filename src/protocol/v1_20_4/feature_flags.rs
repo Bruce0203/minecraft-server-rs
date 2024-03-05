@@ -1,12 +1,13 @@
 use std::io::{prelude::Write, Cursor, Error, Result};
 
-use mc_io::{
+use crate::io::{
     array::{VarIntSizedVecRead, VarIntSizedVecWrite},
     encoding::Encoder,
     identifier::Identifier,
 };
 
-use crate::{connection::prelude::PacketWriter, server::prelude::Player};
+use crate::protocol::prelude::PacketWriter;
+use crate::server::prelude::Player;
 
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,

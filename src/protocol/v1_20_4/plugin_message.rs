@@ -1,8 +1,8 @@
 use std::io::{BufRead, Cursor, Error, Read, Result};
 
-use mc_io::var_string::VarStringRead;
+use crate::io::var_string::VarStringRead;
 
-use crate::{connection::prelude::PacketHandler, server::prelude::{Server, Player}};
+use crate::{protocol::prelude::PacketHandler, server::prelude::{Server, Player}};
 
 #[derive(Debug)]
 pub struct PluginMessage {
@@ -21,8 +21,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for PluginMessage {
     }
 }
 
-impl PacketHandler<Server, Player> for PluginMessage {
-    fn handle_packet(&self, _server: &mut Server, _player: &mut Player) -> Result<()> {
+impl PacketHandler for PluginMessage {
+    fn handle_packet(&self, _player: &mut Player) -> Result<()> {
         Ok(())
     }
 }

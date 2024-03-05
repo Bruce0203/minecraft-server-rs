@@ -1,9 +1,9 @@
 use std::io::{Result, Write};
 
-use mc_io::{encoding::Encoder, var_string::VarStringWrite, primitives::WriteBool, array::VarIntSizedVecWrite};
+use crate::io::{encoding::Encoder, var_string::VarStringWrite, primitives::WriteBool, array::VarIntSizedVecWrite};
 use uuid::Uuid;
 
-use crate::{connection::prelude::PacketWriter, server::prelude::Player};
+use crate::{protocol::prelude::PacketWriter, server::prelude::Player};
 
 pub struct LoginSuccess {
     pub uuid: Uuid,

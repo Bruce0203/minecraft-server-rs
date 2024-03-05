@@ -1,9 +1,9 @@
 use std::io::{Result, Write};
 
-use mc_io::encoding::Encoder;
-use mc_io::var_int::VarIntWrite;
+use crate::io::encoding::Encoder;
+use crate::io::var_int::VarIntWrite;
 
-use crate::connection::prelude::PacketWriter;
+use crate::protocol::prelude::PacketWriter;
 use crate::server::prelude::Player;
 
 pub struct SetCompression {

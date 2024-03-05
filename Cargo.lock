@@ -338,17 +338,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
-name = "mc_io"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd550a3e0cddac8cefce4f3068b1340b654b9ca8d892460a7505736bfebe6b1"
-dependencies = [
- "derive_more",
- "hematite-nbt",
- "serde",
-]
-
-[[package]]
 name = "memchr"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -599,21 +588,10 @@ dependencies = [
  "flate2",
  "hematite-nbt",
  "json",
- "mc_io",
  "mio",
  "serde",
  "serde_json",
- "socket_selector",
  "uuid",
-]
-
-[[package]]
-name = "socket_selector"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3091868a51017586703959cc08574767d1f3381903ab7c54af46584ce922bc3"
-dependencies = [
- "mio",
 ]
 
 [[package]]

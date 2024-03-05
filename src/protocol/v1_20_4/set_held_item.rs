@@ -1,6 +1,6 @@
-use mc_io::{encoding::Encoder, primitives::{I16Write, U8Write}};
+use crate::io::{encoding::Encoder, primitives::{I16Write, U8Write}};
 
-use crate::{connection::prelude::PacketWriter, server::prelude::Player};
+use crate::{protocol::prelude::PacketWriter, server::prelude::Player};
 
 pub struct SetHeldItem {
     pub slot: u8,

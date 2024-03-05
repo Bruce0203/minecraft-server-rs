@@ -1,10 +1,10 @@
 use std::io::{Cursor, Error, Result};
 
-use mc_io::primitives::U128Read;
-use mc_io::var_string::VarStringRead;
+use crate::io::primitives::U128Read;
+use crate::io::var_string::VarStringRead;
 use uuid::Uuid;
 
-use crate::connection::prelude::{PacketHandler, PacketWriter};
+use crate::protocol::prelude::{PacketHandler, PacketWriter};
 use crate::protocol::v1_20_4::login_success::LoginSuccess;
 use crate::protocol::v1_20_4::set_compression;
 use crate::server::prelude::{Server, Player};
@@ -25,8 +25,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for LoginStart {
     }
 }
 
-impl PacketHandler<Server, Player> for LoginStart {
-    fn handle_packet(&self, server: &mut Server, socket: &mut Player) -> Result<()> {
+impl PacketHandler for LoginStart {
+    fn handle_packet(&self, socket: &mut Player) -> Result<()> {
         println!(
             "LoginStart(name={:?}, player_uuid={:?})",
             self.name, self.player_uuid

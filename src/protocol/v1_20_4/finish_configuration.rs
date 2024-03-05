@@ -1,9 +1,18 @@
-use std::io::{Cursor, Error, Result, Write};
+use std::{
+    io::{Cursor, Error, Result, Write},
+    str::FromStr,
+};
 
-use mc_io::{encoding::Encoder, identifier::ToIdentifier, nbt::{NbtNetworkWrite, NbtNetworkRead}};
+use uuid::Uuid;
+
+use crate::io::{
+    encoding::Encoder,
+    identifier::ToIdentifier,
+    nbt::{NbtNetworkRead, NbtNetworkWrite},
+};
 
 use crate::{
-    connection::prelude::{ConnectionState, PacketHandler, PacketWriter},
+    protocol::prelude::{ConnectionState, PacketHandler, PacketWriter},
     protocol::v1_20_4::{
         login_play::LoginPlay,
         player_abilities::{PlayerAbilities, PlayerAbility},
@@ -13,6 +22,8 @@ use crate::{
     },
     server::{self, prelude::*},
 };
+
+use super::player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate, PlayerProperty};
 
 pub struct FinishConfiguration {}
 
@@ -30,9 +41,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for FinishConfiguration {
     }
 }
 
-impl PacketHandler<Server, Player> for FinishConfiguration {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
-        println!("configuration finished");
+impl PacketHandler for FinishConfiguration {
+    fn handle_packet(&self, player: &mut Player) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
             entity_id: 0,
@@ -68,11 +78,29 @@ impl PacketHandler<Server, Player> for FinishConfiguration {
         }
         .send_packet(player)?;
         let server_data = ServerData {
-            message_of_the_day: server.server_status.description.clone(),
+            message_of_the_day: Chat::from("MC Sv ...".to_string()),
             icon: None,
             enforce_secure_chat: true,
         };
         server_data.send_packet(player)?;
+        PlayerInfoUpdate {
+            players: vec![InformedPlayer {
+                uuid: Uuid::from_str("053d384b-5b9f-47d7-a5da-6885c497ce7f").unwrap(),
+                action: vec![
+                    PlayerInfoActions::AddPlayer {
+                        name: "JetBrainer".to_string(),
+                        properties: vec![],
+                    },
+                    PlayerInfoActions::InitializeChat { signature: None },
+                    PlayerInfoActions::UpdateGameMode {
+                        game_mode: GameMode::Survival,
+                    },
+                    PlayerInfoActions::UpdateListed { listed: true },
+                    PlayerInfoActions::UpdateLatency { ping: 0 },
+                    PlayerInfoActions::UpdateDisplayName { display_name: None },
+                ],
+            }],
+        }.send_packet(player)?;
         Ok(())
     }
 }

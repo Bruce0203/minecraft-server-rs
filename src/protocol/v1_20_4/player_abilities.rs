@@ -1,12 +1,12 @@
 use std::io::{prelude::{Write, Read}, Result};
 
 use bitflags::bitflags;
-use mc_io::{
+use crate::io::{
     encoding::{Decoder, Encoder},
     primitives::{F32Read, F32Write, U8Read, U8Write},
 };
 
-use crate::{connection::prelude::PacketWriter, server::prelude::Player};
+use crate::{protocol::prelude::PacketWriter, server::prelude::Player};
 
 pub struct PlayerAbilities {
     pub flags: PlayerAbility,
