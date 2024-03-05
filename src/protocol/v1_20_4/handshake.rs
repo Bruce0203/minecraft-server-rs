@@ -2,7 +2,10 @@ use std::io::{Cursor, Error, ErrorKind};
 
 use crate::io::{primitives::U16Read, var_int::VarIntRead, var_string::VarStringRead};
 
-use crate::{protocol::prelude::{ConnectionState, PacketHandler}, server::prelude::{Server, Player}};
+use crate::{
+    protocol::prelude::{ConnectionState, PacketHandler},
+    server::prelude::{Player, Server},
+};
 
 #[derive(Debug)]
 pub struct HandShake {
@@ -58,11 +61,11 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for NextState {
 }
 
 impl<'server> PacketHandler for HandShake {
-    fn handle_packet(&self, value: &mut Player) -> std::io::Result<()> {
+    fn handle_packet(&self, server: &mut Server, value: &mut Player) -> std::io::Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
-        println!("HandShake!");
         Ok(())
     }
 }
+

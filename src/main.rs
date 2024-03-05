@@ -1,5 +1,8 @@
-use server_workspace::server::server::Server;
+use server_workspace::server::server::{Selector, Server};
 
 fn main() {
-    Server::new().run();
+    Selector {
+        server: Server::new(),
+    }
+    .run();
 }

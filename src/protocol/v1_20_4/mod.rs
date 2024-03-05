@@ -26,41 +26,35 @@ use self::{
     handshake::HandShake, login_acknowledged::LoginAcknowledged, login_start::LoginStart,
     ping::PingRequest, plugin_message::PluginMessage, status::StatusRequest,
 };
-use std::io::{Cursor, Error, ErrorKind, Result};
+use std::io::{Error, ErrorKind, Result};
 
 use super::prelude::{ConnectionState, PacketHandler, PacketReadHandler};
 
 pub struct V1_20_4;
 
 impl PacketReadHandler for V1_20_4 {
-    fn handle_packet_read(player: &mut Player) -> Result<()> {
+    fn handle_packet_read(server: &mut Server, player: &mut Player) -> Result<()> {
         let bytes = &mut player.packet_buf;
         let packet_id = bytes.read_var_i32()?;
         let connection_state = &player.session_relay.connection_state;
         match (connection_state, packet_id) {
-            (ConnectionState::HandShake, 0) => {
-                HandShake::try_from(bytes)?.handle_packet(player)?
-            }
-            (ConnectionState::Login, 0) => {
-                LoginStart::try_from(bytes)?.handle_packet(player)?
-            }
+            (ConnectionState::HandShake, 0) => HandShake::try_from(bytes)?.handle_packet(server, player)?,
+            (ConnectionState::Login, 0) => LoginStart::try_from(bytes)?.handle_packet(server, player)?,
             (ConnectionState::Status, 0) => {
-                StatusRequest::try_from(bytes)?.handle_packet(player)?;
+                StatusRequest::try_from(bytes)?.handle_packet(server, player)?;
             }
-            (ConnectionState::Status, 1) => {
-                PingRequest::try_from(bytes)?.handle_packet(player)?
-            }
+            (ConnectionState::Status, 1) => PingRequest::try_from(bytes)?.handle_packet(server, player)?,
             (ConnectionState::Login, 3) => {
-                LoginAcknowledged::try_from(bytes)?.handle_packet(player)?
+                LoginAcknowledged::try_from(bytes)?.handle_packet(server, player)?
             }
             (ConnectionState::Confgiuration, 0x01) => {
-                PluginMessage::try_from(bytes)?.handle_packet(player)?
+                PluginMessage::try_from(bytes)?.handle_packet(server, player)?
             }
             (ConnectionState::Confgiuration, 0x00) => {
-                ClientInformation::try_from(bytes)?.handle_packet(player)?
+                ClientInformation::try_from(bytes)?.handle_packet(server, player)?
             }
             (ConnectionState::Confgiuration, 0x02) => {
-                FinishConfiguration::try_from(bytes)?.handle_packet(player)?
+                FinishConfiguration::try_from(bytes)?.handle_packet(server, player)?
             }
             _ => {
                 return Err(Error::new(

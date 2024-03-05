@@ -4,8 +4,8 @@ use crate::io::encoding::Encoder;
 use crate::io::var_string::VarStringWrite;
 
 use crate::protocol::prelude::{PacketHandler, PacketWriter};
-use crate::server::prelude::{Player, Server, Chat};
-use crate::server::server_status::{ServerStatus, ServerVersion, Players, SamplePlayers};
+use crate::server::prelude::{Player, Server};
+use crate::server::server_status::ServerStatus;
 
 #[derive(Debug)]
 pub struct StatusRequest {}
@@ -29,7 +29,7 @@ pub struct StatusResponse<'a> {
 }
 
 impl<'a> PacketWriter for StatusResponse<'a> {
-    fn get_packet_id(&self, socket: &mut Player) -> Result<i32> {
+    fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x00)
     }
 }
@@ -43,25 +43,11 @@ impl<'a> Encoder for StatusResponse<'a> {
 }
 
 impl PacketHandler for StatusRequest {
-    fn handle_packet(&self, player: &mut Player) -> Result<()> {
-        let status_response = StatusResponse {
-            server_status: &ServerStatus {
-                version: ServerVersion {
-                    name: "1.20.4".to_string(),
-                    protocol: 765,
-                },
-                description: Chat::from("A Minecraft Server".to_string()),
-                favicon: None,
-                enforce_secure_chat: true,
-                previews_chat: true,
-                players: Players {
-                    max: 20,
-                    online: 0,
-                    sample: SamplePlayers::new(),
-                },
-            },
-        };
-        status_response.send_packet(player)?;
+    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+        StatusResponse {
+            server_status: &mut server.server_status,
+        }
+        .send_packet(player)?;
         Ok(())
     }
 }

@@ -22,7 +22,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for PluginMessage {
 }
 
 impl PacketHandler for PluginMessage {
-    fn handle_packet(&self, _player: &mut Player) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, _player: &mut Player) -> Result<()> {
         Ok(())
     }
 }

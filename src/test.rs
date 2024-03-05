@@ -1,6 +1,9 @@
-use crate::server::prelude::Server;
+use crate::server::{prelude::Server, server::Selector};
 
 #[test]
 fn test_mc_server() {
-    Server::new().run();
+    Selector {
+        server: Server::new(),
+    }
+    .run();
 }

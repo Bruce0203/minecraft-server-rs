@@ -5,11 +5,7 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::io::{
-    encoding::Encoder,
-    identifier::ToIdentifier,
-    nbt::{NbtNetworkRead, NbtNetworkWrite},
-};
+use crate::io::{encoding::Encoder, identifier::ToIdentifier};
 
 use crate::{
     protocol::prelude::{ConnectionState, PacketHandler, PacketWriter},
@@ -20,10 +16,10 @@ use crate::{
         set_default_position::SetDefaultPosition,
         set_held_item::SetHeldItem,
     },
-    server::{self, prelude::*},
+    server::prelude::*,
 };
 
-use super::player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate, PlayerProperty};
+use super::player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate};
 
 pub struct FinishConfiguration {}
 
@@ -42,7 +38,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for FinishConfiguration {
 }
 
 impl PacketHandler for FinishConfiguration {
-    fn handle_packet(&self, player: &mut Player) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
             entity_id: 0,
@@ -100,7 +96,8 @@ impl PacketHandler for FinishConfiguration {
                     PlayerInfoActions::UpdateDisplayName { display_name: None },
                 ],
             }],
-        }.send_packet(player)?;
+        }
+        .send_packet(player)?;
         Ok(())
     }
 }

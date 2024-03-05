@@ -24,8 +24,6 @@ pub struct Server {
 }
 
 impl Server {
-    pub const MAX_PACKET_BUFFER_SIZE: u64 = 100_000;
-
     pub fn new() -> Server {
         Server {
             server_status: ServerStatus {
@@ -45,6 +43,14 @@ impl Server {
             },
         }
     }
+}
+
+pub struct Selector {
+    pub server: Server,
+}
+
+impl Selector {
+    pub const MAX_PACKET_BUFFER_SIZE: u64 = 100_000;
 
     pub fn run(&mut self) {
         let mut poll = Poll::new().unwrap();
@@ -71,7 +77,10 @@ impl Server {
                 if token_index != SERVER_TOKEN_INDEX {
                     let player = connection_pool.get(token_index);
 
-                    if let Err(err) = player.handle_packet_read(Self::handle_packet) {
+                    let server = &mut self.server;
+                    if let Err(err) =
+                        player.handle_packet_read(move |player| Self::handle_packet(server, player))
+                    {
                         if err.kind() == ErrorKind::BrokenPipe {
                             println!("Read error: {}", err);
                             connection_pool.remove(token_index);
@@ -93,8 +102,7 @@ impl Server {
                                 read_buf: Cursor::new(Vec::from(
                                     [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
                                 )),
-                                write_buf: Cursor::new(Vec::from(
-                                    [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
+                                write_buf: Cursor::new(Vec::from( [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
                                 )),
                                 packet_buf: Cursor::new(vec![]),
                             };
@@ -111,14 +119,14 @@ impl Server {
         }
     }
 
-    fn handle_packet(player: &mut Player) -> Result<()> {
-        println!("asdfasd");
+    fn handle_packet(server: &mut Server, player: &mut Player) -> Result<()> {
+        let start = SystemTime::now();
         match player.session_relay.protocol_id {
             0 => {
-                V1_20_4::handle_packet_read(player)?;
+                V1_20_4::handle_packet_read(server, player)?;
             }
             765 => {
-                V1_20_4::handle_packet_read(player)?;
+                V1_20_4::handle_packet_read(server, player)?;
             }
             n => {
                 return Err(Error::new(
@@ -127,6 +135,8 @@ impl Server {
                 ))
             }
         }
+        let end = SystemTime::now();
+        println!("handle packet: {:?}", end.duration_since(start));
         Ok(())
     }
 }

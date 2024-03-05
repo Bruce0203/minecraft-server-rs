@@ -1,9 +1,8 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use mc_io::encoding::Encoder;
-use server_workspace::protocol::v1_20_4::registry::{
+use server_workspace::{protocol::v1_20_4::registry::{
     Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
     MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
-};
+}, io::encoding::Encoder};
 
 fn encode_registry() {
     let registry_data = RegistryData {

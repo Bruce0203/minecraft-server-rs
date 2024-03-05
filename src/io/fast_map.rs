@@ -1,5 +1,5 @@
 pub struct FastMap<E> {
-    vec: Vec<Option<E>>,
+    pub vec: Vec<Option<E>>,
     index_queue: Vec<usize>,
 }
 

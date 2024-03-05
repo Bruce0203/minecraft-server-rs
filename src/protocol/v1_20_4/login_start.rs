@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::protocol::prelude::{PacketHandler, PacketWriter};
 use crate::protocol::v1_20_4::login_success::LoginSuccess;
 use crate::protocol::v1_20_4::set_compression;
-use crate::server::prelude::{Server, Player};
+use crate::server::prelude::{Player, Server};
 
 pub struct LoginStart {
     name: String,
@@ -26,7 +26,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for LoginStart {
 }
 
 impl PacketHandler for LoginStart {
-    fn handle_packet(&self, socket: &mut Player) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, socket: &mut Player) -> Result<()> {
         println!(
             "LoginStart(name={:?}, player_uuid={:?})",
             self.name, self.player_uuid

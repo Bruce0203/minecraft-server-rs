@@ -21,7 +21,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for PingRequest {
 }
 
 impl PacketHandler for PingRequest {
-    fn handle_packet(&self, socket: &mut Player) -> Result<()> {
+    fn handle_packet(&self,server: &mut Server,  socket: &mut Player) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };
