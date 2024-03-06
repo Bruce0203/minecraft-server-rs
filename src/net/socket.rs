@@ -1,5 +1,4 @@
 use std::io::{Error, ErrorKind, Read, Result, Write};
-use std::time::SystemTime;
 use std::{io::Cursor, net::SocketAddr};
 
 use flate2::write::{ZlibDecoder, ZlibEncoder};
@@ -10,7 +9,7 @@ use crate::io::prelude::{Encoder, VarIntRead, VarIntWrite};
 use crate::net::prelude::Selector;
 use crate::protocol::prelude::{PacketWriter, SessionRelay};
 
-pub struct Player {
+pub struct Socket {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
@@ -20,14 +19,18 @@ pub struct Player {
     pub packet_buf: Cursor<Vec<u8>>,
 }
 
-impl Player {
+impl Socket {
     pub fn handle_packet_read<F>(&mut self, f: F) -> Result<()>
     where
         F: FnMut(&mut Self) -> Result<()>,
     {
         let read_len = self.fill_read_buf_from_stream()? as u64;
-        self.read_packet(read_len, f)?;
-        self.read_buf.set_position(read_len);
+        if let Err(err) = self.read_packet(read_len, f) {
+            self.read_buf.set_position(read_len);
+            Err(err)
+        } else {
+            Ok(())
+        }?;
         let write_buf = &self.write_buf.get_ref()[..self.write_buf.position() as usize];
         self.stream.write_all(write_buf)?;
         self.write_buf.set_position(0);
@@ -44,20 +47,18 @@ impl Player {
 
     pub fn read_packet<F>(&mut self, read_len: u64, mut f: F) -> Result<()>
     where
-        F: FnMut(&mut Player) -> Result<()>,
+        F: FnMut(&mut Socket) -> Result<()>,
     {
         self.read_buf.set_position(0);
         while self.read_buf.position() != read_len {
-            let start = SystemTime::now();
             let packet_len = self.read_buf.read_var_i32()?;
             let pos = self.read_buf.position() as usize;
             self.packet_buf = Cursor::new(Vec::from(
                 &self.read_buf.get_ref()[pos..pos + packet_len as usize],
             ));
+
             self.read_buf.read_exact(self.packet_buf.get_mut())?;
             self.process_decompression()?;
-            let end = SystemTime::now();
-            println!("Read packet: {:?}", end.duration_since(start));
             f(self)?;
         }
         Ok(())

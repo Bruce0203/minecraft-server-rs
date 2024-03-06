@@ -19,7 +19,7 @@ pub struct Selector {
 }
 
 impl Selector {
-    pub const MAX_PACKET_BUFFER_SIZE: u64 = 100_000;
+    pub const MAX_PACKET_BUFFER_SIZE: u64 = 100;
 
     pub fn run(&mut self) {
         let mut poll = Poll::new().unwrap();
@@ -36,13 +36,7 @@ impl Selector {
             .unwrap();
 
         loop {
-            let start_time = SystemTime::now();
             poll.poll(&mut events, Some(Duration::ZERO)).unwrap();
-            let has_events = !events.is_empty();
-            let end = SystemTime::now();
-            if has_events {
-                println!("poll{:?}", end.duration_since(start_time));
-            }
             for event in events.iter() {
                 let event_token = event.token();
                 let token_index = event_token.0;
@@ -72,9 +66,7 @@ impl Selector {
                                 token: event_token,
                                 addr,
                                 session_relay: SessionRelay::default(),
-                                read_buf: Cursor::new(Vec::from(
-                                    [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
-                                )),
+                                read_buf: Cursor::new(Vec::from([0; 500])),
                                 write_buf: Cursor::new(Vec::from(
                                     [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
                                 )),
@@ -90,7 +82,6 @@ impl Selector {
     }
 
     fn handle_packet(server: &mut Server, player: &mut Player) -> Result<()> {
-        let start = SystemTime::now();
         match player.session_relay.protocol_id {
             0 => {
                 PacketHandler::handle_packet(&V1_20_4, server, player)?;
@@ -105,8 +96,6 @@ impl Selector {
                 ))
             }
         }
-        let end = SystemTime::now();
-        println!("handle packet: {:?}", end.duration_since(start));
         Ok(())
     }
 }

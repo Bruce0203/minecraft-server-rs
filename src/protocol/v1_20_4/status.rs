@@ -2,7 +2,6 @@ use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::encoding::Encoder;
 use crate::io::prelude::Cache;
-use crate::io::var_string::VarStringWrite;
 
 use crate::protocol::prelude::{PacketHandler, PacketWriter};
 use crate::server::prelude::{Player, Server};
