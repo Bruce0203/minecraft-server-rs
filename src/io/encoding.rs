@@ -16,4 +16,3 @@ pub trait Encoder {
 pub trait Decoder: Sized {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self>;
 }
-

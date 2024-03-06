@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod fast_map;
 pub mod prelude;
 pub mod array;

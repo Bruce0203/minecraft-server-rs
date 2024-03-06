@@ -1,5 +1,9 @@
+use std::io::{prelude::Write, Result};
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::io::prelude::{Encoder, VarIntWrite, VarStringWrite};
 
 use super::chat::Chat;
 
@@ -60,4 +64,12 @@ fn serde_ser_server_status() {
     };
     let result = serde_json::to_string(&model).unwrap();
     println!("{}", result);
+}
+
+impl Encoder for ServerStatus {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        let server_status_data = serde_json::to_string(&self)?;
+        writer.write_var_string(server_status_data.as_str())?;
+        Ok(())
+    }
 }

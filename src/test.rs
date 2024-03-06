@@ -1,4 +1,4 @@
-use crate::server::{prelude::Server, server::Selector};
+use crate::{server::prelude::Server, net::prelude::Selector};
 
 #[test]
 fn test_mc_server() {
@@ -7,3 +7,4 @@ fn test_mc_server() {
     }
     .run();
 }
+

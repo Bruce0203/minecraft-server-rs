@@ -7,9 +7,8 @@ use flate2::Compression;
 use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Encoder, VarIntRead, VarIntWrite};
+use crate::net::prelude::Selector;
 use crate::protocol::prelude::{PacketWriter, SessionRelay};
-
-use super::server::Selector;
 
 pub struct Player {
     pub stream: TcpStream,
@@ -27,13 +26,8 @@ impl Player {
         F: FnMut(&mut Self) -> Result<()>,
     {
         let read_len = self.fill_read_buf_from_stream()? as u64;
-        match self.read_packet(read_len, f) {
-            Ok(_) => {}
-            Err(err) => {
-                println!("Err while read packet: {}", err);
-                self.read_buf.set_position(read_len);
-            }
-        }
+        self.read_packet(read_len, f)?;
+        self.read_buf.set_position(read_len);
         let write_buf = &self.write_buf.get_ref()[..self.write_buf.position() as usize];
         self.stream.write_all(write_buf)?;
         self.write_buf.set_position(0);
@@ -61,7 +55,7 @@ impl Player {
                 &self.read_buf.get_ref()[pos..pos + packet_len as usize],
             ));
             self.read_buf.read_exact(self.packet_buf.get_mut())?;
-            //self.process_decompression()?;
+            self.process_decompression()?;
             let end = SystemTime::now();
             println!("Read packet: {:?}", end.duration_since(start));
             f(self)?;
@@ -71,7 +65,7 @@ impl Player {
 
     pub fn process_decompression(&mut self) -> Result<()> {
         if self.session_relay.compression_threshold == -1 {
-            return Ok(());
+            Ok(())
         } else {
             let decompressed_len = self.packet_buf.read_var_i32()?;
             if self.session_relay.compression_threshold > decompressed_len {
@@ -80,18 +74,15 @@ impl Player {
                 let mut d =
                     ZlibDecoder::new(Cursor::new(Vec::with_capacity(decompressed_len as usize)));
                 d.write_all(self.packet_buf.get_ref())?;
-                let _ = d.finish()?;
+                self.packet_buf = d.finish()?;
                 Ok(())
             }
         }
     }
 
     pub fn send_packet<E: Encoder + PacketWriter>(&mut self, encoder: &E) -> Result<()> {
-        let write_buf = self.encode_to_packet(encoder)?;
-        //self.process_compression()?;
-        self.write_buf.write_var_i32(write_buf.position() as i32)?;
-        self.write_buf.write_all(write_buf.get_ref())?;
-        Ok(())
+        let mut write_buf = self.encode_to_packet(encoder)?;
+        self.handle_write_packet(&mut write_buf)
     }
 
     fn encode_to_packet<E: Encoder + PacketWriter>(
@@ -105,16 +96,15 @@ impl Player {
         Ok(payload_buf)
     }
 
-    fn process_compression(&mut self) -> Result<()> {
+    fn handle_write_packet(&mut self, buf: &mut Cursor<Vec<u8>>) -> Result<()> {
         let compression_threshold = self.session_relay.compression_threshold;
         if compression_threshold != -1 {
-            let mut result_buf = Cursor::new(Vec::new());
             let packet_len = self.packet_buf.position() as i32;
             let packet_payload = &self.packet_buf.get_ref()[..packet_len as usize];
             if compression_threshold > packet_len {
-                result_buf.write_var_i32(packet_len + 1)?;
-                result_buf.write_all(&[0x00])?;
-                result_buf.write_all(packet_payload)?;
+                self.write_buf.write_var_i32(packet_len + 1)?;
+                self.write_buf.write_all(&[0x00])?;
+                self.write_buf.write_all(packet_payload)?;
             } else {
                 let mut encoder = ZlibEncoder::new(Cursor::new(Vec::new()), Compression::default());
                 encoder.write_all(packet_payload)?;
@@ -122,9 +112,12 @@ impl Player {
                 let mut data = Cursor::new(Vec::new());
                 data.write_var_i32(packet_len)?;
                 data.write_all(compressed_bytes.get_ref())?;
-                result_buf.write_var_i32(data.get_ref().len() as i32)?;
-                result_buf.write_all(data.get_ref())?;
+                self.write_buf.write_var_i32(data.get_ref().len() as i32)?;
+                self.write_buf.write_all(data.get_ref())?;
             }
+        } else {
+            self.write_buf.write_var_i32(buf.position() as i32)?;
+            self.write_buf.write_all(buf.get_ref())?;
         }
         Ok(())
     }

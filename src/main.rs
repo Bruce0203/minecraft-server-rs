@@ -1,4 +1,4 @@
-use server_workspace::server::server::{Selector, Server};
+use server_workspace::{server::server::{Server}, net::prelude::Selector};
 
 fn main() {
     Selector {

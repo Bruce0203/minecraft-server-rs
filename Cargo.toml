@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-json = "0.12.4"
 uuid = { version = "1.7.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 mio = { version = "0.8.10", features = ["os-poll", "net"] }
 derivative = "2.2.0"

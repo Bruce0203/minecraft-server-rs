@@ -1,6 +1,7 @@
 use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::encoding::Encoder;
+use crate::io::prelude::Cache;
 use crate::io::var_string::VarStringWrite;
 
 use crate::protocol::prelude::{PacketHandler, PacketWriter};
@@ -25,7 +26,7 @@ impl StatusRequest {
 }
 
 pub struct StatusResponse<'a> {
-    server_status: &'a ServerStatus,
+    server_status: &'a Cache<ServerStatus>,
 }
 
 impl<'a> PacketWriter for StatusResponse<'a> {
@@ -36,8 +37,7 @@ impl<'a> PacketWriter for StatusResponse<'a> {
 
 impl<'a> Encoder for StatusResponse<'a> {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let server_status_data = serde_json::to_string(&self.server_status)?;
-        writer.write_var_string(server_status_data.as_str())?;
+        self.server_status.encode_to_write(writer)?;
         Ok(())
     }
 }
