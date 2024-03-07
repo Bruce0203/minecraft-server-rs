@@ -1,7 +1,6 @@
 use std::io::{Cursor, Error, Result, Write};
 
-use crate::io::encoding::Encoder;
-use crate::io::prelude::Cache;
+use crate::io::prelude::{Cache, Encoder};
 
 use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
 use crate::server::prelude::Server;

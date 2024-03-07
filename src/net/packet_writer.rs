@@ -1,6 +1,6 @@
 use std::io::Result;
 
-use crate::io::encoding::Encoder;
+use crate::io::prelude::Encoder;
 
 use super::prelude::Player;
 

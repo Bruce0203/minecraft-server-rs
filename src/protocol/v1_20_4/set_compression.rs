@@ -1,9 +1,9 @@
 use std::io::{Result, Write};
 
-use crate::io::encoding::Encoder;
-use crate::io::var_int::VarIntWrite;
-
-use crate::net::prelude::{PacketIdentnifier, Player};
+use crate::{
+    io::prelude::{Encoder, VarIntWrite},
+    net::prelude::{PacketIdentnifier, Player},
+};
 
 pub struct SetCompression {
     pub compression_threshold: i32,

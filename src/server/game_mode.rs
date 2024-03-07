@@ -1,9 +1,7 @@
-use std::io::{
-    prelude::{Read, Write},
-    Error, Result,
-};
+use std::io::{Error, Read, Result, Write};
 
-use crate::io::{encoding::{Encoder, Decoder}, var_int::{VarIntRead, VarIntWrite}};
+use crate::io::prelude::VarIntWrite;
+use crate::io::prelude::{Decoder, Encoder, VarIntRead};
 
 pub enum GameMode {
     Survival,
@@ -40,4 +38,3 @@ impl Decoder for GameMode {
         })
     }
 }
-

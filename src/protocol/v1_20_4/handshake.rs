@@ -1,15 +1,12 @@
 use std::io::prelude::Write;
 use std::io::{Cursor, Error, ErrorKind, Read, Result};
 
-use crate::io::prelude::{Decoder, Encoder, VarIntWrite, VarStringWrite};
-use crate::io::primitives::U16Write;
-use crate::io::{primitives::U16Read, var_int::VarIntRead, var_string::VarStringRead};
-
-use crate::net::prelude::{PacketHandler, Player};
-use crate::server::prelude::Server;
-use crate::{
-    protocol::prelude::ConnectionState,
+use crate::io::prelude::{
+    Decoder, Encoder, U16Read, U16Write, VarIntRead, VarIntWrite, VarStringRead, VarStringWrite,
 };
+
+use crate::net::prelude::{ConnectionState, PacketHandler, Player};
+use crate::server::prelude::Server;
 
 #[derive(Debug)]
 pub struct HandShake {

@@ -1,12 +1,6 @@
 use std::io::{Result, Write};
 
-use crate::{
-    io::{
-        array::VarIntSizedVecWrite, encoding::Encoder, primitives::WriteBool,
-        var_string::VarStringWrite,
-    },
-    net::prelude::{PacketIdentnifier, Player},
-};
+use crate::{io::prelude::{Encoder, VarStringWrite, VarIntSizedVecWrite, WriteBool}, net::prelude::{PacketIdentnifier, Player}};
 use uuid::Uuid;
 
 pub struct LoginSuccess {

@@ -3,10 +3,7 @@ use std::io::{
     Result,
 };
 
-use crate::io::{
-    encoding::{Decoder, Encoder},
-    primitives::I64Read,
-};
+use crate::io::prelude::{Decoder, Encoder, I64Read};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Position {
@@ -59,8 +56,20 @@ pub struct FloatRotation {
     z: f32,
 }
 
-pub struct DoubleRotation {
+pub struct DoublePosition {
     x: f64,
     y: f64,
     z: f64,
+}
+
+pub struct Location {
+    pos: DoublePosition,
+    rot: FloatRotation,
+}
+
+impl Encoder for Location {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        self.pos.encode_to_write()?;
+        Ok(())
+    }
 }

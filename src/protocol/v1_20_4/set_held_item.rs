@@ -1,9 +1,5 @@
-use crate::{
-    io::{
-        encoding::Encoder,
-        primitives::{I16Write, U8Write},
-    }, net::prelude::{PacketIdentnifier, Player},
-};
+use crate::{io::prelude::{Encoder, U8Write}, net::prelude::{PacketIdentnifier, Player}};
+
 
 pub struct SetHeldItem {
     pub slot: u8,

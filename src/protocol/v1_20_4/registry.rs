@@ -1,11 +1,8 @@
 use std::io::{Cursor, Result, Write};
 
-use crate::{io::encoding::Encoder, net::prelude::{PacketIdentnifier, Player}};
 use serde::{Deserialize, Serialize};
 
-use crate::server::{
-    chat::ChatStyle,
-};
+use crate::{io::prelude::Encoder, net::prelude::{PacketIdentnifier, Player}, server::chat::ChatStyle};
 
 #[derive(Serialize, Deserialize)]
 pub struct RegistryData {

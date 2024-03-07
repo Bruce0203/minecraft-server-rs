@@ -1,8 +1,9 @@
 use std::ops::Deref;
 
 use bitflags::bitflags;
-use crate::io::{encoding::Encoder, nbt::NbtNetworkWrite};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+
+use crate::io::prelude::NbtNetworkWrite;
 
 #[derive(Debug, Clone)]
 pub enum Chat {

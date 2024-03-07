@@ -1,7 +1,6 @@
 use std::io::{prelude::Write, Result};
 
-use crate::io::{encoding::Encoder, primitives::F32Write};
-
+use crate::io::prelude::{Encoder, F32Write};
 use crate::net::prelude::{PacketIdentnifier, Player};
 use crate::server::coordinates::Position;
 

@@ -6,9 +6,8 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    io::{encoding::Encoder, identifier::ToIdentifier},
-    net::prelude::{PacketHandler, PacketIdentnifier, Player},
-    protocol::prelude::ConnectionState,
+    io::prelude::{Encoder, ToIdentifier},
+    net::prelude::{ConnectionState, PacketHandler, PacketIdentnifier, Player},
 };
 
 use crate::{
@@ -22,7 +21,13 @@ use crate::{
     server::prelude::*,
 };
 
-use super::player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate};
+use super::{
+    player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
+    set_center_chunk::SetCenterChunk,
+    set_render_distance::SetRenderDistance,
+    set_simulation_distance::SetSimulationDistance,
+    update_attributes::{AttributeProperty, UpdateAttributes}, update_time::UpdateTime,
+};
 
 pub struct FinishConfiguration {}
 
@@ -101,6 +106,29 @@ impl PacketHandler for FinishConfiguration {
             }],
         }
         .send_packet(player)?;
+        SetRenderDistance { view_distance: 32 }.send_packet(player);
+        SetSimulationDistance {
+            simulation_distance: 32,
+        }
+        .send_packet(player);
+        SetCenterChunk {
+            chunk_x: 0,
+            chunk_z: 0,
+        }
+        .send_packet(player);
+        UpdateAttributes {
+            entity_id: 0,
+            properties: vec![AttributeProperty {
+                key: "generic.movement_speed".to_identifier(),
+                value: 0.1,
+                modifiers: vec![],
+            }],
+        }.send_packet(player);
+        UpdateTime {
+            world_age: 0,
+            time_of_day: 0,
+        }.send_packet(player);
+
         Ok(())
     }
 }

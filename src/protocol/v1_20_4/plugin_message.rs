@@ -1,7 +1,6 @@
 use std::io::{BufRead, Cursor, Error, Read, Result};
 
-use crate::io::var_string::VarStringRead;
-
+use crate::io::prelude::VarStringRead;
 use crate::net::prelude::{PacketHandler, Player};
 use crate::server::prelude::Server;
 

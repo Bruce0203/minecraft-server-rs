@@ -1,17 +1,8 @@
 use crate::{
-    io::{
-        array::VarIntSizedVecWrite,
-        encoding::{Decoder, Encoder},
-        identifier::{Identifier, ReadIdentifier},
-        primitives::{I64Write, U8Write, WriteBool},
-        var_int::VarIntWrite,
-    },
-    net::prelude::{PacketIdentnifier, Player}, server::prelude::GameMode,
+    io::prelude::{Decoder, Encoder, Identifier, ReadIdentifier, WriteBool, VarIntSizedVecWrite, VarIntWrite, I64Write, U8Write}, net::prelude::{PacketIdentnifier, Player}, server::prelude::GameMode
 };
 
-use crate::server::{
-    coordinates::Position,
-};
+use crate::server::coordinates::Position;
 
 pub struct LoginPlay {
     pub entity_id: i32,

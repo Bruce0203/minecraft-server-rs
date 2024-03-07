@@ -6,8 +6,7 @@ use std::{
 use mio::{net::TcpListener, Events, Interest, Poll, Token};
 
 use crate::{
-    io::fast_map::FastMap, net::prelude::Player, protocol::prelude::SessionRelay,
-    server::prelude::Server,
+    io::fast_map::FastMap, net::prelude::{Player, SessionRelay}, server::prelude::Server,
 };
 
 use super::prelude::PacketHandler;

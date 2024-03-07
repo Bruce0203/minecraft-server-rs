@@ -1,8 +1,6 @@
 use std::io::{Cursor, Error, Result, Write};
 
-use crate::io::encoding::Encoder;
-use crate::io::primitives::I64Read;
-
+use crate::io::prelude::{Encoder, I64Read};
 use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
 use crate::server::prelude::Server;
 

@@ -2,8 +2,7 @@ use std::io::{Error, ErrorKind};
 
 use crate::{
     io::prelude::{Decoder, VarIntRead},
-    net::prelude::{PacketHandler, Player},
-    protocol::prelude::ConnectionState,
+    net::prelude::{ConnectionState, PacketHandler, Player},
     server::prelude::Server,
 };
 

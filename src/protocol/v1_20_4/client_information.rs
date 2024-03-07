@@ -1,10 +1,5 @@
 use crate::{
-    io::{
-        encoding::Decoder,
-        primitives::{BoolRead, I8Read, U8Read},
-        var_int::VarIntRead,
-        var_string::VarStringRead,
-    },
+    io::prelude::{BoolRead, Decoder, I8Read, U8Read, VarStringRead, VarIntRead},
     net::prelude::PacketHandler,
     server::prelude::Server,
 };

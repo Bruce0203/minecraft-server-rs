@@ -1,10 +1,10 @@
 use std::io::{prelude::Write, Cursor, Error, Result};
 
-use crate::{io::{
-    array::{VarIntSizedVecRead, VarIntSizedVecWrite},
-    encoding::Encoder,
-    identifier::Identifier,
-}, net::prelude::Player};
+use crate::io::prelude::Encoder;
+use crate::io::prelude::Identifier;
+use crate::io::prelude::VarIntSizedVecRead;
+use crate::io::prelude::VarIntSizedVecWrite;
+use crate::net::prelude::Player;
 
 use crate::net::prelude::PacketIdentnifier;
 

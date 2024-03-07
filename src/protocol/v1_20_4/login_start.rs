@@ -1,7 +1,6 @@
 use std::io::{Cursor, Error, Result};
 
-use crate::io::primitives::U128Read;
-use crate::io::var_string::VarStringRead;
+use crate::io::prelude::{VarStringRead, U128Read};
 use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
 use crate::server::prelude::Server;
 use uuid::Uuid;
@@ -36,7 +35,7 @@ impl PacketHandler for LoginStart {
             username: self.name.to_owned(),
             properties: Vec::new(),
         };
-        set_compression::set_compression(socket, 20)?;
+        //set_compression::set_compression(socket, 20)?;
         login_success.send_packet(socket)?;
         Ok(())
     }

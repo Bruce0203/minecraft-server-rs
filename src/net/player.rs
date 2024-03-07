@@ -6,12 +6,11 @@ use flate2::Compression;
 use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Encoder, VarIntRead, VarIntWrite};
-use crate::protocol::prelude::SessionRelay;
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
 use crate::server::prelude::Server;
 
 use super::packet_writer::PacketIdentnifier;
-use super::prelude::PacketHandler;
+use super::prelude::{PacketHandler, SessionRelay};
 
 pub struct Player {
     pub stream: TcpStream,

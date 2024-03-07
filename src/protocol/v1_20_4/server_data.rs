@@ -1,10 +1,7 @@
 use std::io::Cursor;
 
-use crate::io::{
-    encoding::Encoder, nbt::NbtNetworkWrite, primitives::WriteBool, var_int::VarIntWrite,
-    var_string::VarStringWrite,
-};
 
+use crate::io::prelude::{Encoder, NbtNetworkWrite, WriteBool, VarIntWrite};
 use crate::net::prelude::{PacketIdentnifier, Player};
 use crate::server::prelude::Chat;
 

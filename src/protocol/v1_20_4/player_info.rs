@@ -1,16 +1,7 @@
 use std::io::prelude::Write;
 
 use crate::{
-    io::{
-        array::VarIntSizedVecWrite,
-        encoding::Encoder,
-        option::OptionWrite,
-        primitives::{I64Write, U128Write, U8Write, WriteBool},
-        var_int::VarIntWrite,
-        var_string::VarStringWrite,
-    },
-    net::prelude::{PacketIdentnifier, Player},
-    server::{chat::ChatNbtWrite, prelude::GameMode},
+    io::prelude::{Encoder, U128Write, I64Write, VarIntWrite, VarStringWrite, WriteBool, U8Write, VarIntSizedVecWrite, OptionWrite}, net::prelude::{PacketIdentnifier, Player}, server::{chat::ChatNbtWrite, prelude::GameMode}
 };
 use uuid::Uuid;
 

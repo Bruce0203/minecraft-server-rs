@@ -3,11 +3,12 @@ use std::io::{
     Result,
 };
 
-use crate::{io::{
-    encoding::{Decoder, Encoder},
-    primitives::{F32Read, F32Write, U8Read, U8Write},
-}, net::prelude::{PacketIdentnifier, Player}};
 use bitflags::bitflags;
+
+use crate::{
+    io::prelude::{Decoder, Encoder, U8Write, F32Write, U8Read, F32Read},
+    net::prelude::{PacketIdentnifier, Player},
+};
 
 pub struct PlayerAbilities {
     pub flags: PlayerAbility,
