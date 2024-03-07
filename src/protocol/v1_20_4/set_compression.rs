@@ -3,8 +3,7 @@ use std::io::{Result, Write};
 use crate::io::encoding::Encoder;
 use crate::io::var_int::VarIntWrite;
 
-use crate::protocol::prelude::PacketWriter;
-use crate::server::prelude::Player;
+use crate::net::prelude::{PacketIdentnifier, Player};
 
 pub struct SetCompression {
     pub compression_threshold: i32,
@@ -17,7 +16,7 @@ impl Encoder for SetCompression {
     }
 }
 
-impl PacketWriter for SetCompression {
+impl PacketIdentnifier for SetCompression {
     fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x03)
     }

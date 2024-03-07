@@ -5,10 +5,13 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::io::{encoding::Encoder, identifier::ToIdentifier};
+use crate::{
+    io::{encoding::Encoder, identifier::ToIdentifier},
+    net::prelude::{PacketHandler, PacketIdentnifier, Player},
+    protocol::prelude::ConnectionState,
+};
 
 use crate::{
-    protocol::prelude::{ConnectionState, PacketHandler, PacketWriter},
     protocol::v1_20_4::{
         login_play::LoginPlay,
         player_abilities::{PlayerAbilities, PlayerAbility},
@@ -102,7 +105,7 @@ impl PacketHandler for FinishConfiguration {
     }
 }
 
-impl PacketWriter for FinishConfiguration {
+impl PacketIdentnifier for FinishConfiguration {
     fn get_packet_id(&self, _player: &mut Player) -> Result<i32> {
         Ok(0x02)
     }

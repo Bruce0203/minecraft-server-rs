@@ -4,11 +4,13 @@ use crate::{
     io::{
         array::VarIntSizedVecWrite,
         encoding::Encoder,
+        option::OptionWrite,
         primitives::{I64Write, U128Write, U8Write, WriteBool},
         var_int::VarIntWrite,
-        var_string::VarStringWrite, option::OptionWrite,
+        var_string::VarStringWrite,
     },
-    server::{chat::ChatNbtWrite, prelude::GameMode}, protocol::prelude::PacketWriter,
+    net::prelude::{PacketIdentnifier, Player},
+    server::{chat::ChatNbtWrite, prelude::GameMode},
 };
 use uuid::Uuid;
 
@@ -141,8 +143,8 @@ impl Encoder for PlayerInfoUpdate {
     }
 }
 
-impl PacketWriter for PlayerInfoUpdate {
-    fn get_packet_id(&self, player: &mut crate::server::prelude::Player) -> std::io::Result<i32> {
+impl PacketIdentnifier for PlayerInfoUpdate {
+    fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x3C)
     }
 }

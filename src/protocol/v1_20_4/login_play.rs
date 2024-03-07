@@ -1,12 +1,17 @@
-use crate::io::{
-    array::VarIntSizedVecWrite,
-    encoding::{Decoder, Encoder},
-    identifier::{Identifier, ReadIdentifier},
-    primitives::{I64Write, U8Write, WriteBool},
-    var_int::VarIntWrite,
+use crate::{
+    io::{
+        array::VarIntSizedVecWrite,
+        encoding::{Decoder, Encoder},
+        identifier::{Identifier, ReadIdentifier},
+        primitives::{I64Write, U8Write, WriteBool},
+        var_int::VarIntWrite,
+    },
+    net::prelude::{PacketIdentnifier, Player}, server::prelude::GameMode,
 };
 
-use crate::{server::{prelude::{GameMode, Player}, coordinates::Position}, protocol::prelude::PacketWriter};
+use crate::server::{
+    coordinates::Position,
+};
 
 pub struct LoginPlay {
     pub entity_id: i32,
@@ -83,11 +88,8 @@ impl Encoder for LoginPlay {
     }
 }
 
-impl PacketWriter for LoginPlay {
-    fn get_packet_id(
-        &self,
-        player: &mut Player,
-    ) -> std::io::Result<i32> {
+impl PacketIdentnifier for LoginPlay {
+    fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x29)
     }
 }

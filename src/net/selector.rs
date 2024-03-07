@@ -6,22 +6,19 @@ use std::{
 use mio::{net::TcpListener, Events, Interest, Poll, Token};
 
 use crate::{
-    io::fast_map::FastMap,
-    protocol::{
-        prelude::{PacketHandler, SessionRelay},
-        v1_20_4::V1_20_4,
-    },
-    server::prelude::{Player, Server},
+    io::fast_map::FastMap, net::prelude::Player, protocol::prelude::SessionRelay,
+    server::prelude::Server,
 };
 
+use super::prelude::PacketHandler;
+
+#[derive(derive_more::Deref, derive_more::DerefMut)]
 pub struct Selector {
     pub server: Server,
 }
 
 impl Selector {
-    pub const MAX_PACKET_BUFFER_SIZE: u64 = 100;
-
-    pub fn run(&mut self) {
+    pub fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self) {
         let mut poll = Poll::new().unwrap();
         let mut events = Events::with_capacity(128);
         let mut connection_pool = FastMap::<Player>::with_capacity(128);
@@ -44,9 +41,8 @@ impl Selector {
                 if token_index != SERVER_TOKEN_INDEX {
                     let player = connection_pool.get(token_index);
 
-                    let server = &mut self.server;
                     if let Err(err) =
-                        player.handle_packet_read(move |player| Self::handle_packet(server, player))
+                        player.handle_packet_read::<MAX_PACKET_BUFFER_SIZE>(&mut *self)
                     {
                         if err.kind() == ErrorKind::BrokenPipe {
                             println!("conneciton closed[{}]: {}", err.kind(), err);
@@ -66,10 +62,8 @@ impl Selector {
                                 token: event_token,
                                 addr,
                                 session_relay: SessionRelay::default(),
-                                read_buf: Cursor::new(Vec::from([0; 500])),
-                                write_buf: Cursor::new(Vec::from(
-                                    [0; Self::MAX_PACKET_BUFFER_SIZE as usize],
-                                )),
+                                read_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
+                                write_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
                                 packet_buf: Cursor::new(vec![]),
                             };
                             Ok(player)
@@ -79,23 +73,5 @@ impl Selector {
                 }
             }
         }
-    }
-
-    fn handle_packet(server: &mut Server, player: &mut Player) -> Result<()> {
-        match player.session_relay.protocol_id {
-            0 => {
-                PacketHandler::handle_packet(&V1_20_4, server, player)?;
-            }
-            765 => {
-                PacketHandler::handle_packet(&V1_20_4, server, player)?;
-            }
-            n => {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    format!("unknown protocol: {:?}", n),
-                ))
-            }
-        }
-        Ok(())
     }
 }

@@ -3,8 +3,8 @@ use std::io::{Cursor, Error, Result, Write};
 use crate::io::encoding::Encoder;
 use crate::io::prelude::Cache;
 
-use crate::protocol::prelude::{PacketHandler, PacketWriter};
-use crate::server::prelude::{Player, Server};
+use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
+use crate::server::prelude::Server;
 use crate::server::server_status::ServerStatus;
 
 #[derive(Debug)]
@@ -28,7 +28,7 @@ pub struct StatusResponse<'a> {
     server_status: &'a Cache<ServerStatus>,
 }
 
-impl<'a> PacketWriter for StatusResponse<'a> {
+impl<'a> PacketIdentnifier for StatusResponse<'a> {
     fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x00)
     }
@@ -47,6 +47,7 @@ impl PacketHandler for StatusRequest {
             server_status: &mut server.server_status,
         }
         .send_packet(player)?;
+        println!("status");
         Ok(())
     }
 }

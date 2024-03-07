@@ -6,10 +6,14 @@ use flate2::Compression;
 use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Encoder, VarIntRead, VarIntWrite};
-use crate::net::prelude::Selector;
-use crate::protocol::prelude::{PacketWriter, SessionRelay};
+use crate::protocol::prelude::SessionRelay;
+use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
+use crate::server::prelude::Server;
 
-pub struct Socket {
+use super::packet_writer::PacketIdentnifier;
+use super::prelude::PacketHandler;
+
+pub struct Player {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
@@ -19,52 +23,81 @@ pub struct Socket {
     pub packet_buf: Cursor<Vec<u8>>,
 }
 
-impl Socket {
-    pub fn handle_packet_read<F>(&mut self, f: F) -> Result<()>
-    where
-        F: FnMut(&mut Self) -> Result<()>,
-    {
-        let read_len = self.fill_read_buf_from_stream()? as u64;
-        if let Err(err) = self.read_packet(read_len, f) {
-            self.read_buf.set_position(read_len);
-            Err(err)
-        } else {
-            Ok(())
-        }?;
+impl Player {
+    pub fn handle_packet_read<const MAX_PACKET_BUFFER_SIZE: usize>(
+        &mut self,
+        server: &mut Server,
+    ) -> Result<()> {
+        self.fill_read_buf_from_socket_stream::<MAX_PACKET_BUFFER_SIZE>()?;
+        self.read_packet_from_read_buf(server)?;
         let write_buf = &self.write_buf.get_ref()[..self.write_buf.position() as usize];
         self.stream.write_all(write_buf)?;
         self.write_buf.set_position(0);
         Ok(())
     }
 
-    pub fn fill_read_buf_from_stream(&mut self) -> Result<usize> {
-        let read_len = self.stream.read(self.read_buf.get_mut())?;
-        if read_len == 0 || self.read_buf.position() >= Selector::MAX_PACKET_BUFFER_SIZE {
-            Err(Error::new(ErrorKind::BrokenPipe, "BrokenPipe"))?
-        }
-        Ok(read_len)
+    pub fn send_packet<E: Encoder + PacketIdentnifier>(&mut self, encoder: &E) -> Result<()> {
+        let mut write_buf = self.encode_to_packet(encoder)?;
+        self.handle_write_packet(&mut write_buf)
     }
 
-    pub fn read_packet<F>(&mut self, read_len: u64, mut f: F) -> Result<()>
-    where
-        F: FnMut(&mut Socket) -> Result<()>,
-    {
-        self.read_buf.set_position(0);
-        while self.read_buf.position() != read_len {
-            let packet_len = self.read_buf.read_var_i32()?;
-            let pos = self.read_buf.position() as usize;
-            self.packet_buf = Cursor::new(Vec::from(
-                &self.read_buf.get_ref()[pos..pos + packet_len as usize],
-            ));
+    fn fill_read_buf_from_socket_stream<const MAX_PACKET_BUFFER_SIZE: usize>(
+        &mut self,
+    ) -> Result<()> {
+        let mut pos = self.read_buf.position() as usize;
+        let read_len = self.stream.read(&mut self.read_buf.get_mut()[pos..])?;
+        pos += read_len;
+        if read_len == 0 || pos >= MAX_PACKET_BUFFER_SIZE {
+            Err(Error::new(ErrorKind::BrokenPipe, "BrokenPipe"))?
+        }
+        self.read_buf.set_position(pos as u64);
+        Ok(())
+    }
 
-            self.read_buf.read_exact(self.packet_buf.get_mut())?;
-            self.process_decompression()?;
-            f(self)?;
+    fn read_packet_from_read_buf(&mut self, server: &mut Server) -> Result<()> {
+        let read_len = self.read_buf.position();
+        self.read_buf.set_position(0);
+        let mut do_read = || -> Result<()> {
+            while self.read_buf.position() != read_len {
+                let packet_len = self.read_buf.read_var_i32()?;
+                let pos = self.read_buf.position() as usize;
+                self.packet_buf = Cursor::new(Vec::from(
+                    &self.read_buf.get_ref()[pos..pos + packet_len as usize],
+                ));
+                self.read_buf.read_exact(self.packet_buf.get_mut())?;
+                self.process_decompression()?;
+                self.process_packet_read(server);
+            }
+            self.read_buf.set_position(0);
+            Ok(())
+        };
+        if let Err(err) = do_read() {
+            self.read_buf.set_position(read_len);
+            return Err(err);
         }
         Ok(())
     }
 
-    pub fn process_decompression(&mut self) -> Result<()> {
+    fn process_packet_read(&mut self, server: &mut Server) -> Result<()> {
+        let player = self;
+        match player.session_relay.protocol_id {
+            0 => {
+                PacketHandler::handle_packet(&V1_20_4, server, player)?;
+            }
+            765 => {
+                PacketHandler::handle_packet(&V1_20_4, server, player)?;
+            }
+            n => {
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("unknown protocol: {:?}", n),
+                ))
+            }
+        }
+        Ok(())
+    }
+
+    fn process_decompression(&mut self) -> Result<()> {
         if self.session_relay.compression_threshold == -1 {
             Ok(())
         } else {
@@ -81,12 +114,7 @@ impl Socket {
         }
     }
 
-    pub fn send_packet<E: Encoder + PacketWriter>(&mut self, encoder: &E) -> Result<()> {
-        let mut write_buf = self.encode_to_packet(encoder)?;
-        self.handle_write_packet(&mut write_buf)
-    }
-
-    fn encode_to_packet<E: Encoder + PacketWriter>(
+    fn encode_to_packet<E: Encoder + PacketIdentnifier>(
         &mut self,
         encoder: &E,
     ) -> Result<Cursor<Vec<u8>>> {

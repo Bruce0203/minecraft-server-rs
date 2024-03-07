@@ -1,12 +1,13 @@
-use std::io::{prelude::{Write, Read}, Result};
-
-use bitflags::bitflags;
-use crate::io::{
-    encoding::{Decoder, Encoder},
-    primitives::{F32Read, F32Write, U8Read, U8Write},
+use std::io::{
+    prelude::{Read, Write},
+    Result,
 };
 
-use crate::{protocol::prelude::PacketWriter, server::prelude::Player};
+use crate::{io::{
+    encoding::{Decoder, Encoder},
+    primitives::{F32Read, F32Write, U8Read, U8Write},
+}, net::prelude::{PacketIdentnifier, Player}};
+use bitflags::bitflags;
 
 pub struct PlayerAbilities {
     pub flags: PlayerAbility,
@@ -44,7 +45,7 @@ impl Decoder for PlayerAbilities {
     }
 }
 
-impl PacketWriter for PlayerAbilities {
+impl PacketIdentnifier for PlayerAbilities {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x36)
     }

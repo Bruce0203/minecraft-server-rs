@@ -1,9 +1,11 @@
-use std::io::{Result, Write, Cursor};
+use std::io::{Cursor, Result, Write};
 
-use crate::io::encoding::Encoder;
+use crate::{io::encoding::Encoder, net::prelude::{PacketIdentnifier, Player}};
 use serde::{Deserialize, Serialize};
 
-use crate::{server::{chat::ChatStyle, prelude::{Player, self}}, protocol::prelude::PacketWriter};
+use crate::server::{
+    chat::ChatStyle,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct RegistryData {
@@ -132,7 +134,7 @@ pub struct Particle {
 #[derive(Serialize, Deserialize)]
 pub struct ParticleOptions {
     pub name: String,
-    pub value: prelude::particle::Particle,
+    pub value: crate::server::prelude::particle::Particle,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -174,7 +176,7 @@ impl Encoder for RegistryData {
     }
 }
 
-impl PacketWriter for RegistryData {
+impl PacketIdentnifier for RegistryData {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x05)
     }

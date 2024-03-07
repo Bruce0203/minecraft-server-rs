@@ -2,7 +2,8 @@ use std::io::{BufRead, Cursor, Error, Read, Result};
 
 use crate::io::var_string::VarStringRead;
 
-use crate::{protocol::prelude::PacketHandler, server::prelude::{Server, Player}};
+use crate::net::prelude::{PacketHandler, Player};
+use crate::server::prelude::Server;
 
 #[derive(Debug)]
 pub struct PluginMessage {

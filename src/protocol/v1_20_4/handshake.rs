@@ -1,13 +1,14 @@
 use std::io::prelude::Write;
-use std::io::{Cursor, Error, ErrorKind, Result};
+use std::io::{Cursor, Error, ErrorKind, Read, Result};
 
 use crate::io::prelude::{Decoder, Encoder, VarIntWrite, VarStringWrite};
 use crate::io::primitives::U16Write;
 use crate::io::{primitives::U16Read, var_int::VarIntRead, var_string::VarStringRead};
 
+use crate::net::prelude::{PacketHandler, Player};
+use crate::server::prelude::Server;
 use crate::{
-    protocol::prelude::{ConnectionState, PacketHandler},
-    server::prelude::{Player, Server},
+    protocol::prelude::ConnectionState,
 };
 
 #[derive(Debug)]
@@ -19,7 +20,7 @@ pub struct HandShake {
 }
 
 impl Decoder for HandShake {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(HandShake {
             protocol_version: reader.read_var_i32()?,
             server_address: reader.read_var_string::<255>()?,
@@ -69,11 +70,12 @@ impl Decoder for NextState {
     }
 }
 
-impl<'server> PacketHandler for HandShake {
+impl PacketHandler for HandShake {
     fn handle_packet(&self, server: &mut Server, value: &mut Player) -> Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
+        println!("handhsake");
         Ok(())
     }
 }

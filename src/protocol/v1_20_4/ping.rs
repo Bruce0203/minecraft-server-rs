@@ -1,9 +1,10 @@
-use std::io::{Error, Result, Write, Cursor};
+use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::encoding::Encoder;
 use crate::io::primitives::I64Read;
 
-use crate::{server::prelude::{Server, Player}, protocol::prelude::{PacketHandler, PacketWriter}};
+use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
+use crate::server::prelude::Server;
 
 #[derive(Debug)]
 pub struct PingRequest {
@@ -21,11 +22,12 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for PingRequest {
 }
 
 impl PacketHandler for PingRequest {
-    fn handle_packet(&self,server: &mut Server,  socket: &mut Player) -> Result<()> {
+    fn handle_packet(&self, server: &mut Server, socket: &mut Player) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };
         ping_response.send_packet(socket)?;
+        println!("ping");
         Ok(())
     }
 }
@@ -34,7 +36,7 @@ pub struct PingResponse {
     payload: i64,
 }
 
-impl PacketWriter for PingResponse {
+impl PacketIdentnifier for PingResponse {
     fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x01)
     }

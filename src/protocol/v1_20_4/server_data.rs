@@ -1,13 +1,12 @@
 use std::io::Cursor;
 
 use crate::io::{
-    encoding::Encoder, primitives::WriteBool, var_int::VarIntWrite, var_string::VarStringWrite, nbt::NbtNetworkWrite,
+    encoding::Encoder, nbt::NbtNetworkWrite, primitives::WriteBool, var_int::VarIntWrite,
+    var_string::VarStringWrite,
 };
 
-use crate::{
-    protocol::prelude::PacketWriter,
-    server::{chat::ChatNbtWrite, prelude::Chat},
-};
+use crate::net::prelude::{PacketIdentnifier, Player};
+use crate::server::prelude::Chat;
 
 pub struct ServerData {
     pub message_of_the_day: Chat,
@@ -30,8 +29,8 @@ impl Encoder for ServerData {
     }
 }
 
-impl PacketWriter for ServerData {
-    fn get_packet_id(&self, player: &mut crate::server::prelude::Player) -> std::io::Result<i32> {
+impl PacketIdentnifier for ServerData {
+    fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x49)
     }
 }

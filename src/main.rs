@@ -1,8 +1,8 @@
-use server_workspace::{server::server::{Server}, net::prelude::Selector};
+use server_workspace::{net::prelude::Selector, server::prelude::Server};
 
 fn main() {
     Selector {
         server: Server::new(),
     }
-    .run();
+    .run::<100_000>();
 }

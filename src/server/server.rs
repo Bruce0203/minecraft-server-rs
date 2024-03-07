@@ -1,4 +1,6 @@
-use crate::io::cache::Cache;
+use std::io::{Error, ErrorKind};
+
+use crate::io::prelude::Cache;
 
 use super::{
     chat::Chat,
@@ -26,7 +28,8 @@ impl Server {
                     online: 0,
                     sample: SamplePlayers::new(),
                 },
-            }.into(),
+            }
+            .into(),
         }
     }
 }

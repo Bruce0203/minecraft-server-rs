@@ -1,6 +1,9 @@
-use crate::io::{encoding::Encoder, primitives::{I16Write, U8Write}};
-
-use crate::{protocol::prelude::PacketWriter, server::prelude::Player};
+use crate::{
+    io::{
+        encoding::Encoder,
+        primitives::{I16Write, U8Write},
+    }, net::prelude::{PacketIdentnifier, Player},
+};
 
 pub struct SetHeldItem {
     pub slot: u8,
@@ -13,7 +16,7 @@ impl Encoder for SetHeldItem {
     }
 }
 
-impl PacketWriter for SetHeldItem {
+impl PacketIdentnifier for SetHeldItem {
     fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x51)
     }

@@ -1,13 +1,12 @@
 use std::io::{prelude::Write, Cursor, Error, Result};
 
-use crate::io::{
+use crate::{io::{
     array::{VarIntSizedVecRead, VarIntSizedVecWrite},
     encoding::Encoder,
     identifier::Identifier,
-};
+}, net::prelude::Player};
 
-use crate::protocol::prelude::PacketWriter;
-use crate::server::prelude::Player;
+use crate::net::prelude::PacketIdentnifier;
 
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,
@@ -30,7 +29,7 @@ impl Encoder for FeatureFlags {
     }
 }
 
-impl PacketWriter for FeatureFlags {
+impl PacketIdentnifier for FeatureFlags {
     fn get_packet_id(&self, _player: &mut Player) -> Result<i32> {
         Ok(0x08)
     }
