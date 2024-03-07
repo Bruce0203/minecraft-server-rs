@@ -1,5 +1,8 @@
-use std::io::{Cursor, Error, ErrorKind};
+use std::io::prelude::Write;
+use std::io::{Cursor, Error, ErrorKind, Result};
 
+use crate::io::prelude::{Decoder, Encoder, VarIntWrite, VarStringWrite};
+use crate::io::primitives::U16Write;
 use crate::io::{primitives::U16Read, var_int::VarIntRead, var_string::VarStringRead};
 
 use crate::{
@@ -15,15 +18,13 @@ pub struct HandShake {
     next_state: NextState,
 }
 
-impl TryFrom<&mut Cursor<Vec<u8>>> for HandShake {
-    type Error = Error;
-
-    fn try_from(mut value: &mut Cursor<Vec<u8>>) -> std::result::Result<Self, Self::Error> {
+impl Decoder for HandShake {
+    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
         Ok(HandShake {
-            protocol_version: value.read_var_i32()?,
-            server_address: value.read_var_string::<255>()?,
-            server_port: value.read_u16()?,
-            next_state: NextState::try_from(value)?,
+            protocol_version: reader.read_var_i32()?,
+            server_address: reader.read_var_string::<255>()?,
+            server_port: reader.read_u16()?,
+            next_state: NextState::decode_from_read(reader)?,
         })
     }
 }
@@ -43,11 +44,19 @@ impl From<&NextState> for ConnectionState {
     }
 }
 
-impl TryFrom<&mut Cursor<Vec<u8>>> for NextState {
-    type Error = Error;
+impl Encoder for NextState {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_var_i32(match self {
+            NextState::Status => 1,
+            NextState::Login => 2,
+        })?;
+        Ok(())
+    }
+}
 
-    fn try_from(value: &mut Cursor<Vec<u8>>) -> std::result::Result<Self, Self::Error> {
-        Ok(match value.read_var_i32()? {
+impl Decoder for NextState {
+    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+        Ok(match reader.read_var_i32()? {
             1 => NextState::Status,
             2 => NextState::Login,
             n => {
@@ -61,7 +70,7 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for NextState {
 }
 
 impl<'server> PacketHandler for HandShake {
-    fn handle_packet(&self, server: &mut Server, value: &mut Player) -> std::io::Result<()> {
+    fn handle_packet(&self, server: &mut Server, value: &mut Player) -> Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
@@ -69,3 +78,12 @@ impl<'server> PacketHandler for HandShake {
     }
 }
 
+impl Encoder for HandShake {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_var_i32(self.protocol_version)?;
+        writer.write_var_string(&self.server_address)?;
+        writer.write_u16(self.server_port)?;
+        self.next_state.encode_to_write(writer)?;
+        Ok(())
+    }
+}

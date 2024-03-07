@@ -28,7 +28,7 @@ use self::{
 };
 use std::io::{Error, ErrorKind, Result};
 
-use super::prelude::{ConnectionState, PacketHandler};
+use super::prelude::{ConnectionState, PacketHandler, Decoder};
 
 pub struct V1_20_4;
 
@@ -40,7 +40,7 @@ impl PacketHandler for V1_20_4 {
         let connection_state = &player.session_relay.connection_state;
         match (connection_state, packet_id) {
             (ConnectionState::HandShake, 0) => {
-                HandShake::try_from(bytes)?.handle_packet(server, player)?
+                HandShake::decode_from_read(bytes)?.handle_packet(server, player)?
             }
             (ConnectionState::Login, 0) => {
                 LoginStart::try_from(bytes)?.handle_packet(server, player)?
