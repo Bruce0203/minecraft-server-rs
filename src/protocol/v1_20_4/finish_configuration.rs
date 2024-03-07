@@ -26,7 +26,9 @@ use super::{
     set_center_chunk::SetCenterChunk,
     set_render_distance::SetRenderDistance,
     set_simulation_distance::SetSimulationDistance,
-    update_attributes::{AttributeProperty, UpdateAttributes}, update_time::UpdateTime,
+    synchronize_player_position::SyncPlayerPosition,
+    update_attributes::{AttributeProperty, UpdateAttributes},
+    update_time::UpdateTime,
 };
 
 pub struct FinishConfiguration {}
@@ -106,16 +108,16 @@ impl PacketHandler for FinishConfiguration {
             }],
         }
         .send_packet(player)?;
-        SetRenderDistance { view_distance: 32 }.send_packet(player);
+        SetRenderDistance { view_distance: 32 }.send_packet(player)?;
         SetSimulationDistance {
             simulation_distance: 32,
         }
-        .send_packet(player);
+        .send_packet(player)?;
         SetCenterChunk {
             chunk_x: 0,
             chunk_z: 0,
         }
-        .send_packet(player);
+        .send_packet(player)?;
         UpdateAttributes {
             entity_id: 0,
             properties: vec![AttributeProperty {
@@ -123,11 +125,29 @@ impl PacketHandler for FinishConfiguration {
                 value: 0.1,
                 modifiers: vec![],
             }],
-        }.send_packet(player);
+        }
+        .send_packet(player)?;
         UpdateTime {
             world_age: 0,
             time_of_day: 0,
-        }.send_packet(player);
+        }
+        .send_packet(player)?;
+        SyncPlayerPosition {
+            location: Location {
+                pos: DoublePosition {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                rot: FloatRotation {
+                    yaw: 0.0,
+                    pitch: 0.0,
+                },
+            },
+            flags: 0,
+            teleport_id: 0,
+        }
+        .send_packet(player)?;
 
         Ok(())
     }
