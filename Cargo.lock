@@ -338,6 +338,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 
 [[package]]
+name = "minecraft_server"
+version = "0.1.0"
+dependencies = [
+ "bitflags",
+ "criterion",
+ "derivative",
+ "derive_more",
+ "flate2",
+ "hematite-nbt",
+ "minecraft_server",
+ "mio",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
 name = "miniz_oxide"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -574,19 +591,6 @@ dependencies = [
 [[package]]
 name = "server-workspace"
 version = "0.1.0"
-dependencies = [
- "bitflags",
- "criterion",
- "derivative",
- "derive_more",
- "flate2",
- "hematite-nbt",
- "mio",
- "serde",
- "serde_json",
- "server-workspace",
- "uuid",
-]
 
 [[package]]
 name = "syn"

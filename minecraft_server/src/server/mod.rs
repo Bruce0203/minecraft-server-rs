@@ -1,3 +1,4 @@
+pub mod slot;
 pub mod chat;
 pub mod coordinates;
 pub mod game_mode;

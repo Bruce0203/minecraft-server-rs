@@ -3,7 +3,7 @@ use std::io::{
     Result,
 };
 
-use crate::io::prelude::{Decoder, Encoder, I64Read};
+use crate::io::prelude::{Decoder, Encoder, F32Write, F64Write, I64Read};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Position {
@@ -51,25 +51,42 @@ fn position_encoding() {
 pub struct Angle(pub u8);
 
 pub struct FloatRotation {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub yaw: f32,
+    pub pitch: f32,
+}
+
+impl Encoder for FloatRotation {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_f32(self.yaw)?;
+        writer.write_f32(self.pitch)?;
+        Ok(())
+    }
 }
 
 pub struct DoublePosition {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
+
+impl Encoder for DoublePosition {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_f64(self.x)?;
+        writer.write_f64(self.y)?;
+        writer.write_f64(self.z)?;
+        Ok(())
+    }
 }
 
 pub struct Location {
-    pos: DoublePosition,
-    rot: FloatRotation,
+    pub pos: DoublePosition,
+    pub rot: FloatRotation,
 }
 
 impl Encoder for Location {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.pos.encode_to_write()?;
+        self.pos.encode_to_write(writer)?;
+        self.rot.encode_to_write(writer)?;
         Ok(())
     }
 }

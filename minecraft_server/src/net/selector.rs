@@ -6,7 +6,9 @@ use std::{
 use mio::{net::TcpListener, Events, Interest, Poll, Token};
 
 use crate::{
-    io::fast_map::FastMap, net::prelude::{Player, SessionRelay}, server::prelude::Server,
+    io::fast_map::FastMap,
+    net::prelude::{Player, SessionRelay},
+    server::prelude::Server,
 };
 
 use super::prelude::PacketHandler;
@@ -33,6 +35,7 @@ impl Selector {
 
         loop {
             poll.poll(&mut events, Some(Duration::ZERO)).unwrap();
+
             for event in events.iter() {
                 let event_token = event.token();
                 let token_index = event_token.0;

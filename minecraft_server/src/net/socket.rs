@@ -9,10 +9,13 @@ use crate::io::prelude::{Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
 use crate::server::prelude::Server;
 
+use super::packet_reader::PacketReader;
 use super::packet_writer::PacketIdentnifier;
 use super::prelude::{PacketHandler, SessionRelay};
 
-pub struct Player {
+pub type Player = Socket;
+
+pub struct Socket {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
@@ -22,7 +25,7 @@ pub struct Player {
     pub packet_buf: Cursor<Vec<u8>>,
 }
 
-impl Player {
+impl Socket {
     pub fn handle_packet_read<const MAX_PACKET_BUFFER_SIZE: usize>(
         &mut self,
         server: &mut Server,
@@ -81,10 +84,10 @@ impl Player {
         let player = self;
         match player.session_relay.protocol_id {
             0 => {
-                PacketHandler::handle_packet(&V1_20_4, server, player)?;
+                V1_20_4::read_packet(server, player)?;
             }
             765 => {
-                PacketHandler::handle_packet(&V1_20_4, server, player)?;
+                V1_20_4::read_packet(server, player)?;
             }
             n => {
                 return Err(Error::new(
