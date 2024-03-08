@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite},
-    net::prelude::PacketIdentifier,
+    net::prelude::{PacketIdentifier, LoginPlayer},
 };
 
 pub struct UpdateAttributes {
@@ -20,8 +20,8 @@ impl Encoder for UpdateAttributes {
     }
 }
 
-impl PacketIdentifier for UpdateAttributes {
-    fn get_packet_id(&self, player: &mut crate::net::prelude::Player) -> Result<i32> {
+impl PacketIdentifier<LoginPlayer> for UpdateAttributes {
+    fn get_packet_id(&self, player: &mut LoginPlayer) -> Result<i32> {
         Ok(0x71)
     }
 }

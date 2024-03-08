@@ -1,28 +1,28 @@
 use std::{
     io::{Cursor, Error, ErrorKind, Result},
-    time::{Duration, SystemTime},
+    time::{Duration, SystemTime}, ops::DerefMut,
 };
 
 use mio::{net::TcpListener, Events, Interest, Poll, Token};
 
 use crate::{
     io::fast_map::FastMap,
-    net::prelude::{Player, SessionRelay},
+    net::{prelude::SessionRelay, socket::Socket},
     server::prelude::Server,
 };
 
 use super::prelude::PacketHandler;
 
 #[derive(derive_more::Deref, derive_more::DerefMut)]
-pub struct Selector {
+pub struct Selector<Server> {
     pub server: Server,
 }
 
-impl Selector {
-    pub fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self) {
+impl<Server: Default> Selector<Server> {
+    pub fn run<Player: Default, const MAX_PACKET_BUFFER_SIZE: usize>(&mut self) {
         let mut poll = Poll::new().unwrap();
         let mut events = Events::with_capacity(128);
-        let mut connection_pool = FastMap::<Player>::with_capacity(128);
+        let mut connection_pool = FastMap::<Socket<Player>>::with_capacity(128);
 
         let addr = "0.0.0.0:25565".parse().unwrap();
         let mut listener = TcpListener::bind(addr).unwrap();
@@ -44,7 +44,7 @@ impl Selector {
                     let player = connection_pool.get(token_index);
 
                     if let Err(err) =
-                        player.handle_packet_read::<MAX_PACKET_BUFFER_SIZE>(&mut *self)
+                        player.handle_read_event(&mut self.server)
                     {
                         if err.kind() == ErrorKind::BrokenPipe {
                             println!("conneciton closed[{}]: {}", err.kind(), err);
@@ -59,10 +59,11 @@ impl Selector {
                                 Token(index),
                                 Interest::READABLE,
                             )?;
-                            let player = Player {
+                            let player = Socket {
                                 stream,
                                 token: event_token,
                                 addr,
+                                player_data: Player::default(),
                                 session_relay: SessionRelay::default(),
                                 read_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
                                 write_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),

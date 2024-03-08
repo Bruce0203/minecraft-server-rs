@@ -1,7 +1,7 @@
 use std::io::{Cursor, Error, Result};
 
 use crate::io::prelude::Decoder;
-use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter};
+use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter, LoginPlayer};
 use crate::server::prelude::Server;
 
 use super::{
@@ -21,8 +21,8 @@ impl Decoder for LoginAcknowledged {
     }
 }
 
-impl PacketHandler for LoginAcknowledged {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+impl PacketHandler<LoginPlayer> for LoginAcknowledged {
+    fn handle_packet(&self, server: &mut Server, player: &mut LoginPlayer) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
 
         let registry_data = RegistryData {

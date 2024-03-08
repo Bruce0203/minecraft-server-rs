@@ -1,6 +1,6 @@
 use crate::{
     io::prelude::{BoolRead, Decoder, I8Read, U8Read, VarIntRead, VarStringRead},
-    net::prelude::PacketHandler,
+    net::prelude::{PacketHandler, LoginPlayer},
     server::prelude::Server,
 };
 use bitflags::bitflags;
@@ -92,8 +92,8 @@ impl Decoder for MainHand {
     }
 }
 
-impl PacketHandler for ClientInformation {
-    fn handle_packet(&self, server: &mut Server, _player: &mut Player) -> Result<()> {
+impl PacketHandler<LoginPlayer> for ClientInformation {
+    fn handle_packet(&self, server: &mut Server, _player: &mut LoginPlayer) -> Result<()> {
         Ok(())
     }
 }

@@ -1,28 +1,29 @@
-use std::io::{Error, ErrorKind};
-
+use crate::protocol;
+use crate::server::prelude::GamePlayer;
 use crate::{
     io::prelude::{Decoder, VarIntRead},
-    net::prelude::{ConnectionState, PacketHandler, Player},
-    protocol::packets,
+    net::prelude::{ConnectionState, PacketHandler},
+    protocol::protocol_macro::packets,
 };
+use std::io::{Error, ErrorKind};
+use ConnectionState::*;
 
-use super::{
-    client_information::ClientInformation, finish_configuration::FinishConfiguration,
-    handshake::HandShake, login_acknowledged::LoginAcknowledged, login_start::LoginStart,
-    ping::PingRequest, plugin_message::PluginMessage, status::StatusRequest,
-};
-use crate::protocol;
+use super::status::ping::PingRequest;
+use super::status::status::StatusRequest;
 
 pub struct V1_20_4;
-use protocol::Bound::*;
+
 packets!(
+    Server,
+    GamePlayer,
     V1_20_4,
-    (Server, ConnectionState::HandShake, 0x00, HandShake),
-    (Server, ConnectionState::Status, 0x00, StatusRequest),
-    (Server, ConnectionState::Status, 0x01, PingRequest),
-    (Server, ConnectionState::Login, 0x00, LoginStart),
-    (Server, ConnectionState::Login, 0x03, LoginAcknowledged),
-    (Server, ConnectionState::Confgiuration, 0x00, ClientInformation),
-    (Server, ConnectionState::Confgiuration, 0x01, PluginMessage),
-    (Server, ConnectionState::Confgiuration, 0x02, FinishConfiguration),
+    (Bound::Server, HandShake, 0x00, super::handshake::HandShake),
+    (Bound::Server, Status, 0x00, StatusRequest),
+    (Bound::Server, Status, 0x01, PingRequest),
+    //    (Bound::Server, Login, 0x00, LoginStart),
+    //    (Bound::Server, Login, 0x03, LoginAcknowledged),
+    //
+    //    (Bound::Server, Confgiuration, 0x00, ClientInformation),
+    //    (Bound::Server, Confgiuration, 0x01, PluginMessage),
+    //    (Bound::Server, Confgiuration, 0x02, FinishConfiguration),
 );

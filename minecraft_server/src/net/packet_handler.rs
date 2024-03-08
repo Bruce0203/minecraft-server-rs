@@ -2,9 +2,9 @@ use std::io::Result;
 
 use crate::{server::prelude::Server, io::prelude::Decoder};
 
-use super::prelude::Player;
+use super::prelude::Socket;
 
-pub trait PacketHandler {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()>;
+pub trait PacketHandler<Player> {
+    fn handle_packet(&self, server: &mut Server, player: &mut Socket<Player>) -> Result<()>;
 }
 

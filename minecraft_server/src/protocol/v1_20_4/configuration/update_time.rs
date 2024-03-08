@@ -1,6 +1,6 @@
 use crate::{
     io::prelude::{Encoder, I64Write},
-    net::prelude::PacketIdentifier,
+    net::prelude::{PacketIdentifier, LoginPlayer, Player},
 };
 
 pub struct UpdateTime {
@@ -16,8 +16,8 @@ impl Encoder for UpdateTime {
     }
 }
 
-impl PacketIdentifier for UpdateTime {
-    fn get_packet_id(&self, player: &mut crate::net::prelude::Player) -> std::io::Result<i32> {
+impl PacketIdentifier<LoginPlayer> for UpdateTime {
+    fn get_packet_id(&self, player: &mut LoginPlayer) -> std::io::Result<i32> {
         Ok(0x62)
     }
 }

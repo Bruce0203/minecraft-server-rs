@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Decoder, Encoder, ToIdentifier},
-    net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter},
+    net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter, LoginPlayer},
 };
 
 use crate::{
@@ -45,8 +45,8 @@ impl Decoder for FinishConfiguration {
     }
 }
 
-impl PacketHandler for FinishConfiguration {
-    fn handle_packet(&self, server: &mut Server, player: &mut Player) -> Result<()> {
+impl PacketHandler<LoginPlayer> for FinishConfiguration {
+    fn handle_packet(&self, server: &mut Server, player: &mut LoginPlayer) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
             entity_id: 0,

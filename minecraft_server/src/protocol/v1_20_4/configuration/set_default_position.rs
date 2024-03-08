@@ -1,7 +1,7 @@
 use std::io::{prelude::Write, Result};
 
 use crate::io::prelude::{Encoder, F32Write};
-use crate::net::prelude::{PacketIdentifier, Player};
+use crate::net::prelude::{PacketIdentifier, Player, LoginPlayer};
 use crate::server::coordinates::Position;
 
 pub struct SetDefaultPosition {
@@ -17,8 +17,8 @@ impl Encoder for SetDefaultPosition {
     }
 }
 
-impl PacketIdentifier for SetDefaultPosition {
-    fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
+impl PacketIdentifier<LoginPlayer> for SetDefaultPosition {
+    fn get_packet_id(&self, player: &mut LoginPlayer) -> Result<i32> {
         Ok(0x54)
     }
 }

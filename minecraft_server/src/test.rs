@@ -5,5 +5,5 @@ fn test_mc_server() {
     Selector {
         server: Server::new(),
     }
-    .run::<100_000>();
+    .run::<Player, 100_000>();
 }

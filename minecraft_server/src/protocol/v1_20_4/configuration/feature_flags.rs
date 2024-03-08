@@ -4,6 +4,7 @@ use crate::io::prelude::Encoder;
 use crate::io::prelude::Identifier;
 use crate::io::prelude::VarIntSizedVecRead;
 use crate::io::prelude::VarIntSizedVecWrite;
+use crate::net::prelude::LoginPlayer;
 use crate::net::prelude::Player;
 
 use crate::net::prelude::PacketIdentifier;
@@ -29,8 +30,8 @@ impl Encoder for FeatureFlags {
     }
 }
 
-impl PacketIdentifier for FeatureFlags {
-    fn get_packet_id(&self, _player: &mut Player) -> Result<i32> {
+impl PacketIdentifier<LoginPlayer> for FeatureFlags {
+    fn get_packet_id(&self, _player: &mut LoginPlayer) -> Result<i32> {
         Ok(0x08)
     }
 }

@@ -19,6 +19,6 @@ criterion = "0.5.1"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "test_server"
+name = "fast_map"
 harness = false
 

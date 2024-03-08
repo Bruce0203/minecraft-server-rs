@@ -1,7 +1,7 @@
 use std::io::Result;
 
-use super::socket::Player;
+use super::socket::Socket;
 
-pub trait PacketIdentifier: Sized {
-    fn get_packet_id(&self, player: &mut Player) -> Result<i32>;
+pub trait PacketIdentifier<Player>: Sized {
+    fn get_packet_id(&self, player: &mut Socket<Player>) -> Result<i32>;
 }

@@ -2,13 +2,14 @@ use std::io::prelude::Read;
 use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::prelude::{Decoder, Encoder, I64Read};
-use crate::net::prelude::{PacketHandler, PacketIdentifier, Player, PacketWriter};
-use crate::server::prelude::Server;
+use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
+use crate::server::prelude::{Server, GamePlayer};
 
 #[derive(Debug)]
 pub struct PingRequest {
     payload: i64,
 }
+
 impl Decoder for PingRequest {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(PingRequest {
@@ -17,8 +18,8 @@ impl Decoder for PingRequest {
     }
 }
 
-impl PacketHandler for PingRequest {
-    fn handle_packet(&self, server: &mut Server, socket: &mut Player) -> Result<()> {
+impl PacketHandler<GamePlayer> for PingRequest {
+    fn handle_packet(&self, server: &mut Server, socket: &mut Socket<GamePlayer>) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };
@@ -31,8 +32,8 @@ pub struct PingResponse {
     payload: i64,
 }
 
-impl PacketIdentifier for PingResponse {
-    fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
+impl PacketIdentifier<GamePlayer> for PingResponse {
+    fn get_packet_id(&self, _socket: &mut GamePlayer) -> Result<i32> {
         Ok(0x01)
     }
 }
