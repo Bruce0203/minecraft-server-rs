@@ -6,7 +6,7 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Encoder, ToIdentifier},
+    io::prelude::{Decoder, Encoder, ToIdentifier},
     net::prelude::{ConnectionState, PacketHandler, PacketIdentnifier, Player},
 };
 
@@ -39,10 +39,8 @@ impl FinishConfiguration {
     }
 }
 
-impl TryFrom<&mut Cursor<Vec<u8>>> for FinishConfiguration {
-    type Error = Error;
-
-    fn try_from(_value: &mut Cursor<Vec<u8>>) -> Result<Self> {
+impl Decoder for FinishConfiguration {
+    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
         Ok(FinishConfiguration {})
     }
 }
