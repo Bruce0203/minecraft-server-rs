@@ -5,3 +5,6 @@ edition = "2021"
 
 [workspace]
 members = ["minecraft_server"]
+
+[dependencies]
+delegate = "0.12.0"
