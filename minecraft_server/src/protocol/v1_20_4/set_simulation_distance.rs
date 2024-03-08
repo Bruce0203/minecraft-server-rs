@@ -2,7 +2,7 @@ use std::io::{Result, Write};
 
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
-    net::prelude::{PacketIdentnifier, Player},
+    net::prelude::{PacketIdentifier, Player},
 };
 
 pub struct SetSimulationDistance {
@@ -16,7 +16,7 @@ impl Encoder for SetSimulationDistance {
     }
 }
 
-impl PacketIdentnifier for SetSimulationDistance {
+impl PacketIdentifier for SetSimulationDistance {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x60)
     }

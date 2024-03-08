@@ -1,5 +1,5 @@
 use crate::{
-    io::prelude::{Decoder, Encoder, Identifier, ReadIdentifier, WriteBool, VarIntSizedVecWrite, VarIntWrite, I64Write, U8Write}, net::prelude::{PacketIdentnifier, Player}, server::prelude::GameMode
+    io::prelude::{Decoder, Encoder, Identifier, ReadIdentifier, WriteBool, VarIntSizedVecWrite, VarIntWrite, I64Write, U8Write}, net::prelude::{PacketIdentifier, Player}, server::prelude::GameMode
 };
 
 use crate::server::coordinates::Position;
@@ -79,7 +79,7 @@ impl Encoder for LoginPlay {
     }
 }
 
-impl PacketIdentnifier for LoginPlay {
+impl PacketIdentifier for LoginPlay {
     fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x29)
     }

@@ -2,13 +2,13 @@ use std::io::Result;
 
 use crate::io::prelude::Encoder;
 
-use super::prelude::Player;
+use super::prelude::{Player, PacketIdentifier};
 
-pub trait PacketIdentnifier: Sized + Encoder {
-    fn get_packet_id(&self, player: &mut Player) -> Result<i32>;
-
+pub trait PacketWriter: PacketIdentifier + Encoder {
     fn send_packet(&self, player: &mut Player) -> Result<()> {
         player.send_packet(self)?;
         Ok(())
     }
 }
+
+impl<P: Encoder + PacketIdentifier> PacketWriter for P {}

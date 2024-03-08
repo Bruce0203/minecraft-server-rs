@@ -1,6 +1,6 @@
 use std::io::{Result, Write};
 
-use crate::{io::prelude::Encoder, net::prelude::PacketIdentnifier};
+use crate::{io::prelude::Encoder, net::prelude::PacketIdentifier};
 use crate::io::prelude::VarIntWrite;
 
 pub struct SetCenterChunk {
@@ -16,7 +16,7 @@ impl Encoder for SetCenterChunk {
     }
 }
 
-impl PacketIdentnifier for SetCenterChunk {
+impl PacketIdentifier for SetCenterChunk {
     fn get_packet_id(&self, player: &mut crate::net::prelude::Player) -> Result<i32> {
         Ok(0x52)
     }

@@ -2,7 +2,7 @@ use std::io::{Cursor, Result, Write};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{io::prelude::Encoder, net::prelude::{PacketIdentnifier, Player}, server::chat::ChatStyle};
+use crate::{io::prelude::Encoder, net::prelude::{PacketIdentifier, Player}, server::chat::ChatStyle};
 
 #[derive(Serialize, Deserialize)]
 pub struct RegistryData {
@@ -173,7 +173,7 @@ impl Encoder for RegistryData {
     }
 }
 
-impl PacketIdentnifier for RegistryData {
+impl PacketIdentifier for RegistryData {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x05)
     }

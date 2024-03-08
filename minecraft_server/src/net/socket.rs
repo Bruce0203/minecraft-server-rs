@@ -10,8 +10,7 @@ use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
 use crate::server::prelude::Server;
 
 use super::packet_reader::PacketReader;
-use super::packet_writer::PacketIdentnifier;
-use super::prelude::{PacketHandler, SessionRelay};
+use super::prelude::{PacketHandler, SessionRelay, PacketIdentifier};
 
 pub type Player = Socket;
 
@@ -38,7 +37,7 @@ impl Socket {
         Ok(())
     }
 
-    pub fn send_packet<E: Encoder + PacketIdentnifier>(&mut self, encoder: &E) -> Result<()> {
+    pub fn send_packet<E: Encoder + PacketIdentifier>(&mut self, encoder: &E) -> Result<()> {
         let mut write_buf = self.encode_to_packet(encoder)?;
         self.handle_write_packet(&mut write_buf)
     }
@@ -116,7 +115,7 @@ impl Socket {
         }
     }
 
-    fn encode_to_packet<E: Encoder + PacketIdentnifier>(
+    fn encode_to_packet<E: Encoder + PacketIdentifier>(
         &mut self,
         encoder: &E,
     ) -> Result<Cursor<Vec<u8>>> {

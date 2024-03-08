@@ -6,7 +6,7 @@ use crate::io::prelude::VarIntSizedVecRead;
 use crate::io::prelude::VarIntSizedVecWrite;
 use crate::net::prelude::Player;
 
-use crate::net::prelude::PacketIdentnifier;
+use crate::net::prelude::PacketIdentifier;
 
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,
@@ -29,7 +29,7 @@ impl Encoder for FeatureFlags {
     }
 }
 
-impl PacketIdentnifier for FeatureFlags {
+impl PacketIdentifier for FeatureFlags {
     fn get_packet_id(&self, _player: &mut Player) -> Result<i32> {
         Ok(0x08)
     }

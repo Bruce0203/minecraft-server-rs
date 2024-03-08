@@ -1,4 +1,4 @@
-use crate::{io::prelude::{Encoder, U8Write}, net::prelude::{PacketIdentnifier, Player}};
+use crate::{io::prelude::{Encoder, U8Write}, net::prelude::{PacketIdentifier, Player}};
 
 
 pub struct SetHeldItem {
@@ -12,7 +12,7 @@ impl Encoder for SetHeldItem {
     }
 }
 
-impl PacketIdentnifier for SetHeldItem {
+impl PacketIdentifier for SetHeldItem {
     fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x51)
     }

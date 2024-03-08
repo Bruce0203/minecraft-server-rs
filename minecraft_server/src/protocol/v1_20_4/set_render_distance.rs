@@ -2,7 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::Encoder;
 use crate::io::prelude::VarIntWrite;
-use crate::net::prelude::PacketIdentnifier;
+use crate::net::prelude::PacketIdentifier;
 use crate::net::prelude::Player;
 
 use super::set_default_position::SetDefaultPosition;
@@ -18,7 +18,7 @@ impl Encoder for SetRenderDistance {
     }
 }
 
-impl PacketIdentnifier for SetRenderDistance {
+impl PacketIdentifier for SetRenderDistance {
     fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
         Ok(0x53)
     }

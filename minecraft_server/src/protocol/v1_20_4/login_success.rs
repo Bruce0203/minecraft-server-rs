@@ -1,6 +1,6 @@
 use std::io::{Result, Write};
 
-use crate::{io::prelude::{Encoder, VarStringWrite, VarIntSizedVecWrite, WriteBool}, net::prelude::{PacketIdentnifier, Player}};
+use crate::{io::prelude::{Encoder, VarStringWrite, VarIntSizedVecWrite, WriteBool}, net::prelude::{PacketIdentifier, Player}};
 use uuid::Uuid;
 
 pub struct LoginSuccess {
@@ -25,7 +25,7 @@ impl Encoder for LoginSuccess {
     }
 }
 
-impl PacketIdentnifier for LoginSuccess {
+impl PacketIdentifier for LoginSuccess {
     fn get_packet_id(&self, _socket: &mut Player) -> Result<i32> {
         Ok(0x02)
     }

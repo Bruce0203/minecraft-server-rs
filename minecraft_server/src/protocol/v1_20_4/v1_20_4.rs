@@ -3,7 +3,7 @@ use std::io::{Error, ErrorKind};
 use crate::{
     io::prelude::{Decoder, VarIntRead},
     net::prelude::{ConnectionState, PacketHandler, Player},
-    server::prelude::Server,
+    protocol::packets,
 };
 
 use super::{
@@ -14,14 +14,15 @@ use super::{
 use crate::protocol;
 
 pub struct V1_20_4;
-protocol::packets!(
+use protocol::Bound::*;
+packets!(
     V1_20_4,
-    (ConnectionState::HandShake, 0x00, HandShake),
-    (ConnectionState::Status, 0x00, StatusRequest),
-    (ConnectionState::Status, 0x01, PingRequest),
-    (ConnectionState::Login, 0x00, LoginStart),
-    (ConnectionState::Login, 0x03, LoginAcknowledged),
-    (ConnectionState::Confgiuration, 0x00, ClientInformation),
-    (ConnectionState::Confgiuration, 0x01, PluginMessage),
-    (ConnectionState::Confgiuration, 0x02, FinishConfiguration),
+    (Server, ConnectionState::HandShake, 0x00, HandShake),
+    (Server, ConnectionState::Status, 0x00, StatusRequest),
+    (Server, ConnectionState::Status, 0x01, PingRequest),
+    (Server, ConnectionState::Login, 0x00, LoginStart),
+    (Server, ConnectionState::Login, 0x03, LoginAcknowledged),
+    (Server, ConnectionState::Confgiuration, 0x00, ClientInformation),
+    (Server, ConnectionState::Confgiuration, 0x01, PluginMessage),
+    (Server, ConnectionState::Confgiuration, 0x02, FinishConfiguration),
 );

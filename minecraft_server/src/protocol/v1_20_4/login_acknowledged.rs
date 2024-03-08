@@ -1,7 +1,7 @@
 use std::io::{Cursor, Error, Result};
 
 use crate::io::prelude::Decoder;
-use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentnifier, Player};
+use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter};
 use crate::server::prelude::Server;
 
 use super::{

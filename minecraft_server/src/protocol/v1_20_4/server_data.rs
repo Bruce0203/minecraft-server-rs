@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 
 use crate::io::prelude::{Encoder, NbtNetworkWrite, WriteBool, VarIntWrite};
-use crate::net::prelude::{PacketIdentnifier, Player};
+use crate::net::prelude::{PacketIdentifier, Player};
 use crate::server::prelude::Chat;
 
 pub struct ServerData {
@@ -26,7 +26,7 @@ impl Encoder for ServerData {
     }
 }
 
-impl PacketIdentnifier for ServerData {
+impl PacketIdentifier for ServerData {
     fn get_packet_id(&self, player: &mut Player) -> std::io::Result<i32> {
         Ok(0x49)
     }

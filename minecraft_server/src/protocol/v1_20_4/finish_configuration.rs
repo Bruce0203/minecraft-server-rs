@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Decoder, Encoder, ToIdentifier},
-    net::prelude::{ConnectionState, PacketHandler, PacketIdentnifier, Player},
+    net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter},
 };
 
 use crate::{
@@ -148,12 +148,6 @@ impl PacketHandler for FinishConfiguration {
         .send_packet(player)?;
 
         Ok(())
-    }
-}
-
-impl PacketIdentnifier for FinishConfiguration {
-    fn get_packet_id(&self, _player: &mut Player) -> Result<i32> {
-        Ok(0x02)
     }
 }
 

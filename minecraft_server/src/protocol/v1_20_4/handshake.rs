@@ -5,7 +5,7 @@ use crate::io::prelude::{
     Decoder, Encoder, U16Read, U16Write, VarIntRead, VarIntWrite, VarStringRead, VarStringWrite,
 };
 
-use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentnifier, Player};
+use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player};
 use crate::server::prelude::Server;
 
 #[derive(Debug)]
@@ -24,12 +24,6 @@ impl Decoder for HandShake {
             server_port: reader.read_u16()?,
             next_state: NextState::decode_from_read(reader)?,
         })
-    }
-}
-
-impl PacketIdentnifier for HandShake {
-    fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
-        Ok(0x00)
     }
 }
 
@@ -78,7 +72,6 @@ impl PacketHandler for HandShake {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
-        println!("handhsake");
         Ok(())
     }
 }

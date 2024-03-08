@@ -2,7 +2,7 @@ use std::io::prelude::Write;
 use std::io::{Cursor, Error, Result};
 
 use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
-use crate::net::prelude::{PacketHandler, PacketIdentnifier, Player};
+use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Player};
 use crate::server::prelude::Server;
 use uuid::Uuid;
 
@@ -45,11 +45,5 @@ impl Encoder for LoginStart {
         writer.write_var_string(&self.name)?;
         writer.write_uuid(self.player_uuid)?;
         Ok(())
-    }
-}
-
-impl PacketIdentnifier for LoginStart {
-    fn get_packet_id(&self, player: &mut Player) -> Result<i32> {
-        Ok(0x00)
     }
 }
