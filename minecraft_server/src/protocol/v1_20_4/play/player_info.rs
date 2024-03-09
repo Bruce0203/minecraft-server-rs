@@ -5,7 +5,7 @@ use crate::{
         Encoder, I64Write, OptionWrite, U128Write, U8Write, VarIntSizedVecWrite, VarIntWrite,
         VarStringWrite, WriteBool,
     },
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::{
         chat::ChatNbtWrite,
         prelude::{GameMode, LoginPlayer},
@@ -142,8 +142,8 @@ impl Encoder for PlayerInfoUpdate {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for PlayerInfoUpdate {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
+impl PacketId<LoginPlayer> for PlayerInfoUpdate {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
         Ok(0x3C)
     }
 }

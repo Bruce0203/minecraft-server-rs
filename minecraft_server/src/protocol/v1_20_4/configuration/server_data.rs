@@ -1,7 +1,7 @@
 use std::io::Cursor;
 
 use crate::io::prelude::{Encoder, NbtNetworkWrite, VarIntWrite, WriteBool};
-use crate::net::prelude::{PacketIdentifier, Socket};
+use crate::net::prelude::{PacketId, Socket};
 use crate::server::prelude::{Chat, LoginPlayer, LoginServer};
 
 pub struct ServerData {
@@ -25,8 +25,8 @@ impl Encoder for ServerData {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for ServerData {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
+impl PacketId<LoginPlayer> for ServerData {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
         Ok(0x49)
     }
 }

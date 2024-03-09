@@ -2,7 +2,7 @@ use std::{io::Cursor, net::SocketAddr, str::FromStr};
 
 use criterion::{criterion_group, criterion_main, BatchSize::PerIteration, Criterion};
 use minecraft_server::{
-    net::prelude::{Server, PacketWriter, Socket, Bound, SessionRelay},
+    net::prelude::{Server, PacketWriter, Socket, SessionRelay},
     protocol::v1_20_4::{handshake::{HandShake, NextState}, login::login_start::LoginStart},
     server::prelude::{LoginServer, LoginPlayer},
 };
@@ -55,7 +55,6 @@ fn new_client(addr: SocketAddr) -> Socket<LoginPlayer> {
         read_buf: Cursor::new(Vec::from([0; 10_000])),
         write_buf: Cursor::new(Vec::from([0; 10_000])),
         packet_buf: Cursor::new(vec![]),
-        bound: Bound::Client,
         player_data: LoginPlayer::default(),
     }
 }

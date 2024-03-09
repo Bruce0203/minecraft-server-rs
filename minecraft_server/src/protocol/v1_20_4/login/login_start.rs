@@ -2,7 +2,7 @@ use std::io::prelude::Write;
 use std::io::{Cursor, Error, Result};
 
 use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
-use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
+use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::protocol::v1_20_4::login::login_success::LoginSuccess;
 use crate::server::prelude::{LoginPlayer, LoginServer};
 use uuid::Uuid;

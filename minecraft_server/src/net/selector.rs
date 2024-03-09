@@ -11,7 +11,7 @@ use crate::{
     net::{prelude::SessionRelay, socket::Socket},
 };
 
-use super::prelude::{Server, Bound};
+use super::prelude::Server;
 
 pub trait Selector {
     fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self);
@@ -33,7 +33,7 @@ impl<Server: super::prelude::Server> Selector for Server {
             .register(&mut listener, server_token, Interest::READABLE)
             .unwrap();
 
-        run_server_with_listener::<Server, SERVER_TOKEN_INDEX>(
+        start_loop_with_listener::<Server, SERVER_TOKEN_INDEX>(
             self,
             poll,
             events,
@@ -44,7 +44,7 @@ impl<Server: super::prelude::Server> Selector for Server {
     }
 }
 
-fn run_server_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
+fn start_loop_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
     server: &mut S,
     mut poll: Poll,
     mut events: Events,
@@ -77,7 +77,6 @@ fn run_server_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
                             stream,
                             event_token,
                             addr,
-                            Bound::Server,
                             S::Player::default(),
                         );
                         Ok(player)

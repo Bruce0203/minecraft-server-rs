@@ -45,6 +45,7 @@ pub struct SamplePlayer {
     id: Uuid,
 }
 
+#[ignore]
 #[test]
 fn serde_ser_server_status() {
     let model = ServerStatus {

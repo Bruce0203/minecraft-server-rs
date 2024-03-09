@@ -1,8 +1,11 @@
+pub mod set_container_property;
 pub mod player_abilities;
 pub mod player_info;
 pub mod set_center_chunk;
+pub mod set_container_contents;
 pub mod set_container_slot;
 pub mod set_default_position;
+pub mod set_entity_metadata;
 pub mod set_held_item;
 pub mod set_render_distance;
 pub mod set_simulation_distance;

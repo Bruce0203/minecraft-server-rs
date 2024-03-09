@@ -7,7 +7,7 @@ use bitflags::bitflags;
 
 use crate::{
     io::prelude::{Decoder, Encoder, F32Read, F32Write, U8Read, U8Write},
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::prelude::LoginPlayer,
 };
 
@@ -47,8 +47,8 @@ impl Decoder for PlayerAbilities {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for PlayerAbilities {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for PlayerAbilities {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x36)
     }
 }

@@ -2,7 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::Encoder;
 use crate::io::prelude::VarIntWrite;
-use crate::net::prelude::PacketIdentifier;
+use crate::net::prelude::PacketId;
 use crate::net::prelude::Socket;
 use crate::server::prelude::LoginPlayer;
 
@@ -19,8 +19,8 @@ impl Encoder for SetRenderDistance {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for SetRenderDistance {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for SetRenderDistance {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x53)
     }
 }

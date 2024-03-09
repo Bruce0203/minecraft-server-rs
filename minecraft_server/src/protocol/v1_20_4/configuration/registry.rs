@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     io::prelude::Encoder,
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::{
         chat::ChatStyle,
         prelude::{LoginPlayer, LoginServer},
@@ -180,8 +180,8 @@ impl Encoder for RegistryData {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for RegistryData {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for RegistryData {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x05)
     }
 }

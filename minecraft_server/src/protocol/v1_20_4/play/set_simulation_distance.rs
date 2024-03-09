@@ -2,7 +2,7 @@ use std::io::{Result, Write};
 
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::prelude::LoginPlayer,
 };
 
@@ -17,8 +17,8 @@ impl Encoder for SetSimulationDistance {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for SetSimulationDistance {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for SetSimulationDistance {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x60)
     }
 }

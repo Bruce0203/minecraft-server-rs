@@ -6,7 +6,7 @@ use crate::{
     io::prelude::{
         Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite,
     },
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::prelude::LoginPlayer,
 };
 
@@ -23,8 +23,8 @@ impl Encoder for UpdateAttributes {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for UpdateAttributes {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for UpdateAttributes {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x71)
     }
 }

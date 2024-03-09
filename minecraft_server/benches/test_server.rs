@@ -1,5 +1,5 @@
 use minecraft_server::{
-    net::prelude::{PacketIdentifier, SessionRelay, Socket, Bound},
+    net::prelude::{PacketId, SessionRelay, Socket},
     protocol::v1_20_4::handshake::HandShake,
     server::prelude::LoginPlayer,
 };
@@ -28,7 +28,6 @@ fn criterion_benchmark(c: &mut Criterion) {
             ),
             Token(0),
             listener.local_addr().unwrap(),
-            Bound::Client,
             LoginPlayer::default(),
         );
         let (stream, addr) = listener.accept().unwrap();

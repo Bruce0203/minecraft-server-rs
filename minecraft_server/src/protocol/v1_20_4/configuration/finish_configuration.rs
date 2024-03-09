@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::{
     io::prelude::{Decoder, Encoder, ToIdentifier},
     net::prelude::{
-        ConnectionState, PacketHandler, PacketIdentifier, PacketWriter, Server, Socket,
+        ConnectionState, PacketHandler, PacketId, PacketWriter, Server, Socket,
     },
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
@@ -22,7 +22,7 @@ use crate::{
             set_simulation_distance::SetSimulationDistance,
             synchronize_player_position::SyncPlayerPosition,
             update_attributes::{AttributeProperty, UpdateAttributes},
-            update_time::UpdateTime,
+            update_time::UpdateTime, set_container_slot::SetContainerSlot,
         },
     },
     server::{

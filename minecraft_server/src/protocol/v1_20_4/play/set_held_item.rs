@@ -1,6 +1,6 @@
 use crate::{
     io::prelude::{Encoder, U8Write},
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::prelude::LoginPlayer,
 };
 
@@ -15,8 +15,8 @@ impl Encoder for SetHeldItem {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for SetHeldItem {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
+impl PacketId<LoginPlayer> for SetHeldItem {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
         Ok(0x51)
     }
 }

@@ -2,7 +2,7 @@ use std::io::prelude::Read;
 use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::prelude::{Decoder, Encoder, I64Read};
-use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
+use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::server::prelude::{LoginServer, LoginPlayer};
 
 #[derive(Debug)]
@@ -32,8 +32,8 @@ pub struct PingResponse {
     payload: i64,
 }
 
-impl PacketIdentifier<LoginPlayer> for PingResponse {
-    fn get_protocol_id(&self, _socket: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for PingResponse {
+    fn get_packet_id(&self, _socket: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x01)
     }
 }

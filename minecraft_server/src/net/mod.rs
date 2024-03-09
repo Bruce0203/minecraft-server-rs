@@ -1,11 +1,7 @@
-mod protocol_identifier;
-mod bound;
+mod protocol;
 mod server;
-mod packet_identifier;
-mod packet_reader;
+mod packet;
 mod session_relay;
-mod packet_writer;
-mod packet_handler;
 mod socket;
 pub mod prelude;
 mod selector;

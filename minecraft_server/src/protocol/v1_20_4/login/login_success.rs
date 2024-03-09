@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Encoder, VarIntSizedVecWrite, VarStringWrite as _, WriteBool},
-    net::prelude::{PacketIdentifier, Socket},
+    net::prelude::{PacketId, Socket},
     server::prelude::{LoginPlayer, LoginServer},
 };
 
@@ -30,8 +30,8 @@ impl Encoder for LoginSuccess {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for LoginSuccess {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for LoginSuccess {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x02)
     }
 }

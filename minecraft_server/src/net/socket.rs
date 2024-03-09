@@ -11,14 +11,13 @@ use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
 use crate::server::prelude::LoginServer;
 
-use super::prelude::{Bound, PacketHandler, PacketIdentifier, SessionRelay};
+use super::prelude::{SessionRelay, PacketId};
 
 pub struct Socket<Player> {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
     pub session_relay: SessionRelay,
-    pub bound: Bound,
     pub player_data: Player,
     pub read_buf: Cursor<Vec<u8>>,
     pub write_buf: Cursor<Vec<u8>>,
@@ -30,14 +29,12 @@ impl<Player> Socket<Player> {
         stream: TcpStream,
         token: Token,
         addr: SocketAddr,
-        bound: Bound,
         player_data: Player,
     ) -> Socket<Player> {
         Socket {
             stream,
             token,
             addr,
-            bound,
             player_data,
             session_relay: SessionRelay::default(),
             read_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
@@ -76,12 +73,12 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    pub fn encode_to_packet<E: Encoder + PacketIdentifier<Player>>(
+    pub fn encode_to_packet<E: Encoder + PacketId<Player>>(
         &mut self,
         encoder: &E,
     ) -> Result<Cursor<Vec<u8>>> {
         let mut payload_buf = Cursor::new(Vec::new());
-        let packet_id = encoder.get_protocol_id(self)?;
+        let packet_id = encoder.get_packet_id(self)?;
         payload_buf.write_var_i32(packet_id)?;
         encoder.encode_to_write(&mut payload_buf)?;
         Ok(payload_buf)
@@ -113,7 +110,7 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    pub fn send_packet<E: Encoder + PacketIdentifier<Player>>(
+    pub fn send_packet<E: Encoder + PacketId<Player>>(
         &mut self,
         encoder: &E,
     ) -> Result<()> {

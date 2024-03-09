@@ -2,7 +2,7 @@ use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::prelude::{Cache, Decoder, Encoder};
 
-use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
+use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::server::prelude::{LoginPlayer, LoginServer};
 use crate::server::server_status::ServerStatus;
 
@@ -25,8 +25,8 @@ pub struct StatusResponse<'a> {
     server_status: &'a Cache<ServerStatus>,
 }
 
-impl<'a> PacketIdentifier<LoginPlayer> for StatusResponse<'a> {
-    fn get_protocol_id(&self, _socket: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl<'a> PacketId<LoginPlayer> for StatusResponse<'a> {
+    fn get_packet_id(&self, _socket: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x00)
     }
 }

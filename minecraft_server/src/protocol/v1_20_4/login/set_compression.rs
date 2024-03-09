@@ -2,7 +2,7 @@ use std::io::{Result, Write};
 
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
-    net::prelude::{PacketIdentifier, PacketWriter, Socket},
+    net::prelude::{PacketId, PacketWriter, Socket},
     server::prelude::{LoginPlayer, LoginServer},
 };
 
@@ -17,8 +17,8 @@ impl Encoder for SetCompression {
     }
 }
 
-impl PacketIdentifier<LoginPlayer> for SetCompression {
-    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
+impl PacketId<LoginPlayer> for SetCompression {
+    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x03)
     }
 }
