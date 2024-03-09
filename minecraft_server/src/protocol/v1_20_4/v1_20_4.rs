@@ -11,7 +11,7 @@ use super::{
     login::{
         login_acknowledged::LoginAcknowledged, login_start::LoginStart, login_success::LoginSuccess,
     },
-    status::{ping::PingRequest, status::StatusRequest},
+    status::{ping::PingRequest, status::{StatusRequest, StatusResponse}},
 };
 use crate::net::prelude::ConnectionState::*;
 

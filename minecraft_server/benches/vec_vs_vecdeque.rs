@@ -1,4 +1,3 @@
-use server_workspace::io::prelude::VarIntRead;
 use std::{collections::VecDeque, io::Cursor};
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};

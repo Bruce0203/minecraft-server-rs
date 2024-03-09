@@ -1,14 +1,7 @@
-pub enum Bound {
-    Server,
-    Client,
-}
-
 macro_rules! protocols {
-    ($packet_buffer_isze:expr, $server:ty, $player:ty, $latest_protocol:ty, $($protocol:ty, )*) => {
+    ($server:ty, $player:ty, $latest_protocol:ty, $($protocol:ty, )*) => {
 
             impl crate::net::prelude::Server for $server {
-                const MAX_PACKET_BUFFER_SIZE: usize = $packet_buffer_isze;
-
                 type Player = $player;
 
                 fn read_packet(&mut self, player: &mut crate::net::prelude::Socket<$player>) -> std::io::Result<()> {
@@ -16,11 +9,11 @@ macro_rules! protocols {
                         0 => {
                         <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         },
-                        <$latest_protocol as crate::net::prelude::ProtocolIdentifier>::ProtocolId => {
+                        <$latest_protocol as crate::net::prelude::ProtocolIdentifier>::PROTOCOL_ID => {
                             <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }
                         $(
-                        <$protocol as crate::net::prelude::ProtocolIdentifier>::ProtocolId => {
+                        <$protocol as crate::net::prelude::ProtocolIdentifier>::PROTOCOL_ID => {
                             <$protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }
                         )*
@@ -49,7 +42,7 @@ macro_rules! packets {
             )*
 
             impl crate::net::prelude::ProtocolIdentifier for $protocol {
-                const ProtocolId: i32 = $protocol_id;
+                const PROTOCOL_ID: i32 = $protocol_id;
             }
 
             impl crate::net::prelude::PacketReadHandler<$server> for $protocol {

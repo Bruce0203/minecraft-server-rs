@@ -1,4 +1,5 @@
 mod protocol_identifier;
+mod bound;
 mod server;
 mod packet_identifier;
 mod packet_reader;

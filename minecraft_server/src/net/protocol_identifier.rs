@@ -1,3 +1,3 @@
 pub trait ProtocolIdentifier {
-    const ProtocolId: i32;
+    const PROTOCOL_ID: i32;
 }

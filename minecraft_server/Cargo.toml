@@ -19,6 +19,6 @@ criterion = "0.5.1"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "fast_map"
+name = "if_branching"
 harness = false
 

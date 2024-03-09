@@ -41,4 +41,3 @@ impl<T: Encoder> Encoder for Cache<T> {
         Ok(())
     }
 }
-

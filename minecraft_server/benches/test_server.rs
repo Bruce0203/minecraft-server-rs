@@ -1,11 +1,11 @@
+use minecraft_server::{
+    net::prelude::{PacketIdentifier, SessionRelay, Socket, Bound},
+    protocol::v1_20_4::handshake::HandShake,
+    server::prelude::LoginPlayer,
+};
 use mio::{
     net::{TcpListener, TcpStream},
     Token,
-};
-use server_workspace::{
-    io::prelude::VarIntRead,
-    net::prelude::{Player, Selector, SessionRelay, Socket},
-    server::prelude::Server,
 };
 use std::{
     collections::VecDeque,
@@ -22,17 +22,17 @@ use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("test server", |b| {
         let listener = TcpListener::bind("0.0.0.0:0".parse().unwrap()).unwrap();
-        let player = Socket {
-            stream: TcpStream::from_std(
+        let player: Socket<LoginPlayer> = Socket::new::<100>(
+            TcpStream::from_std(
                 std::net::TcpStream::connect(listener.local_addr().unwrap()).unwrap(),
             ),
-            token: Token(0),
-            addr: listener.local_addr().unwrap(),
-            session_relay: SessionRelay::default(),
-            read_buf: Cursor::new(Vec::from([0; 10_000])),
-            write_buf: Cursor::new(Vec::from([0; 10_000])),
-            packet_buf: Cursor::new(vec![]),
-        };
+            Token(0),
+            listener.local_addr().unwrap(),
+            Bound::Client,
+            LoginPlayer::default(),
+        );
+        let (stream, addr) = listener.accept().unwrap();
+        assert_eq!(addr, player.addr);
     });
 }
 criterion_group!(benches, criterion_benchmark);

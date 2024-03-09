@@ -11,13 +11,14 @@ use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
 use crate::server::prelude::LoginServer;
 
-use super::prelude::{PacketHandler, PacketIdentifier, SessionRelay};
+use super::prelude::{Bound, PacketHandler, PacketIdentifier, SessionRelay};
 
 pub struct Socket<Player> {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
     pub session_relay: SessionRelay,
+    pub bound: Bound,
     pub player_data: Player,
     pub read_buf: Cursor<Vec<u8>>,
     pub write_buf: Cursor<Vec<u8>>,
@@ -29,12 +30,14 @@ impl<Player> Socket<Player> {
         stream: TcpStream,
         token: Token,
         addr: SocketAddr,
+        bound: Bound,
         player_data: Player,
     ) -> Socket<Player> {
         Socket {
             stream,
             token,
             addr,
+            bound,
             player_data,
             session_relay: SessionRelay::default(),
             read_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
@@ -57,6 +60,20 @@ impl<Player> Socket<Player> {
                 Ok(())
             }
         }
+    }
+
+    pub fn fill_read_buf_from_socket_stream<const MAX_PACKET_BUFFER_SIZE: usize>(
+        &mut self,
+    ) -> Result<()> {
+        let player = self;
+        let mut pos = player.read_buf.position() as usize;
+        let read_len = player.stream.read(&mut player.read_buf.get_mut()[pos..])?;
+        pos += read_len;
+        if read_len == 0 || pos >= MAX_PACKET_BUFFER_SIZE {
+            Err(Error::new(ErrorKind::BrokenPipe, "BrokenPipe"))?
+        }
+        player.read_buf.set_position(pos as u64);
+        Ok(())
     }
 
     pub fn encode_to_packet<E: Encoder + PacketIdentifier<Player>>(

@@ -1,4 +1,4 @@
-# Markservers (made with Rust)
+# Minecraft server (made with Rust)
 
 ## Future features
 - Anticheat 

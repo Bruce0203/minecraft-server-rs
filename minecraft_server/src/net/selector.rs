@@ -11,7 +11,7 @@ use crate::{
     net::{prelude::SessionRelay, socket::Socket},
 };
 
-use super::prelude::Server;
+use super::prelude::{Server, Bound};
 
 pub trait Selector {
     fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self);
@@ -62,7 +62,7 @@ fn run_server_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
             if token_index != SERVER_TOKEN_INDEX {
                 let player = connection_pool.get(token_index);
 
-                if let Err(err) = server.handle_read_event(player) {
+                if let Err(err) = server.handle_read_event::<MAX_PACKET_BUFFER_SIZE>(player) {
                     if err.kind() == ErrorKind::BrokenPipe {
                         println!("conneciton closed[{}]: {}", err.kind(), err);
                         connection_pool.remove(token_index);
@@ -77,6 +77,7 @@ fn run_server_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
                             stream,
                             event_token,
                             addr,
+                            Bound::Server,
                             S::Player::default(),
                         );
                         Ok(player)
