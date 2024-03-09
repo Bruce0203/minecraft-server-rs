@@ -3,8 +3,11 @@ use std::io::{prelude::Write, Result};
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite},
-    net::prelude::{PacketIdentifier, LoginPlayer},
+    io::prelude::{
+        Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite,
+    },
+    net::prelude::{PacketIdentifier, Socket},
+    server::prelude::LoginPlayer,
 };
 
 pub struct UpdateAttributes {
@@ -21,7 +24,7 @@ impl Encoder for UpdateAttributes {
 }
 
 impl PacketIdentifier<LoginPlayer> for UpdateAttributes {
-    fn get_packet_id(&self, player: &mut LoginPlayer) -> Result<i32> {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x71)
     }
 }
@@ -72,5 +75,3 @@ impl Encoder for ModifierOperation {
         Ok(())
     }
 }
-
-

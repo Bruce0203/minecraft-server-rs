@@ -1,3 +1,5 @@
+use crate::server::slot::Slot;
+
 pub struct SetContainerSlot {
     window_id: u8,
     state_id: i32,

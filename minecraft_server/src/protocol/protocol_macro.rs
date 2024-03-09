@@ -14,13 +14,12 @@ macro_rules! protocols {
                 fn read_packet(&mut self, player: &mut crate::net::prelude::Socket<$player>) -> std::io::Result<()> {
                     match player.session_relay.protocol_id {
                         0 => {
-                            <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
+                        <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         },
                         <$latest_protocol as crate::net::prelude::ProtocolIdentifier>::ProtocolId => {
                             <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }
                         $(
-                            
                         <$protocol as crate::net::prelude::ProtocolIdentifier>::ProtocolId => {
                             <$protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }

@@ -7,29 +7,31 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Decoder, Encoder, ToIdentifier},
-    net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter, LoginPlayer},
-};
-
-use crate::{
-    protocol::v1_20_4::{
-        login_play::LoginPlay,
-        player_abilities::{PlayerAbilities, PlayerAbility},
-        server_data::ServerData,
-        set_default_position::SetDefaultPosition,
-        set_held_item::SetHeldItem,
+    net::prelude::{
+        ConnectionState, PacketHandler, PacketIdentifier, PacketWriter, Server, Socket,
     },
-    server::prelude::*,
+    protocol::v1_20_4::{
+        login::login_play::LoginPlay,
+        play::{
+            player_abilities::{PlayerAbilities, PlayerAbility},
+            player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
+            set_center_chunk::SetCenterChunk,
+            set_default_position::SetDefaultPosition,
+            set_held_item::SetHeldItem,
+            set_render_distance::SetRenderDistance,
+            set_simulation_distance::SetSimulationDistance,
+            synchronize_player_position::SyncPlayerPosition,
+            update_attributes::{AttributeProperty, UpdateAttributes},
+            update_time::UpdateTime,
+        },
+    },
+    server::{
+        coordinates::{DoublePosition, FloatRotation, Location, Position},
+        prelude::{Chat, GameMode, LoginPlayer, LoginServer},
+    },
 };
 
-use super::{
-    player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
-    set_center_chunk::SetCenterChunk,
-    set_render_distance::SetRenderDistance,
-    set_simulation_distance::SetSimulationDistance,
-    synchronize_player_position::SyncPlayerPosition,
-    update_attributes::{AttributeProperty, UpdateAttributes},
-    update_time::UpdateTime,
-};
+use super::server_data::ServerData;
 
 pub struct FinishConfiguration {}
 
@@ -45,8 +47,12 @@ impl Decoder for FinishConfiguration {
     }
 }
 
-impl PacketHandler<LoginPlayer> for FinishConfiguration {
-    fn handle_packet(&self, server: &mut Server, player: &mut LoginPlayer) -> Result<()> {
+impl PacketHandler<LoginServer> for FinishConfiguration {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        player: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
             entity_id: 0,

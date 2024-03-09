@@ -2,8 +2,8 @@ use std::io::{Result, Write};
 
 use crate::{
     io::prelude::{Encoder, U8Write, VarIntWrite},
-    net::prelude::{PacketIdentifier, Player, LoginPlayer},
-    server::coordinates::Location,
+    net::prelude::{PacketIdentifier, Socket},
+    server::{coordinates::Location, prelude::LoginPlayer},
 };
 
 pub struct SyncPlayerPosition {
@@ -22,7 +22,7 @@ impl Encoder for SyncPlayerPosition {
 }
 
 impl PacketIdentifier<LoginPlayer> for SyncPlayerPosition {
-    fn get_packet_id(&self, player: &mut LoginPlayer) -> Result<i32> {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x3E)
     }
 }

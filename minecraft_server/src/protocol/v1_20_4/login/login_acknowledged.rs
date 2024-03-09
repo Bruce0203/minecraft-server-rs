@@ -1,16 +1,17 @@
 use std::io::{Cursor, Error, Result};
 
-use crate::io::prelude::Decoder;
-use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Player, PacketWriter, LoginPlayer};
-use crate::server::prelude::Server;
-
-use super::{
-    feature_flags::FeatureFlags,
-    finish_configuration::FinishConfiguration,
-    registry::{
-        Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
-        MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
+use crate::{
+    io::prelude::Decoder,
+    net::prelude::{ConnectionState, PacketHandler, Socket, PacketWriter},
+    protocol::v1_20_4::configuration::{
+        feature_flags::FeatureFlags,
+        finish_configuration::FinishConfiguration,
+        registry::{
+            Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
+            MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
+        },
     },
+    server::prelude::{LoginPlayer, LoginServer},
 };
 
 pub struct LoginAcknowledged {}
@@ -21,8 +22,13 @@ impl Decoder for LoginAcknowledged {
     }
 }
 
-impl PacketHandler<LoginPlayer> for LoginAcknowledged {
-    fn handle_packet(&self, server: &mut Server, player: &mut LoginPlayer) -> Result<()> {
+
+impl PacketHandler<LoginServer> for LoginAcknowledged {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        player: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
 
         let registry_data = RegistryData {

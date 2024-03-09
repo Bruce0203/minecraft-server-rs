@@ -2,7 +2,8 @@ use std::io::{Result, Write};
 
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
-    net::prelude::{PacketIdentifier, Player, PacketWriter, LoginPlayer},
+    net::prelude::{PacketIdentifier, PacketWriter, Socket},
+    server::prelude::{LoginPlayer, LoginServer},
 };
 
 pub struct SetCompression {
@@ -17,12 +18,12 @@ impl Encoder for SetCompression {
 }
 
 impl PacketIdentifier<LoginPlayer> for SetCompression {
-    fn get_packet_id(&self, _socket: &mut LoginPlayer) -> Result<i32> {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x03)
     }
 }
 
-pub fn set_compression(socket: &mut LoginPlayer, compression_threshold: i32) -> Result<()> {
+pub fn set_compression(socket: &mut Socket<LoginPlayer>, compression_threshold: i32) -> Result<()> {
     let set_compression = SetCompression {
         compression_threshold,
     };

@@ -1,10 +1,10 @@
 use std::io::{BufRead, Cursor, Error, Read, Result};
 
-use crate::io::prelude::{VarStringRead, Decoder};
-use crate::net::prelude::{PacketHandler, Player, LoginPlayer};
-use crate::server::prelude::Server;
-
-use super::login_play::LoginPlay;
+use crate::{
+    io::prelude::{Decoder, VarStringRead},
+    net::prelude::{PacketHandler, Socket},
+    server::prelude::{LoginPlayer, LoginServer},
+};
 
 #[derive(Debug)]
 pub struct PluginMessage {
@@ -21,8 +21,12 @@ impl Decoder for PluginMessage {
     }
 }
 
-impl PacketHandler<LoginPlay> for PluginMessage {
-    fn handle_packet(&self, server: &mut Server, _player: &mut LoginPlayer) -> Result<()> {
+impl PacketHandler<LoginServer> for PluginMessage {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        _player: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         Ok(())
     }
 }

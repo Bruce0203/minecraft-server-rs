@@ -2,12 +2,10 @@ use std::io::prelude::Write;
 use std::io::{Cursor, Error, Result};
 
 use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
-use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Player, LoginPlayer};
-use crate::server::prelude::Server;
+use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
+use crate::protocol::v1_20_4::login::login_success::LoginSuccess;
+use crate::server::prelude::{LoginPlayer, LoginServer};
 use uuid::Uuid;
-
-use crate::protocol::v1_20_4::login_success::LoginSuccess;
-use crate::protocol::v1_20_4::set_compression;
 
 pub struct LoginStart {
     pub name: String,
@@ -23,8 +21,12 @@ impl Decoder for LoginStart {
     }
 }
 
-impl PacketHandler<LoginPlayer> for LoginStart {
-    fn handle_packet(&self, server: &mut Server, socket: &mut LoginPlayer) -> Result<()> {
+impl PacketHandler<LoginServer> for LoginStart {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        socket: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         println!(
             "LoginStart(name={:?}, player_uuid={:?})",
             self.name, self.player_uuid

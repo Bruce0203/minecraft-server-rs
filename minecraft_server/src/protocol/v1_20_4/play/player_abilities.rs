@@ -6,8 +6,9 @@ use std::io::{
 use bitflags::bitflags;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, U8Write, F32Write, U8Read, F32Read},
-    net::prelude::{PacketIdentifier, Player, LoginPlayer},
+    io::prelude::{Decoder, Encoder, F32Read, F32Write, U8Read, U8Write},
+    net::prelude::{PacketIdentifier, Socket},
+    server::prelude::LoginPlayer,
 };
 
 pub struct PlayerAbilities {
@@ -47,7 +48,7 @@ impl Decoder for PlayerAbilities {
 }
 
 impl PacketIdentifier<LoginPlayer> for PlayerAbilities {
-    fn get_packet_id(&self, player: &mut LoginPlayer) -> Result<i32> {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x36)
     }
 }

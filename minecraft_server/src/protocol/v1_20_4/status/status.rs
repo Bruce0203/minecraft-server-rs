@@ -3,7 +3,7 @@ use std::io::{Cursor, Error, Result, Write};
 use crate::io::prelude::{Cache, Decoder, Encoder};
 
 use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
-use crate::server::prelude::{LoginServer, LoginPlayer};
+use crate::server::prelude::{LoginPlayer, LoginServer};
 use crate::server::server_status::ServerStatus;
 
 #[derive(Debug)]
@@ -39,7 +39,11 @@ impl<'a> Encoder for StatusResponse<'a> {
 }
 
 impl PacketHandler<LoginServer> for StatusRequest {
-    fn handle_packet(&self, server: &mut LoginServer, player: &mut Socket<LoginPlayer>) -> Result<()> {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        player: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         StatusResponse {
             server_status: &mut server.server_status,
         }

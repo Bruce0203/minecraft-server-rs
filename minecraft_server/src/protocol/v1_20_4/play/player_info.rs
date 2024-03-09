@@ -5,14 +5,15 @@ use crate::{
         Encoder, I64Write, OptionWrite, U128Write, U8Write, VarIntSizedVecWrite, VarIntWrite,
         VarStringWrite, WriteBool,
     },
-    net::prelude::{PacketIdentifier, Player, LoginPlayer},
-    server::{chat::ChatNbtWrite, prelude::GameMode},
+    net::prelude::{PacketIdentifier, Socket},
+    server::{
+        chat::ChatNbtWrite,
+        prelude::{GameMode, LoginPlayer},
+    },
 };
 use uuid::Uuid;
 
 use crate::server::prelude::Chat;
-
-use super::login_play::LoginPlay;
 
 pub struct PlayerInfoUpdate {
     pub players: Vec<InformedPlayer>,
@@ -141,8 +142,8 @@ impl Encoder for PlayerInfoUpdate {
     }
 }
 
-impl PacketIdentifier<LoginPlay> for PlayerInfoUpdate {
-    fn get_packet_id(&self, player: &mut LoginPlayer) -> std::io::Result<i32> {
+impl PacketIdentifier<LoginPlayer> for PlayerInfoUpdate {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
         Ok(0x3C)
     }
 }

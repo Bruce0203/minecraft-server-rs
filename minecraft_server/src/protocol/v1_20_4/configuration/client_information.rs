@@ -1,12 +1,10 @@
 use crate::{
     io::prelude::{BoolRead, Decoder, I8Read, U8Read, VarIntRead, VarStringRead},
-    net::prelude::{PacketHandler, LoginPlayer},
-    server::prelude::Server,
+    net::prelude::{PacketHandler, Socket},
+    server::prelude::{LoginPlayer, LoginServer},
 };
 use bitflags::bitflags;
 use std::io::{Cursor, Error, Read, Result};
-
-use crate::net::prelude::Player;
 
 #[derive(Debug)]
 pub struct ClientInformation {
@@ -92,8 +90,12 @@ impl Decoder for MainHand {
     }
 }
 
-impl PacketHandler<LoginPlayer> for ClientInformation {
-    fn handle_packet(&self, server: &mut Server, _player: &mut LoginPlayer) -> Result<()> {
+impl PacketHandler<LoginServer> for ClientInformation {
+    fn handle_packet(
+        &self,
+        server: &mut LoginServer,
+        _player: &mut Socket<LoginPlayer>,
+    ) -> Result<()> {
         Ok(())
     }
 }

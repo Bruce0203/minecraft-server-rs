@@ -1,8 +1,14 @@
 use crate::{
-    io::prelude::{Decoder, Encoder, Identifier, ReadIdentifier, WriteBool, VarIntSizedVecWrite, VarIntWrite, I64Write, U8Write}, net::prelude::{PacketIdentifier, Player, LoginPlayer}, server::prelude::GameMode
+    io::prelude::{
+        Decoder, Encoder, I64Write, Identifier, ReadIdentifier, U8Write, VarIntSizedVecWrite,
+        VarIntWrite, WriteBool,
+    },
+    net::prelude::{PacketIdentifier, Socket},
+    server::{
+        coordinates::Position,
+        prelude::{GameMode, LoginPlayer},
+    },
 };
-
-use crate::server::coordinates::Position;
 
 pub struct LoginPlay {
     pub entity_id: i32,
@@ -80,7 +86,7 @@ impl Encoder for LoginPlay {
 }
 
 impl PacketIdentifier<LoginPlayer> for LoginPlay {
-    fn get_packet_id(&self, player: &mut LoginPlayer) -> std::io::Result<i32> {
+    fn get_protocol_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
         Ok(0x29)
     }
 }
