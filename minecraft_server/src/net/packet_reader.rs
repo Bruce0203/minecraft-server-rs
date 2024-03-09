@@ -1,16 +1,17 @@
-use std::io::{Result, Read};
+use std::io::Result;
 
-use crate::{server::prelude::Server, io::prelude::Decoder};
+use crate::io::prelude::Decoder;
 
-use super::prelude::{Socket, PacketIdentifier, PacketHandler};
+use super::prelude::{PacketHandler, Socket, Server};
 
-pub trait PacketReader<Server, Player> {
-    fn read_packet(server: &mut Server, player: &mut Socket<Player>) -> Result<()>;
+pub trait PacketReadHandler<S: Server> {
+    #[inline]
+    fn handle_packet_read(server: &mut S, player: &mut Socket<S::Player>) -> Result<()>;
 }
 
-impl<Packet: Decoder + PacketHandler<Player>, Player> PacketReader<Server, Player> for Packet {
-    fn read_packet(server: &mut Server, player: &mut Socket<Player>) -> Result<()> {
-        player.read_packet::<Packet>(server)?;
+impl<S: Server, P: PacketHandler<S> + Decoder> PacketReadHandler<S> for P {
+    fn handle_packet_read(server: &mut S, player: &mut Socket<S::Player>) -> Result<()> {
+        P::decode_from_read(&mut player.packet_buf)?.handle_packet(server, player)?;
         Ok(())
     }
 }

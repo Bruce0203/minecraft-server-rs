@@ -1,4 +1,4 @@
 #[derive(Default)]
-pub struct GamePlayer {
+pub struct LoginPlayer {
 
 }

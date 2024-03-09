@@ -1,7 +1,7 @@
-# 마크 서버 (러스트로 만드는)
+# Markservers (made with Rust)
 
-## 미래의 기능
-- 안티치트 
-- 다중버전
-- 졸라 빠름 
-- 미니게임
+## Future features
+- Anticheat 
+- Multiversions
+- Blazing Fast 
+- Support Minigames

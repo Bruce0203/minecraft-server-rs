@@ -1,8 +1,5 @@
-use minecraft_server::{net::prelude::Selector, server::prelude::Server};
+use minecraft_server::{net::prelude::Selector, server::prelude::LoginServer};
 
 fn main() {
-    Selector {
-        server: Server::new(),
-    }
-    .run::<100_000>();
+    LoginServer::new().run();
 }

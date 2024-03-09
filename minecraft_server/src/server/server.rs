@@ -7,13 +7,13 @@ use super::{
     server_status::{Players, SamplePlayers, ServerStatus, ServerVersion},
 };
 
-pub struct Server {
+pub struct LoginServer {
     pub server_status: Cache<ServerStatus>,
 }
 
-impl Server {
-    pub fn new() -> Server {
-        Server {
+impl LoginServer {
+    pub fn new() -> LoginServer {
+        LoginServer {
             server_status: ServerStatus {
                 version: ServerVersion {
                     name: "1.20.4".to_string(),

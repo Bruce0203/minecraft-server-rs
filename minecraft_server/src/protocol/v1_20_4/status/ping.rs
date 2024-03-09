@@ -3,7 +3,7 @@ use std::io::{Cursor, Error, Result, Write};
 
 use crate::io::prelude::{Decoder, Encoder, I64Read};
 use crate::net::prelude::{PacketHandler, PacketIdentifier, PacketWriter, Socket};
-use crate::server::prelude::{Server, GamePlayer};
+use crate::server::prelude::{LoginServer, LoginPlayer};
 
 #[derive(Debug)]
 pub struct PingRequest {
@@ -18,8 +18,8 @@ impl Decoder for PingRequest {
     }
 }
 
-impl PacketHandler<GamePlayer> for PingRequest {
-    fn handle_packet(&self, server: &mut Server, socket: &mut Socket<GamePlayer>) -> Result<()> {
+impl PacketHandler<LoginServer> for PingRequest {
+    fn handle_packet(&self, server: &mut LoginServer, socket: &mut Socket<LoginPlayer>) -> Result<()> {
         let ping_response = PingResponse {
             payload: self.payload,
         };
@@ -32,8 +32,8 @@ pub struct PingResponse {
     payload: i64,
 }
 
-impl PacketIdentifier<GamePlayer> for PingResponse {
-    fn get_packet_id(&self, _socket: &mut GamePlayer) -> Result<i32> {
+impl PacketIdentifier<LoginPlayer> for PingResponse {
+    fn get_protocol_id(&self, _socket: &mut Socket<LoginPlayer>) -> Result<i32> {
         Ok(0x01)
     }
 }

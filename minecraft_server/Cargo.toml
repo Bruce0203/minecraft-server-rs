@@ -7,7 +7,7 @@ edition = "2021"
 uuid = { version = "1.7.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 mio = { version = "0.8.10", features = ["os-poll", "net"] }
 derivative = "2.2.0"
-derive_more = "0.99.17"
+derive_more = { version = "0.99.17", features = ["constructor"] }
 bitflags = "2.4.2"
 flate2 = "1.0.28"
 serde = { version = "1.0.197", features = ["derive"] }

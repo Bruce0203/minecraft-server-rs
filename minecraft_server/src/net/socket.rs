@@ -8,9 +8,8 @@ use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
-use crate::server::prelude::Server;
+use crate::server::prelude::LoginServer;
 
-use super::packet_reader::PacketReader;
 use super::prelude::{PacketHandler, PacketIdentifier, SessionRelay};
 
 pub struct Socket<T> {
@@ -25,84 +24,7 @@ pub struct Socket<T> {
 }
 
 impl<Player> Socket<Player> {
-    const MAX_PACKET_BUFFER_SIZE: usize = 100_000;
-
-    pub fn handle_read_event<Server: PacketReader<Server, Player>>(&mut self, server: &mut Server) -> Result<()> {
-        self.fill_read_buf_from_socket_stream()?;
-        self.read_packet_from_read_buf(server)?;
-        let write_buf = &self.write_buf.get_ref()[..self.write_buf.position() as usize];
-        self.stream.write_all(write_buf)?;
-        self.write_buf.set_position(0);
-        Ok(())
-    }
-
-    pub fn send_packet<E: Encoder + PacketIdentifier<Player>>(&mut self, encoder: &E) -> Result<()> {
-        let mut write_buf = self.encode_to_packet(encoder)?;
-        self.handle_write_packet(&mut write_buf)
-    }
-
-    pub fn read_packet<Packet: Decoder + PacketHandler<Player>>(
-        &mut self,
-        server: &mut Server,
-    ) -> Result<()> {
-        Packet::decode_from_read(&mut self.packet_buf)?.handle_packet(server, self)?;
-        Ok(())
-    }
-
-    fn fill_read_buf_from_socket_stream(&mut self) -> Result<()> {
-        let mut pos = self.read_buf.position() as usize;
-        let read_len = self.stream.read(&mut self.read_buf.get_mut()[pos..])?;
-        pos += read_len;
-        if read_len == 0 || pos >= Self::MAX_PACKET_BUFFER_SIZE {
-            Err(Error::new(ErrorKind::BrokenPipe, "BrokenPipe"))?
-        }
-        self.read_buf.set_position(pos as u64);
-        Ok(())
-    }
-
-    fn read_packet_from_read_buf<Server: PacketReader<Server, Player>>(&mut self, server: &mut Server) -> Result<()> {
-        let read_len = self.read_buf.position();
-        self.read_buf.set_position(0);
-        let mut do_read = || -> Result<()> {
-            while self.read_buf.position() != read_len {
-                let packet_len = self.read_buf.read_var_i32()?;
-                let pos = self.read_buf.position() as usize;
-                self.packet_buf = Cursor::new(Vec::from(
-                    &self.read_buf.get_ref()[pos..pos + packet_len as usize],
-                ));
-                self.read_buf.read_exact(self.packet_buf.get_mut())?;
-                self.process_decompression()?;
-                Server::read_packet(server, self)?;
-            }
-            self.read_buf.set_position(0);
-            Ok(())
-        };
-        if let Err(err) = do_read() {
-            self.read_buf.set_position(read_len);
-            return Err(err);
-        }
-        Ok(())
-    }
-
-    fn process_packet_read<Server: PacketReader<Server, Player>>(&mut self, server: &mut Server) -> Result<()> {
-        let player = self;
-        match player.session_relay.protocol_id {
-            0 => {
-                Server::read_packet(server, player)?;
-            }
-            765 => {
-            }
-            n => {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    format!("unknown protocol: {:?}", n),
-                ))
-            }
-        }
-        Ok(())
-    }
-
-    fn process_decompression(&mut self) -> Result<()> {
+    pub fn process_decompression(&mut self) -> Result<()> {
         if self.session_relay.compression_threshold == -1 {
             Ok(())
         } else {
@@ -119,18 +41,19 @@ impl<Player> Socket<Player> {
         }
     }
 
-    fn encode_to_packet<E: Encoder + PacketIdentifier<Player>>(
+
+    pub fn encode_to_packet<E: Encoder + PacketIdentifier<Player>>(
         &mut self,
         encoder: &E,
     ) -> Result<Cursor<Vec<u8>>> {
         let mut payload_buf = Cursor::new(Vec::new());
-        let packet_id = encoder.get_packet_id(self)?;
+        let packet_id = encoder.get_protocol_id(self)?;
         payload_buf.write_var_i32(packet_id)?;
         encoder.encode_to_write(&mut payload_buf)?;
         Ok(payload_buf)
     }
 
-    fn handle_write_packet(&mut self, buf: &mut Cursor<Vec<u8>>) -> Result<()> {
+    pub fn handle_write_packet(&mut self, buf: &mut Cursor<Vec<u8>>) -> Result<()> {
         let compression_threshold = self.session_relay.compression_threshold;
         if compression_threshold != -1 {
             let packet_len = self.packet_buf.position() as i32;
@@ -154,5 +77,13 @@ impl<Player> Socket<Player> {
             self.write_buf.write_all(buf.get_ref())?;
         }
         Ok(())
+    }
+
+    pub fn send_packet<E: Encoder + PacketIdentifier<Player>>(
+        &mut self,
+        encoder: &E,
+    ) -> Result<()> {
+        let mut write_buf = self.encode_to_packet(encoder)?;
+        self.handle_write_packet(&mut write_buf)
     }
 }
