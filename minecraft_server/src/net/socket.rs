@@ -1,3 +1,4 @@
+use std::char::MAX;
 use std::io::{Error, ErrorKind, Read, Result, Write};
 use std::ops::{Deref, DerefMut};
 use std::{io::Cursor, net::SocketAddr};
@@ -12,18 +13,35 @@ use crate::server::prelude::LoginServer;
 
 use super::prelude::{PacketHandler, PacketIdentifier, SessionRelay};
 
-pub struct Socket<T> {
+pub struct Socket<Player> {
     pub stream: TcpStream,
     pub token: Token,
     pub addr: SocketAddr,
     pub session_relay: SessionRelay,
-    pub player_data: T,
+    pub player_data: Player,
     pub read_buf: Cursor<Vec<u8>>,
     pub write_buf: Cursor<Vec<u8>>,
     pub packet_buf: Cursor<Vec<u8>>,
 }
 
 impl<Player> Socket<Player> {
+    pub fn new<const MAX_PACKET_BUFFER_SIZE: usize>(
+        stream: TcpStream,
+        token: Token,
+        addr: SocketAddr,
+        player_data: Player,
+    ) -> Socket<Player> {
+        Socket {
+            stream,
+            token,
+            addr,
+            player_data,
+            session_relay: SessionRelay::default(),
+            read_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
+            write_buf: Cursor::new(Vec::from([0; MAX_PACKET_BUFFER_SIZE])),
+            packet_buf: Cursor::new(vec![]),
+        }
+    }
     pub fn process_decompression(&mut self) -> Result<()> {
         if self.session_relay.compression_threshold == -1 {
             Ok(())
@@ -40,7 +58,6 @@ impl<Player> Socket<Player> {
             }
         }
     }
-
 
     pub fn encode_to_packet<E: Encoder + PacketIdentifier<Player>>(
         &mut self,

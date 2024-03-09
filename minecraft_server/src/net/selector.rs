@@ -14,63 +14,75 @@ use crate::{
 use super::prelude::Server;
 
 pub trait Selector {
-    fn run(&mut self);
+    fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self);
 }
 
+const SERVER_TOKEN_INDEX: usize = 100_000;
+
 impl<Server: super::prelude::Server> Selector for Server {
-    fn run(&mut self) {
+    fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self) {
         let mut poll = Poll::new().unwrap();
         let mut events = Events::with_capacity(128);
         let mut connection_pool = FastMap::<Socket<Server::Player>>::with_capacity(128);
 
         let addr = "0.0.0.0:25565".parse().unwrap();
         let mut listener = TcpListener::bind(addr).unwrap();
-        const SERVER_TOKEN_INDEX: usize = usize::MAX;
         let server_token = Token(SERVER_TOKEN_INDEX);
 
         poll.registry()
             .register(&mut listener, server_token, Interest::READABLE)
             .unwrap();
 
-        loop {
-            poll.poll(&mut events, Some(Duration::ZERO)).unwrap();
+        run_server_with_listener::<Server, SERVER_TOKEN_INDEX>(
+            self,
+            poll,
+            events,
+            connection_pool,
+            listener,
+            server_token,
+        );
+    }
+}
 
-            for event in events.iter() {
-                let event_token = event.token();
-                let token_index = event_token.0;
+fn run_server_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
+    server: &mut S,
+    mut poll: Poll,
+    mut events: Events,
+    mut connection_pool: FastMap<Socket<S::Player>>,
+    listener: TcpListener,
+    server_token: Token,
+) {
+    loop {
+        poll.poll(&mut events, Some(Duration::ZERO)).unwrap();
 
-                if token_index != SERVER_TOKEN_INDEX {
-                    let player = connection_pool.get(token_index);
+        for event in events.iter() {
+            let event_token = event.token();
+            let token_index = event_token.0;
 
-                    if let Err(err) = self.handle_read_event(player) {
-                        if err.kind() == ErrorKind::BrokenPipe {
-                            println!("conneciton closed[{}]: {}", err.kind(), err);
-                            connection_pool.remove(token_index);
-                        }
+            if token_index != SERVER_TOKEN_INDEX {
+                let player = connection_pool.get(token_index);
+
+                if let Err(err) = server.handle_read_event(player) {
+                    if err.kind() == ErrorKind::BrokenPipe {
+                        println!("conneciton closed[{}]: {}", err.kind(), err);
+                        connection_pool.remove(token_index);
                     }
-                } else {
-                    let _ = connection_pool.add(|index| match listener.accept() {
-                        Ok((mut stream, addr)) => {
-                            poll.registry().register(
-                                &mut stream,
-                                Token(index),
-                                Interest::READABLE,
-                            )?;
-                            let player = Socket {
-                                stream,
-                                token: event_token,
-                                addr,
-                                player_data: Server::Player::default(),
-                                session_relay: SessionRelay::default(),
-                                read_buf: Cursor::new(Vec::from([0; 1000])),
-                                write_buf: Cursor::new(Vec::from([0; 1000])),
-                                packet_buf: Cursor::new(vec![]),
-                            };
-                            Ok(player)
-                        }
-                        Err(err) => Err(err),
-                    });
                 }
+            } else {
+                let _ = connection_pool.add(|index| match listener.accept() {
+                    Ok((mut stream, addr)) => {
+                        poll.registry()
+                            .register(&mut stream, Token(index), Interest::READABLE)?;
+                        let player = Socket::new::<MAX_PACKET_BUFFER_SIZE>(
+                            stream,
+                            event_token,
+                            addr,
+                            S::Player::default(),
+                        );
+                        Ok(player)
+                    }
+                    Err(err) => Err(err),
+                });
             }
         }
     }

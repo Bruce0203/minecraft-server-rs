@@ -1,4 +1,3 @@
-#![feature(more_qualified_paths)]
 #![allow(warnings)]
 
 pub mod io;

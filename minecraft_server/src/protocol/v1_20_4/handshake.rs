@@ -8,7 +8,6 @@ use crate::io::prelude::{
 use crate::net::prelude::{ConnectionState, PacketHandler, PacketIdentifier, Socket};
 use crate::server::prelude::{LoginServer, LoginPlayer};
 
-use super::v1_20_4::{HandShakeServer, HandShakingPlayer, V1_20_4};
 
 #[derive(Debug)]
 pub struct HandShake {
@@ -69,8 +68,8 @@ impl Decoder for NextState {
     }
 }
 
-impl PacketHandler<HandShakeServer> for HandShake {
-    fn handle_packet(&self, server: &mut HandShakeServer, value: &mut Socket<HandShakingPlayer>) -> Result<()> {
+impl PacketHandler<LoginServer> for HandShake {
+    fn handle_packet(&self, server: &mut LoginServer, value: &mut Socket<LoginPlayer>) -> Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
