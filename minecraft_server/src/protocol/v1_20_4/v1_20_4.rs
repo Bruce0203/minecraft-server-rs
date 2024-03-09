@@ -1,5 +1,5 @@
 use crate::{
-    protocol::macros::{packets, protocols},
+    protocol::macros::{protocols, receiving_packets, sending_packets},
     server::prelude::{LoginPlayer, LoginServer},
 };
 
@@ -11,16 +11,12 @@ use super::{
     login::{
         login_acknowledged::LoginAcknowledged, login_start::LoginStart, login_success::LoginSuccess,
     },
-    status::{
-        ping::PingRequest,
-        status::{StatusRequest, StatusResponse},
-    },
+    status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
 use crate::net::prelude::ConnectionState::*;
 
 pub struct V1_20_4;
-
-packets!(
+receiving_packets!(
     V1_20_4,
     (0x00, HandShake, super::handshake::HandShake),
     (0x00, Status, StatusRequest),
@@ -30,4 +26,9 @@ packets!(
     (0x00, Confgiuration, ClientInformation),
     (0x01, Confgiuration, PluginMessage),
     (0x02, Confgiuration, FinishConfiguration),
+);
+
+sending_packets!(V1_20_4,
+    (0x00, Status, StatusResponse<'_>),
+    (0x01, Status, PingResponse),
 );

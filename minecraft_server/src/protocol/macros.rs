@@ -39,40 +39,53 @@ macro_rules! protocols {
     };
 }
 
-macro_rules! packets {
-        ($protocol:ty, $protocol_id:expr, $(($packet_id:expr, $connection_state:pat, $typ:ty), )*) => {
-            $(
-                impl crate::net::prelude::PacketId<<$protocol as crate::net::prelude::Protocol>::Player> for $typ {
-                    fn get_packet_id(&self, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<i32> {
-                        Ok($packet_id)
-                    }
-                }
-            )*
-
-            impl crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server> for $protocol {
-                fn handle_packet_read(server: &mut <$protocol as crate::net::prelude::Protocol>::Server, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<()> {
-                    let bytes = &mut player.packet_buf;
-                    let packet_id = crate::io::prelude::VarIntRead::read_var_i32(bytes)?;
-                    let connection_state = &player.session_relay.connection_state;
-                    match (connection_state, packet_id) {
-                        $(
-
-                            ($connection_state, $packet_id) => {
-                            <$typ as crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server>>::handle_packet_read(server, player)?;
-                        }
-                        )*
-                        _ => {
-                            return Err(std::io::Error::new(
-                                std::io::ErrorKind::InvalidInput,
-                                format!("{:?}[{:#04X?}] not exists", connection_state, packet_id),
-                            ))
-                        }
-                    }
-                    Ok(())
+macro_rules! receiving_packets {
+    ($protocol:ty, $(($packet_id:expr, $connection_state:pat, $typ:ty), )*) => {
+        $(
+            impl crate::net::prelude::PacketId<<$protocol as crate::net::prelude::Protocol>::Player> for $typ {
+                fn get_packet_id(&self, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<i32> {
+                    Ok($packet_id)
                 }
             }
-        };
-    }
+        )*
 
-pub(crate) use packets;
+        impl crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server> for $protocol {
+            fn handle_packet_read(server: &mut <$protocol as crate::net::prelude::Protocol>::Server, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<()> {
+                let bytes = &mut player.packet_buf;
+                let packet_id = crate::io::prelude::VarIntRead::read_var_i32(bytes)?;
+                let connection_state = &player.session_relay.connection_state;
+                match (connection_state, packet_id) {
+                    $(
+
+                        ($connection_state, $packet_id) => {
+                        <$typ as crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server>>::handle_packet_read(server, player)?;
+                    }
+                    )*
+                    _ => {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            format!("{:?}[{:#04X?}] not exists", connection_state, packet_id),
+                        ))
+                    }
+                }
+                Ok(())
+            }
+        }
+    };
+}
+
+macro_rules! sending_packets {
+    ($protocol:ty, $(($packet_id:expr, $connection_state:pat, $typ:ty), )*) => {
+        $(
+            impl crate::net::prelude::PacketId<<$protocol as crate::net::prelude::Protocol>::Player> for $typ {
+                fn get_packet_id(&self, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<i32> {
+                    Ok($packet_id)
+                }
+            }
+        )*
+    };
+}
+
 pub(crate) use protocols;
+pub(crate) use receiving_packets;
+pub(crate) use sending_packets;
