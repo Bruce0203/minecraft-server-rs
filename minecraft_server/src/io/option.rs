@@ -32,3 +32,4 @@ impl<W: std::io::Write> OptionWrite for W {
         Ok(())
     }
 }
+

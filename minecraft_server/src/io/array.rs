@@ -2,21 +2,21 @@ use std::io::Result;
 use std::{io::Read, io::Write};
 
 use super::encoding::{Decoder, Encoder};
-use super::var_int::{VarIntWrite, VarIntRead};
+use super::var_int::{VarIntRead, VarIntWrite};
 
 pub trait VarIntSizedVecRead<D>: Sized {
     fn read_var_int_sized_vec(&mut self) -> Result<Vec<D>>;
 }
 
-pub trait VarIntSizedVecWrite {
-    fn write_var_int_sized_vec<E: Encoder>(&mut self, vec: &Vec<E>) -> Result<()>;
+pub trait VarIntSizedVecWrite<E> {
+    fn write_var_int_sized_vec(&mut self, vec: &Vec<E>) -> Result<()>;
 }
 
-impl<W> VarIntSizedVecWrite for W
+impl<W, E: Encoder> VarIntSizedVecWrite<E> for W
 where
     W: Write,
 {
-    fn write_var_int_sized_vec<E: Encoder>(&mut self, vec: &Vec<E>) -> Result<()> {
+    fn write_var_int_sized_vec(&mut self, vec: &Vec<E>) -> Result<()> {
         self.write_var_i32(vec.len() as i32)?;
         for ele in vec {
             ele.encode_to_write(self)?;

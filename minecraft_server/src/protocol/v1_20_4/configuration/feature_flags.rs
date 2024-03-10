@@ -28,9 +28,3 @@ impl Encoder for FeatureFlags {
         Ok(())
     }
 }
-
-impl PacketId<LoginPlayer> for FeatureFlags {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x08)
-    }
-}

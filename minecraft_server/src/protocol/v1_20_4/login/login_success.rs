@@ -30,11 +30,6 @@ impl Encoder for LoginSuccess {
     }
 }
 
-impl PacketId<LoginPlayer> for LoginSuccess {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x02)
-    }
-}
 
 impl Encoder for LoginProperty {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {

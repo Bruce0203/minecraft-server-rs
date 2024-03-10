@@ -23,12 +23,6 @@ impl Encoder for UpdateAttributes {
     }
 }
 
-impl PacketId<LoginPlayer> for UpdateAttributes {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x71)
-    }
-}
-
 pub struct AttributeProperty {
     pub key: Identifier,
     pub value: f64,

@@ -142,8 +142,3 @@ impl Encoder for PlayerInfoUpdate {
     }
 }
 
-impl PacketId<LoginPlayer> for PlayerInfoUpdate {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
-        Ok(0x3C)
-    }
-}

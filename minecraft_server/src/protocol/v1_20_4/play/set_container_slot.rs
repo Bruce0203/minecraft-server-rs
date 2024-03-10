@@ -1,12 +1,16 @@
 use std::io::{prelude::Write, Result};
 
-use crate::{io::prelude::{Encoder, U8Write, VarIntWrite, I16Write, NbtNetworkWrite}, server::slot::Slot, net::prelude::PacketWriter};
+use crate::{
+    io::prelude::{Encoder, I16Write, NbtNetworkWrite, U8Write, VarIntWrite},
+    net::prelude::PacketWriter,
+    server::slot::Slot,
+};
 
 pub struct SetContainerSlot {
-    window_id: u8,
-    state_id: i32,
-    slot: i16,
-    slot_data: Slot,
+    pub window_id: u8,
+    pub state_id: i32,
+    pub slot: i16,
+    pub slot_data: Slot,
 }
 
 impl Encoder for SetContainerSlot {
@@ -18,4 +22,3 @@ impl Encoder for SetContainerSlot {
         Ok(())
     }
 }
-

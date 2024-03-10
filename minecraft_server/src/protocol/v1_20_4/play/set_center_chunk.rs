@@ -18,8 +18,3 @@ impl Encoder for SetCenterChunk {
     }
 }
 
-impl PacketId<LoginPlayer> for SetCenterChunk {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x52)
-    }
-}

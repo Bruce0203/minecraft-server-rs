@@ -17,11 +17,6 @@ impl Encoder for SetCompression {
     }
 }
 
-impl PacketId<LoginPlayer> for SetCompression {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x03)
-    }
-}
 
 pub fn set_compression(socket: &mut Socket<LoginPlayer>, compression_threshold: i32) -> Result<()> {
     let set_compression = SetCompression {

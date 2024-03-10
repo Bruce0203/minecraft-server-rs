@@ -17,7 +17,7 @@ pub trait Selector {
     fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self);
 }
 
-const SERVER_TOKEN_INDEX: usize = 100_000;
+const SERVER_TOKEN_INDEX: usize = usize::MAX;
 
 impl<Server: super::prelude::Server> Selector for Server {
     fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self) {
@@ -33,7 +33,7 @@ impl<Server: super::prelude::Server> Selector for Server {
             .register(&mut listener, server_token, Interest::READABLE)
             .unwrap();
 
-        start_loop_with_listener::<Server, SERVER_TOKEN_INDEX>(
+        start_loop_with_listener::<Server, MAX_PACKET_BUFFER_SIZE>(
             self,
             poll,
             events,

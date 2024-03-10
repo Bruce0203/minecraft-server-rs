@@ -1,7 +1,39 @@
-# Minecraft server (made with Rust)
+# minecraft-server-rs
+마인크래프트 서버를 운영하는데에 있어서 금전적 어려움 없이 개발하기 위해
+기존에 요구됬었던 하드웨어적 성능 비용을 없애고 밑바닥 부터 최적화를 하는 프로젝트이다다
 
-## Future features
-- Anticheat 
-- Multiversions
-- Blazing Fast 
-- Support Minigames
+## 굳이 내가 이 프로젝트를 시작하고 새로운 것을 만드는 이유
+아래 요구사항을 만족하는 마인크래프트 서버가 존재하지 않았다.
+
+## 프로젝트 요구사항
+- Raspberry Pi Zero 2 W (ARM Cortex A53 processor clocked at 1GHz and 512MB RAM) 에서 동시접속자 30명 이상을 버티는 고성능 서버 애플리케이션을 요구한다.
+- 다양한 버전의 클라이언트가 하나의 서버에 접속
+- AntiCheat
+- 다양한 미니게임들
+
+---
+
+# 논의 
+
+## 좀 더 생각해보고 확실하게 결정해야 할 것들 
+- 테스트용 클라이언트를 구현해야 한다.
+- pluggable selector 패턴 설계 구조나 ECS(Entity Component System) 구조
+- 테스트용 클라이언트를 위해 session relay 를 서버와 공유할 수 있도록 portable 하게 코드를 짜야 한다.
+
+## 프로젝트에서 이미 신중하게 결정한 것들 
+- 마인크래프트 서버를 러스트로 구현한다
+- 소켓 셀렉터를 kqueue/epoll 을 굳이 어렵게 직접 구현하지 않고 쉬운 mio 크레이트를 쓰자 
+
+---
+
+# 부록 
+
+## 러스트 언어를 선택한 이유
+- 원래 자바 언어로 만들어진 서버 중에 내가 원하는 성능을 내는 사례가 없었다.
+- 자바가 느리다. 하나의 버퍼를 생성하는데 무려 7나노초나 걸린다.(최고의 성능으로 1나노초가 걸리는 러스트에 비해 느렸던 것이다.)
+- Zig나 C/C++ 대신 러스트를 선택하게 된 이유는, 러스트는 자바나 코틀린 보다 더 강력한 타입 시스템이 있기 때문이다.
+
+## bytes 크레이트를 쓰지 않고 기본 라이브러리를 쓰는 이유
+[참조](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
+
+

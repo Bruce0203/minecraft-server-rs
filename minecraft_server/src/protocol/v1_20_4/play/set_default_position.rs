@@ -18,8 +18,3 @@ impl Encoder for SetDefaultPosition {
     }
 }
 
-impl PacketId<LoginPlayer> for SetDefaultPosition {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x54)
-    }
-}

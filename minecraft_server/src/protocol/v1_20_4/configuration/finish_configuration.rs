@@ -7,27 +7,28 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{Decoder, Encoder, ToIdentifier},
-    net::prelude::{
-        ConnectionState, PacketHandler, PacketId, PacketWriter, Server, Socket,
-    },
+    net::prelude::{ConnectionState, PacketHandler, PacketId, PacketWriter, Server, Socket},
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
             player_abilities::{PlayerAbilities, PlayerAbility},
             player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
             set_center_chunk::SetCenterChunk,
+            set_container_contents::SetContainerContent,
+            set_container_slot::SetContainerSlot,
             set_default_position::SetDefaultPosition,
-            set_held_item::SetHeldItem,
+            set_held_item::{S2CSetHeldItem, SetHeldItem},
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
             synchronize_player_position::SyncPlayerPosition,
             update_attributes::{AttributeProperty, UpdateAttributes},
-            update_time::UpdateTime, set_container_slot::SetContainerSlot,
+            update_time::UpdateTime,
         },
     },
     server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
         prelude::{Chat, GameMode, LoginPlayer, LoginServer},
+        slot::Slot,
     },
 };
 
@@ -81,18 +82,20 @@ impl PacketHandler<LoginServer> for FinishConfiguration {
             field_of_view_modifier: 0.1,
         };
         player_abilities.send_packet(player)?;
-        SetHeldItem { slot: 0 }.send_packet(player)?;
+        S2CSetHeldItem(SetHeldItem { slot: 0 }).send_packet(player)?;
         SetDefaultPosition {
             location: Position::new(0, 0, 0),
             angle: 0.0,
         }
         .send_packet(player)?;
+
         let server_data = ServerData {
             message_of_the_day: Chat::from("MC Sv ...".to_string()),
             icon: None,
             enforce_secure_chat: true,
         };
         server_data.send_packet(player)?;
+
         PlayerInfoUpdate {
             players: vec![InformedPlayer {
                 uuid: Uuid::from_str("053d384b-5b9f-47d7-a5da-6885c497ce7f").unwrap(),
@@ -152,7 +155,25 @@ impl PacketHandler<LoginServer> for FinishConfiguration {
             teleport_id: 0,
         }
         .send_packet(player)?;
-
+        SetContainerContent {
+            window_id: 0,
+            state_id: 1,
+            slot_data: vec![Slot::None; 46],
+            carried_item: Slot::None,
+        }
+        .send_packet(player)?;
+        SetContainerSlot {
+            window_id: 0,
+            state_id: 2,
+            slot: 45,
+            slot_data: Slot::None,
+        }
+        .send_packet(player)?;
+        //SetEntityMetadata {
+        //    entity_id: 0,
+        //    metadata: todo!(),
+        //}
+        //.send_packet(player);
         Ok(())
     }
 }

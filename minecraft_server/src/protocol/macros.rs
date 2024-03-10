@@ -1,5 +1,5 @@
 macro_rules! protocols {
-    ($server:ty, $player:ty, $latest_protocol:ty, $($protocol:ty, $protocol_id:expr, )*) => {
+    ($server:ty, $player:ty, $latest_protocol:ty, $(($protocol:ty, $protocol_id:expr), )*) => {
 
         $(
             impl crate::net::prelude::Protocol for $protocol {
@@ -40,14 +40,7 @@ macro_rules! protocols {
 }
 
 macro_rules! receiving_packets {
-    ($protocol:ty, $(($packet_id:expr, $connection_state:pat, $typ:ty), )*) => {
-        $(
-            impl crate::net::prelude::PacketId<<$protocol as crate::net::prelude::Protocol>::Player> for $typ {
-                fn get_packet_id(&self, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<i32> {
-                    Ok($packet_id)
-                }
-            }
-        )*
+    ($protocol:ty, $(($connection_state:pat, $typ:ty), )*) => {
 
         impl crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server> for $protocol {
             fn handle_packet_read(server: &mut <$protocol as crate::net::prelude::Protocol>::Server, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<()> {
@@ -56,8 +49,7 @@ macro_rules! receiving_packets {
                 let connection_state = &player.session_relay.connection_state;
                 match (connection_state, packet_id) {
                     $(
-
-                        ($connection_state, $packet_id) => {
+                        ($connection_state, <$typ as crate::net::prelude::PacketId>::PACKET_ID) => {
                         <$typ as crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server>>::handle_packet_read(server, player)?;
                     }
                     )*
@@ -74,13 +66,11 @@ macro_rules! receiving_packets {
     };
 }
 
-macro_rules! sending_packets {
-    ($protocol:ty, $(($packet_id:expr, $connection_state:pat, $typ:ty), )*) => {
+macro_rules! packet_id {
+    ($protocol:ty, $(($packet_id:expr, $typ:ty), )*) => {
         $(
-            impl crate::net::prelude::PacketId<<$protocol as crate::net::prelude::Protocol>::Player> for $typ {
-                fn get_packet_id(&self, player: &mut crate::net::prelude::Socket<<$protocol as crate::net::prelude::Protocol>::Player>) -> std::io::Result<i32> {
-                    Ok($packet_id)
-                }
+            impl crate::net::prelude::PacketId for $typ {
+                const PACKET_ID: i32 = $packet_id;
             }
         )*
     };
@@ -88,4 +78,4 @@ macro_rules! sending_packets {
 
 pub(crate) use protocols;
 pub(crate) use receiving_packets;
-pub(crate) use sending_packets;
+pub(crate) use packet_id;

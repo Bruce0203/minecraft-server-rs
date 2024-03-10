@@ -1,3 +1,4 @@
+pub use super::slot::Slot;
 pub use super::chat::Chat;
 pub use super::coordinates::*;
 pub use super::game_mode::GameMode;

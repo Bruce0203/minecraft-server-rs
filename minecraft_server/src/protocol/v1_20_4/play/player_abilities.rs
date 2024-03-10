@@ -47,8 +47,3 @@ impl Decoder for PlayerAbilities {
     }
 }
 
-impl PacketId<LoginPlayer> for PlayerAbilities {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x36)
-    }
-}

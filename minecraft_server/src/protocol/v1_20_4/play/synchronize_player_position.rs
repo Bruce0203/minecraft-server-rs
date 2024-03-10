@@ -21,8 +21,3 @@ impl Encoder for SyncPlayerPosition {
     }
 }
 
-impl PacketId<LoginPlayer> for SyncPlayerPosition {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x3E)
-    }
-}

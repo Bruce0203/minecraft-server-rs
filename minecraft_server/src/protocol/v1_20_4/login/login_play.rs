@@ -85,8 +85,3 @@ impl Encoder for LoginPlay {
     }
 }
 
-impl PacketId<LoginPlayer> for LoginPlay {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
-        Ok(0x29)
-    }
-}

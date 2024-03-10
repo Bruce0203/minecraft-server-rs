@@ -1,4 +1,26 @@
-use std::io::{Error, ErrorKind, Result};
+use derive_more::{Deref, From, Into};
+use std::io::{
+    prelude::{Read, Write},
+    Error, ErrorKind, Result,
+};
+
+use super::prelude::{Decoder, Encoder};
+
+#[derive(Deref, From, Into)]
+pub struct VarInt(i32);
+
+impl Decoder for VarInt {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_var_i32()?.into())
+    }
+}
+
+impl Encoder for VarInt {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_var_i32(self.0)?;
+        Ok(())
+    }
+}
 
 pub fn read_var_i32_fast(buf: &[u8]) -> Result<(i32, usize)> {
     let mut val = 0;
@@ -14,12 +36,10 @@ pub fn read_var_i32_fast(buf: &[u8]) -> Result<(i32, usize)> {
 
 pub trait VarIntRead {
     fn read_var_i32(&mut self) -> Result<i32>;
-    fn read_var_i64(&mut self) -> Result<i64>;
 }
 
 pub trait VarIntWrite {
     fn write_var_i32(&mut self, value: i32) -> Result<usize>;
-    fn write_var_i64(&mut self, value: i64) -> Result<usize>;
 }
 
 impl<R> VarIntRead for R
@@ -38,19 +58,6 @@ where
             }
         }
         Err(Error::new(ErrorKind::InvalidInput, "VarInt is too large"))
-    }
-
-    fn read_var_i64(&mut self) -> Result<i64> {
-        let mut buf = [0];
-        let mut ans = 0;
-        for i in 0..8 {
-            self.read_exact(&mut buf)?;
-            ans |= ((buf[0] & 0b0111_1111) as i64) << 7 * i;
-            if buf[0] & 0b1000_0000 == 0 {
-                break;
-            }
-        }
-        Ok(ans)
     }
 }
 
@@ -80,20 +87,6 @@ where
 
         Ok(self.write(unsafe { bytes.get_unchecked(..bytes_needed as usize) })?)
     }
-
-    fn write_var_i64(&mut self, mut value: i64) -> Result<usize> {
-        let mut buf = [0];
-        let mut cnt = 0;
-        while value != 0 {
-            buf[0] = (value & 0b0111_1111) as u8;
-            value = (value >> 7) & (i64::max_value() >> 6);
-            if value != 0 {
-                buf[0] |= 0b1000_0000;
-            }
-            cnt += self.write(&mut buf)?;
-        }
-        Ok(cnt)
-    }
 }
 
 #[test]
@@ -117,4 +110,3 @@ fn test_var_i32() {
     test(vec![0xff, 0xff, 0xff, 0xff, 0x0f], -1);
     test(vec![0x80, 0x80, 0x80, 0x80, 0x08], -2147483648);
 }
-

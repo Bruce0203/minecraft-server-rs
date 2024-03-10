@@ -8,11 +8,8 @@ use super::{
     var_string::{VarStringRead, VarStringWrite},
 };
 
-#[derive(derive_more::Deref, derive_more::From, derive_more::Into)]
-pub struct Identifier(Var32767String);
-
-#[derive(Debug, derive_more::From)]
-pub struct Var32767String(String);
+#[derive(derive_more::Deref)]
+pub struct Identifier(String);
 
 pub trait ToIdentifier {
     fn to_identifier(&self) -> Identifier;
@@ -20,17 +17,17 @@ pub trait ToIdentifier {
 
 impl<S: ToString> ToIdentifier for S {
     fn to_identifier(&self) -> Identifier {
-        Identifier(self.to_string().into())
+        Identifier(self.to_string())
     }
 }
 
-impl Decoder for Var32767String {
+impl Decoder for Identifier {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
-        Ok(Identifier(reader.read_var_string::<32767>()?.into()).into())
+        Ok(Identifier(reader.read_var_string::<32767>()?))
     }
 }
 
-impl Encoder for Var32767String {
+impl Encoder for Identifier {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_var_string(&self.0)?;
         Ok(())
@@ -47,6 +44,6 @@ pub trait WriteIdentifier {
 
 impl<R: Read> ReadIdentifier for R {
     fn read_identifier(&mut self) -> Result<Identifier> {
-        Ok(Identifier(self.read_var_string::<32767>()?.into()).into())
+        Ok(Identifier(self.read_var_string::<32767>()?))
     }
 }

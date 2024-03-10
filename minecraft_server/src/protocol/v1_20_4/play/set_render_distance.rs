@@ -19,8 +19,3 @@ impl Encoder for SetRenderDistance {
     }
 }
 
-impl PacketId<LoginPlayer> for SetRenderDistance {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x53)
-    }
-}

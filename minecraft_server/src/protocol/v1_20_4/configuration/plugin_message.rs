@@ -6,6 +6,20 @@ use crate::{
     server::prelude::{LoginPlayer, LoginServer},
 };
 
+use derive_more::{Deref, From};
+
+#[derive(Deref, From)]
+pub struct C2SPluginMessageConfiguration(PluginMessage);
+
+#[derive(Deref, From)]
+pub struct C2SPluginMessagePlay(PluginMessage);
+
+#[derive(Deref, From)]
+pub struct S2CPluginMessageConfiguration(PluginMessage);
+
+#[derive(Deref, From)]
+pub struct S2CPluginMessagePlay(PluginMessage);
+
 #[derive(Debug)]
 pub struct PluginMessage {
     channel: String,

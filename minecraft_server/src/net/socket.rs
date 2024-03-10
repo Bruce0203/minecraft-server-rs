@@ -73,12 +73,12 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    pub fn encode_to_packet<E: Encoder + PacketId<Player>>(
+    pub fn encode_to_packet<E: Encoder + PacketId>(
         &mut self,
         encoder: &E,
     ) -> Result<Cursor<Vec<u8>>> {
         let mut payload_buf = Cursor::new(Vec::new());
-        let packet_id = encoder.get_packet_id(self)?;
+        let packet_id = E::PACKET_ID;
         payload_buf.write_var_i32(packet_id)?;
         encoder.encode_to_write(&mut payload_buf)?;
         Ok(payload_buf)
@@ -110,7 +110,7 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    pub fn send_packet<E: Encoder + PacketId<Player>>(
+    pub fn send_packet<E: Encoder + PacketId>(
         &mut self,
         encoder: &E,
     ) -> Result<()> {

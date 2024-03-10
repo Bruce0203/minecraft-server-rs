@@ -6,6 +6,12 @@ use crate::{
 use bitflags::bitflags;
 use std::io::{Cursor, Error, Read, Result};
 
+
+#[derive(Debug, derive_more::Deref, derive_more::From)]
+pub struct ClientInformationConfiguration(ClientInformation);
+#[derive(Debug, derive_more::Deref, derive_more::From)]
+pub struct ClientInformationPlay(ClientInformation);
+
 #[derive(Debug)]
 pub struct ClientInformation {
     pub locale: String,

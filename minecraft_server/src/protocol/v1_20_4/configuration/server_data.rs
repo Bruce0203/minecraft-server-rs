@@ -24,9 +24,3 @@ impl Encoder for ServerData {
         Ok(())
     }
 }
-
-impl PacketId<LoginPlayer> for ServerData {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
-        Ok(0x49)
-    }
-}

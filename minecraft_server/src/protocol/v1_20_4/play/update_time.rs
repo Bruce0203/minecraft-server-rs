@@ -17,8 +17,3 @@ impl Encoder for UpdateTime {
     }
 }
 
-impl PacketId<LoginPlayer> for UpdateTime {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> std::io::Result<i32> {
-        Ok(0x62)
-    }
-}

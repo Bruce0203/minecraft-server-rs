@@ -17,8 +17,3 @@ impl Encoder for SetSimulationDistance {
     }
 }
 
-impl PacketId<LoginPlayer> for SetSimulationDistance {
-    fn get_packet_id(&self, player: &mut Socket<LoginPlayer>) -> Result<i32> {
-        Ok(0x60)
-    }
-}
