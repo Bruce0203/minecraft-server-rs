@@ -1,4 +1,4 @@
-# minecraft-server-rs
+# minecraft server (made with Rust)
 It is a project that eliminates the necessary hardware performance cost and optimizes the server from the bottom without the economic difficulty of purchasing expensive hosting servers to operate Minecraft servers
 
 ## Why do I have to start this project and make something new

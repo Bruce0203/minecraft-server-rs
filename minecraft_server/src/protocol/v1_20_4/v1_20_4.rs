@@ -35,7 +35,7 @@ use super::{
         set_simulation_distance::SetSimulationDistance,
         synchronize_player_position::SyncPlayerPosition,
         update_attributes::UpdateAttributes,
-        update_time::UpdateTime,
+        update_time::UpdateTime, set_entity_metadata::SetEntityMetadata,
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
@@ -79,7 +79,7 @@ packet_id!(
     (0x13, SetContainerContent),
     (0x14, SetContainerProperty),
     (0x15, SetContainerSlot),
-    //(0x56, SetEntityMetadata),
+    (0x56, SetEntityMetadata),
 );
 
 receiving_packets!(
