@@ -10,6 +10,9 @@ No Minecraft server existed that satisfies the requirements below.
 - AntiCheat
 - Various minigames
 
+## Currently used server design
+![my_diagram](https://github.com/Bruce0203/minecraft-server-rs/assets/56539682/0f3c4cdb-71ec-4717-901a-90422650bacd)
+
 ---
 
 # Discussion 
@@ -34,7 +37,4 @@ No Minecraft server existed that satisfies the requirements below.
 ## Why use the standard library's buffer Cursor<Vec<u8>> without using the BytesMut of bytes crate
 [click here](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
 
-
-## Currently used server design
-![my_diagram](https://github.com/Bruce0203/minecraft-server-rs/assets/56539682/0f3c4cdb-71ec-4717-901a-90422650bacd)
 
