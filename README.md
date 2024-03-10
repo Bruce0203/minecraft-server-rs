@@ -17,11 +17,10 @@ No Minecraft server existed that satisfies the requirements below.
 ## Things that I need to think about more and make sure to decide 
 - A client for testing shall be implemented.
 - Pluggable selector pattern design structure or ECS (Entity Component System) structure
-- For the testing client, the code should be portably compiled so that the session relay can be shared with the server.
 
 ## things that have already been carefully decided in the project 
 - Implement Minecraft Server as Rust
-- Let's use an mio, without having to implement the socket selector kqueue/epoll directly 
+- Let's use the mio crate, without having to implement the socket selector kqueue/epoll directly 
 
 ---
 
@@ -33,9 +32,9 @@ No Minecraft server existed that satisfies the requirements below.
 - The reason for choosing Rust over C/C++ is that Rust has a more powerful type system than Java/Kotlin.
 
 ## Why use the standard library's buffer Cursor<Vec<u8>> without using the BytesMut of bytes crate
-[click](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
+[click here](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
 
 
-## Current socket server design
+## Currently used server design
 ![my_diagram](https://github.com/Bruce0203/minecraft-server-rs/assets/56539682/0f3c4cdb-71ec-4717-901a-90422650bacd)
 
