@@ -13,11 +13,11 @@ pub struct SetContainerContent {
 }
 
 impl Encoder for SetContainerContent {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_u8(self.window_id)?;
-        writer.write_var_i32(self.state_id)?;
-        writer.write_var_int_sized_vec(&self.slot_data)?;
-        self.carried_item.encode_to_write(writer)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_u8(self.window_id)?;
+        buf.write_var_i32(self.state_id)?;
+        buf.write_var_int_sized_vec(&self.slot_data)?;
+        self.carried_item.encode_to_buffer(buf)?;
         Ok(())
     }
 }

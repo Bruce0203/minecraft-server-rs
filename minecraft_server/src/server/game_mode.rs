@@ -11,8 +11,8 @@ pub enum GameMode {
 }
 
 impl Encoder for GameMode {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(match self {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(match self {
             GameMode::Survival => 0,
             GameMode::Creative => 1,
             GameMode::Adventure => 2,

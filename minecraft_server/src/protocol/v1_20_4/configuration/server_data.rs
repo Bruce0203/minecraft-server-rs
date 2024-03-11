@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::io::{Cursor, Write};
 
 use crate::io::prelude::{Encoder, NbtNetworkWrite, VarIntWrite, WriteBool};
 use crate::net::prelude::{PacketId, Socket};
@@ -11,16 +11,16 @@ pub struct ServerData {
 }
 
 impl Encoder for ServerData {
-    fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_network_nbt(&self.message_of_the_day)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
+        buf.write_network_nbt(&self.message_of_the_day)?;
         if let Some(icon) = &self.icon {
-            writer.write_bool(true)?;
-            writer.write_var_i32(icon.len() as i32)?;
-            writer.write_all(icon)?;
+            buf.write_bool(true)?;
+            buf.write_var_i32(icon.len() as i32)?;
+            buf.write_all(icon)?;
         } else {
-            writer.write_bool(false)?;
+            buf.write_bool(false)?;
         }
-        writer.write_bool(self.enforce_secure_chat)?;
+        buf.write_bool(self.enforce_secure_chat)?;
         Ok(())
     }
 }

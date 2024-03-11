@@ -11,12 +11,11 @@ pub struct SetCompression {
 }
 
 impl Encoder for SetCompression {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.compression_threshold)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.compression_threshold)?;
         Ok(())
     }
 }
-
 
 pub fn set_compression(socket: &mut Socket<GamePlayer>, compression_threshold: i32) -> Result<()> {
     let set_compression = SetCompression {

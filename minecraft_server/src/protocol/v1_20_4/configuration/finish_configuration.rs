@@ -28,7 +28,8 @@ use crate::{
     },
     server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        slot::Slot, prelude::{GameServer, GamePlayer, GameMode, Chat, Player},
+        prelude::{Chat, GameMode, GamePlayer, GameServer},
+        slot::Slot,
     },
 };
 
@@ -171,7 +172,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         SetEntityMetadata {
             entity_id: 0,
-            metadata: Box::new(Player::default()),
+            //metadata: Box::new(Player::default()),
         }
         .send_packet(player);
         Ok(())
@@ -179,7 +180,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
 }
 
 impl Encoder for FinishConfiguration {
-    fn encode_to_write<W: Write>(&self, _writer: &mut W) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         Ok(())
     }
 }

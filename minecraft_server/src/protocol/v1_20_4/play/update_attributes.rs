@@ -16,9 +16,9 @@ pub struct UpdateAttributes {
 }
 
 impl Encoder for UpdateAttributes {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.entity_id)?;
-        writer.write_var_int_sized_vec(&self.properties)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.entity_id)?;
+        buf.write_var_int_sized_vec(&self.properties)?;
         Ok(())
     }
 }
@@ -30,10 +30,10 @@ pub struct AttributeProperty {
 }
 
 impl Encoder for AttributeProperty {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.key.encode_to_write(writer)?;
-        writer.write_f64(self.value)?;
-        writer.write_var_int_sized_vec(&self.modifiers)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        self.key.encode_to_buffer(buf)?;
+        buf.write_f64(self.value)?;
+        buf.write_var_int_sized_vec(&self.modifiers)?;
         Ok(())
     }
 }
@@ -45,10 +45,10 @@ pub struct ModifierData {
 }
 
 impl Encoder for ModifierData {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_uuid(self.uuid)?;
-        writer.write_f64(self.amount)?;
-        self.operation.encode_to_write(writer)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_uuid(self.uuid)?;
+        buf.write_f64(self.amount)?;
+        self.operation.encode_to_buffer(buf)?;
         Ok(())
     }
 }
@@ -60,8 +60,8 @@ pub enum ModifierOperation {
 }
 
 impl Encoder for ModifierOperation {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_u8(match self {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_u8(match self {
             ModifierOperation::Add => 0,
             ModifierOperation::Precentage => 1,
             ModifierOperation::Multiply => 2,

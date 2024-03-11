@@ -11,10 +11,9 @@ pub struct SetDefaultPosition {
 }
 
 impl Encoder for SetDefaultPosition {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.location.encode_to_write(writer)?;
-        writer.write_f32(self.angle)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        self.location.encode_to_buffer(buf)?;
+        buf.write_f32(self.angle)?;
         Ok(())
     }
 }
-

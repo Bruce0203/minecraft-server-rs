@@ -13,9 +13,8 @@ pub struct SetRenderDistance {
 }
 
 impl Encoder for SetRenderDistance {
-    fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.view_distance);
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.view_distance);
         Ok(())
     }
 }
-

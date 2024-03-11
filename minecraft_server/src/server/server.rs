@@ -4,12 +4,11 @@ use crate::io::prelude::Cache;
 
 use super::{
     chat::Chat,
-    server_status::{Players, SamplePlayers, ServerStatus, ServerVersion}, prelude::Player,
+    server_status::{Players, SamplePlayers, ServerStatus, ServerVersion},
 };
 
 pub struct GameServer {
     pub server_status: Cache<ServerStatus>,
-    pub players: Vec<Player>,
 }
 
 impl GameServer {
@@ -31,7 +30,6 @@ impl GameServer {
                 },
             }
             .into(),
-            players: Vec::with_capacity(128),
         }
     }
 }

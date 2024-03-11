@@ -331,8 +331,8 @@ impl<W: std::io::Write> ChatNbtWrite for W {
 }
 
 impl Encoder for Chat {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_nbt_chat(self)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
+        buf.write_nbt_chat(self)?;
         Ok(())
     }
 }

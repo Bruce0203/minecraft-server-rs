@@ -68,9 +68,9 @@ fn serde_ser_server_status() {
 }
 
 impl Encoder for ServerStatus {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         let server_status_data = serde_json::to_string(&self)?;
-        writer.write_var_string(server_status_data.as_str())?;
+        buf.write_var_string(server_status_data.as_str())?;
         Ok(())
     }
 }

@@ -26,8 +26,8 @@ pub struct StatusResponse<'a> {
 }
 
 impl<'a> Encoder for StatusResponse<'a> {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.server_status.encode_to_write(writer)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        self.server_status.encode_to_buffer(buf)?;
         Ok(())
     }
 }
@@ -78,8 +78,8 @@ pub struct PingResponse {
 }
 
 impl Encoder for PingResponse {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_all(&i64::to_be_bytes(self.payload))?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_all(&i64::to_be_bytes(self.payload))?;
         Ok(())
     }
 }

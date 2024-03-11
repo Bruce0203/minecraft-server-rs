@@ -28,8 +28,8 @@ pub enum Pose {
 }
 
 impl Encoder for Pose {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(*self as i32)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(*self as i32)?;
         Ok(())
     }
 }

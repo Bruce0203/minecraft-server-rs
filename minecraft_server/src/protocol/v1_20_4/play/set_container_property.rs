@@ -1,6 +1,6 @@
 use std::io::{prelude::Write, Result};
 
-use crate::io::prelude::{Encoder, VarIntWrite, U8Write, U16Write};
+use crate::io::prelude::{Encoder, U16Write, U8Write, VarIntWrite};
 
 pub struct SetContainerProperty {
     window_id: u8,
@@ -66,10 +66,10 @@ pub enum Lectern {
 }
 
 impl Encoder for SetContainerProperty {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_u8(self.window_id)?;
-        writer.write_u16(self.property)?;
-        writer.write_u16(self.value)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_u8(self.window_id)?;
+        buf.write_u16(self.property)?;
+        buf.write_u16(self.value)?;
         Ok(())
     }
 }

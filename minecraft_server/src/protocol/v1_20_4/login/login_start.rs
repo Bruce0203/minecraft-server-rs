@@ -43,9 +43,9 @@ impl PacketHandler<GameServer> for LoginStart {
 }
 
 impl Encoder for LoginStart {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_string(&self.name)?;
-        writer.write_uuid(self.player_uuid)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_string(&self.name)?;
+        buf.write_uuid(self.player_uuid)?;
         Ok(())
     }
 }

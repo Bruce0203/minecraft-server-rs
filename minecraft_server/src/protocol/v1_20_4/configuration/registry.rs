@@ -171,11 +171,11 @@ pub struct Music {
 }
 
 impl Encoder for RegistryData {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let mut buf = Cursor::new(Vec::new());
-        nbt::to_writer(&mut buf, self, Some(""))?;
-        writer.write_all(&[10])?;
-        writer.write_all(&buf.get_ref()[3..])?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        let mut buffer = Cursor::new(Vec::new());
+        nbt::to_writer(&mut buffer, self, Some(""))?;
+        buf.write_all(&[10])?;
+        buf.write_all(&buffer.get_ref()[3..])?;
         Ok(())
     }
 }

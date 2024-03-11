@@ -14,28 +14,27 @@ use crate::{
     server::{
         chat::ChatNbtWrite,
         coordinates::{Direction, Position},
-        prelude::{Chat, EntityMeta, EntityMetadata, Player},
         slot::Slot,
     },
 };
 
 pub struct SetEntityMetadata {
     pub entity_id: i32,
-    pub metadata: Box<dyn crate::server::prelude::Metadata>,
+    //pub metadata: Box<dyn crate::server::prelude::Metadata>,
 }
 
 impl Decoder for SetEntityMetadata {
     fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
         Ok(SetEntityMetadata {
             entity_id: reader.read_var_i32()?,
-            metadata: Box::new(Player::default()),
+            //metadata: Box::new(Player::default()),
         })
     }
 }
 
 impl Encoder for SetEntityMetadata {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.entity_id)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.entity_id)?;
         Ok(())
     }
 }

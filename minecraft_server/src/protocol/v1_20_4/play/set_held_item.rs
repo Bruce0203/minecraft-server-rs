@@ -17,8 +17,8 @@ pub struct SetHeldItem {
 }
 
 impl Encoder for SetHeldItem {
-    fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_u8(self.slot)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
+        buf.write_u8(self.slot)?;
         Ok(())
     }
 }

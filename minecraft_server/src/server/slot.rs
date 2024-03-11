@@ -3,7 +3,7 @@ use std::io::{prelude::Write, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::io::prelude::{
-    DecoderDeref, Encoder, EncoderDeref, NbtNetworkWrite, OptionWrite, U8Write, VarIntWrite
+    DecoderDeref, Encoder, EncoderDeref, NbtNetworkWrite, OptionWrite, U8Write, VarIntWrite,
 };
 
 pub type Slot = Option<SlotData>;
@@ -19,17 +19,17 @@ impl !EncoderDeref for SlotData {}
 impl !DecoderDeref for SlotData {}
 
 impl Encoder for Slot {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_option(self)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_option(self)?;
         Ok(())
     }
 }
 
 impl Encoder for SlotData {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.item_id)?;
-        writer.write_u8(self.item_count)?;
-        writer.write_network_nbt(&self.nbt)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.item_id)?;
+        buf.write_u8(self.item_count)?;
+        buf.write_network_nbt(&self.nbt)?;
         Ok(())
     }
 }

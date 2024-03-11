@@ -29,10 +29,10 @@ bitflags! {
 }
 
 impl Encoder for PlayerAbilities {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_u8(self.flags.0 .0)?;
-        writer.write_f32(self.flying_speed)?;
-        writer.write_f32(self.field_of_view_modifier)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_u8(self.flags.0 .0)?;
+        buf.write_f32(self.flying_speed)?;
+        buf.write_f32(self.field_of_view_modifier)?;
         Ok(())
     }
 }
@@ -46,4 +46,3 @@ impl Decoder for PlayerAbilities {
         })
     }
 }
-

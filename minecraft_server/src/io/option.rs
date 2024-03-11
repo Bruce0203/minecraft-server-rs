@@ -8,7 +8,7 @@ use serde::de::value;
 use super::{
     encoding::{Decoder, Encoder},
     prelude::Buffer,
-    primitives::{BoolRead, WriteBool},
+    primitive::{BoolRead, WriteBool},
 };
 
 pub trait OptionRead {

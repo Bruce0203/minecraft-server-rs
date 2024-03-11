@@ -80,7 +80,7 @@ impl<Player> Socket<Player> {
         let mut payload_buf = Cursor::new(Vec::new());
         let packet_id = E::PACKET_ID;
         payload_buf.write_var_i32(packet_id)?;
-        encoder.encode_to_write(&mut payload_buf)?;
+        encoder.encode_to_buffer(&mut payload_buf)?;
         Ok(payload_buf)
     }
 

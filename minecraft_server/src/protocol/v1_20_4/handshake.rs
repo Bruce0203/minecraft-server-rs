@@ -6,8 +6,7 @@ use crate::io::prelude::{
 };
 
 use crate::net::prelude::{ConnectionState, PacketHandler, PacketId, Socket};
-use crate::server::prelude::{GameServer, GamePlayer};
-
+use crate::server::prelude::{GamePlayer, GameServer};
 
 #[derive(Debug)]
 pub struct HandShake {
@@ -44,8 +43,8 @@ impl From<&NextState> for ConnectionState {
 }
 
 impl Encoder for NextState {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(match self {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(match self {
             NextState::Status => 1,
             NextState::Login => 2,
         })?;
@@ -78,11 +77,11 @@ impl PacketHandler<GameServer> for HandShake {
 }
 
 impl Encoder for HandShake {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.protocol_version)?;
-        writer.write_var_string(&self.server_address)?;
-        writer.write_u16(self.server_port)?;
-        self.next_state.encode_to_write(writer)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_i32(self.protocol_version)?;
+        buf.write_var_string(&self.server_address)?;
+        buf.write_u16(self.server_port)?;
+        self.next_state.encode_to_buffer(buf)?;
         Ok(())
     }
 }

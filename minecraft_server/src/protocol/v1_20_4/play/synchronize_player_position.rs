@@ -13,11 +13,10 @@ pub struct SyncPlayerPosition {
 }
 
 impl Encoder for SyncPlayerPosition {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.location.encode_to_write(writer)?;
-        writer.write_u8(self.flags)?;
-        writer.write_var_i32(self.teleport_id)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        self.location.encode_to_buffer(buf)?;
+        buf.write_u8(self.flags)?;
+        buf.write_var_i32(self.teleport_id)?;
         Ok(())
     }
 }
-

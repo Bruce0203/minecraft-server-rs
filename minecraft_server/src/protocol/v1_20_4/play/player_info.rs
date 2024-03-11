@@ -60,35 +60,35 @@ pub struct PlayerChatSignature {
 }
 
 impl Encoder for PlayerChatSignature {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_u128(self.chat_session_id.as_u128())?;
-        writer.write_i64(self.public_key_expiry_time)?;
-        writer.write_var_i32(self.encoded_public_key.len() as i32)?;
-        writer.write_all(&self.encoded_public_key)?;
-        writer.write_var_i32(self.public_key_signature.len() as i32)?;
-        writer.write_all(&self.public_key_signature)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
+        buf.write_u128(self.chat_session_id.as_u128())?;
+        buf.write_i64(self.public_key_expiry_time)?;
+        buf.write_var_i32(self.encoded_public_key.len() as i32)?;
+        buf.write_all(&self.encoded_public_key)?;
+        buf.write_var_i32(self.public_key_signature.len() as i32)?;
+        buf.write_all(&self.public_key_signature)?;
         Ok(())
     }
 }
 
 impl Encoder for PlayerProperty {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        writer.write_var_string(&self.name)?;
-        writer.write_var_string(&self.value)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
+        buf.write_var_string(&self.name)?;
+        buf.write_var_string(&self.value)?;
         if let Some(signature) = &self.signature {
-            writer.write_bool(true)?;
-            writer.write_var_string(&signature)?;
+            buf.write_bool(true)?;
+            buf.write_var_string(&signature)?;
         } else {
-            writer.write_bool(false)?;
+            buf.write_bool(false)?;
         }
         Ok(())
     }
 }
 
 impl Encoder for PlayerInfoUpdate {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
         if self.players.is_empty() {
-            writer.write_all(&[0x00, 0x00])?;
+            buf.write_all(&[0x00, 0x00])?;
             return Ok(());
         }
         let mut actions = 0;
@@ -105,34 +105,34 @@ impl Encoder for PlayerInfoUpdate {
                 PlayerInfoActions::UpdateDisplayName { display_name: _ } => actions |= 0x20,
             };
         }
-        writer.write_u8(actions)?;
-        writer.write_var_i32(self.players.len() as i32)?;
+        buf.write_u8(actions)?;
+        buf.write_var_i32(self.players.len() as i32)?;
         for player in &self.players {
-            writer.write_u128(player.uuid.as_u128())?;
+            buf.write_u128(player.uuid.as_u128())?;
             for action in &player.action {
                 match action {
                     PlayerInfoActions::AddPlayer { name, properties } => {
-                        writer.write_var_string(name.as_str())?;
-                        writer.write_var_int_sized_vec(properties)?;
+                        buf.write_var_string(name.as_str())?;
+                        buf.write_var_int_sized_vec(properties)?;
                     }
                     PlayerInfoActions::InitializeChat { signature } => {
-                        writer.write_option(signature)?;
+                        buf.write_option(signature)?;
                     }
                     PlayerInfoActions::UpdateGameMode { game_mode } => {
-                        game_mode.encode_to_write(writer)?;
+                        game_mode.encode_to_buffer(buf)?;
                     }
                     PlayerInfoActions::UpdateListed { listed } => {
-                        writer.write_bool(*listed)?;
+                        buf.write_bool(*listed)?;
                     }
                     PlayerInfoActions::UpdateLatency { ping } => {
-                        writer.write_var_i32(*ping)?;
+                        buf.write_var_i32(*ping)?;
                     }
                     PlayerInfoActions::UpdateDisplayName { display_name } => {
                         if let Some(display_name) = display_name {
-                            writer.write_bool(true)?;
-                            writer.write_nbt_chat(display_name)?;
+                            buf.write_bool(true)?;
+                            buf.write_nbt_chat(display_name)?;
                         } else {
-                            writer.write_bool(false)?;
+                            buf.write_bool(false)?;
                         }
                     }
                 }
@@ -141,4 +141,3 @@ impl Encoder for PlayerInfoUpdate {
         Ok(())
     }
 }
-

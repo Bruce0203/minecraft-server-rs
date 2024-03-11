@@ -9,6 +9,6 @@ mod identifier;
 mod nbt;
 mod option;
 pub mod prelude;
-mod primitives;
+mod primitive;
 mod var_int;
 mod var_string;

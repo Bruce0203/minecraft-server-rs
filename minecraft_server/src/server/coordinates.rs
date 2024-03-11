@@ -19,10 +19,10 @@ impl Position {
 }
 
 impl Encoder for Position {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         let encoded =
             ((self.x & 0x3FFFFFF) << 38) | ((self.z & 0x3FFFFFF) << 12) | (self.y & 0xFFF);
-        writer.write_all(&encoded.to_be_bytes())?;
+        buf.write_all(&encoded.to_be_bytes())?;
         Ok(())
     }
 }
@@ -56,9 +56,9 @@ pub struct FloatRotation {
 }
 
 impl Encoder for FloatRotation {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_f32(self.yaw)?;
-        writer.write_f32(self.pitch)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_f32(self.yaw)?;
+        buf.write_f32(self.pitch)?;
         Ok(())
     }
 }
@@ -70,10 +70,10 @@ pub struct DoublePosition {
 }
 
 impl Encoder for DoublePosition {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_f64(self.x)?;
-        writer.write_f64(self.y)?;
-        writer.write_f64(self.z)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_f64(self.x)?;
+        buf.write_f64(self.y)?;
+        buf.write_f64(self.z)?;
         Ok(())
     }
 }
@@ -84,9 +84,9 @@ pub struct Location {
 }
 
 impl Encoder for Location {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        self.pos.encode_to_write(writer)?;
-        self.rot.encode_to_write(writer)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        self.pos.encode_to_buffer(buf)?;
+        self.rot.encode_to_buffer(buf)?;
         Ok(())
     }
 }

@@ -23,8 +23,8 @@ impl TryFrom<&mut Cursor<Vec<u8>>> for FeatureFlags {
 }
 
 impl Encoder for FeatureFlags {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_int_sized_vec(&self.feature_flags)?;
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_var_int_sized_vec(&self.feature_flags)?;
         Ok(())
     }
 }
