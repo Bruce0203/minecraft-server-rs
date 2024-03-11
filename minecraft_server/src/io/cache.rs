@@ -4,12 +4,14 @@ use std::{
     ops::Deref,
 };
 
-use super::prelude::Encoder;
+use super::prelude::{DecoderDeref, Encoder, EncoderDeref};
 
 pub struct Cache<T: Encoder> {
     inner: T,
     cache: UnsafeCell<Option<Vec<u8>>>,
 }
+
+impl<T: Encoder> !EncoderDeref for Cache<T> {}
 
 impl<T: Encoder> From<T> for Cache<T> {
     fn from(value: T) -> Self {

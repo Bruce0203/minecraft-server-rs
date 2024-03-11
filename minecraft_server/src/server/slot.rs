@@ -2,7 +2,9 @@ use std::io::{prelude::Write, Result};
 
 use serde::{Deserialize, Serialize};
 
-use crate::io::prelude::{Encoder, NbtNetworkWrite, U8Write, VarIntWrite, OptionWrite};
+use crate::io::prelude::{
+    DecoderDeref, Encoder, EncoderDeref, NbtNetworkWrite, OptionWrite, U8Write, VarIntWrite
+};
 
 pub type Slot = Option<SlotData>;
 
@@ -12,6 +14,9 @@ pub struct SlotData {
     item_count: u8,
     nbt: SlotNbt,
 }
+
+impl !EncoderDeref for SlotData {}
+impl !DecoderDeref for SlotData {}
 
 impl Encoder for Slot {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {

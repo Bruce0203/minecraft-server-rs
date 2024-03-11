@@ -5,6 +5,7 @@ use std::io::{
 
 use super::{
     encoding::{Decoder, Encoder},
+    prelude::{DecoderDeref, EncoderDeref},
     var_string::{VarStringRead, VarStringWrite},
 };
 
@@ -20,6 +21,10 @@ impl<S: ToString> ToIdentifier for S {
         Identifier(self.to_string())
     }
 }
+
+impl !DecoderDeref for Identifier {}
+
+impl !EncoderDeref for Identifier {}
 
 impl Decoder for Identifier {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {

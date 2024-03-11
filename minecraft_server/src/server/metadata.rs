@@ -7,7 +7,9 @@ use bitflags::bitflags;
 use delegate::delegate;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, OptionWrite, U8Write, VarInt, VarIntWrite, WriteBool},
+    io::prelude::{
+        Decoder, Encoder, F32Write, OptionWrite, U8Write, VarInt, VarIntWrite, WriteBool,
+    },
     server::{
         coordinates::Position,
         prelude::{Chat, MainHand},
@@ -150,7 +152,7 @@ impl EntityMeta for EntityMetadata {
     }
 
     fn custom_name(&self) -> &Option<Box<Chat>> {
-        &Box::new(self.custom_name)
+        &self.custom_name
     }
 
     fn is_custom_name_visible(&self) -> bool {
@@ -359,7 +361,7 @@ pub struct Player {
     living_entity: LivingEntityMetadata,
     additional_hearts: f32,
     score: i32,
-    player_byte0: PlayerByte0,
+    player_index17: PlayerIndex17,
     main_hand: MainHand,
 }
 
@@ -369,7 +371,7 @@ impl Default for Player {
             living_entity: Default::default(),
             additional_hearts: Default::default(),
             score: Default::default(),
-            player_byte0: PlayerByte0::None,
+            player_index17: PlayerIndex17::None,
             main_hand: MainHand::Right,
         }
     }
@@ -385,34 +387,35 @@ impl PlayerMetadata for Player {
     }
 
     fn cape_enabled(&self) -> bool {
-        self.player_byte0.intersects(PlayerByte0::CapeEnabled)
+        self.player_index17.intersects(PlayerIndex17::CapeEnabled)
     }
 
     fn jacket_enabled(&self) -> bool {
-        self.player_byte0.intersects(PlayerByte0::JacketEnabled)
+        self.player_index17.intersects(PlayerIndex17::JacketEnabled)
     }
 
     fn left_sleeve_enabled(&self) -> bool {
-        self.player_byte0.intersects(PlayerByte0::LeftSleeveEnabled)
+        self.player_index17
+            .intersects(PlayerIndex17::LeftSleeveEnabled)
     }
 
     fn right_sleeve_enabled(&self) -> bool {
-        self.player_byte0
-            .intersects(PlayerByte0::RightSleeveEnabled)
+        self.player_index17
+            .intersects(PlayerIndex17::RightSleeveEnabled)
     }
 
     fn left_pants_leg_enabled(&self) -> bool {
-        self.player_byte0
-            .intersects(PlayerByte0::LeftPantsLegEnabeld)
+        self.player_index17
+            .intersects(PlayerIndex17::LeftPantsLegEnabeld)
     }
 
     fn right_pants_leg_enabled(&self) -> bool {
-        self.player_byte0
-            .intersects(PlayerByte0::RightPantsLegEnabled)
+        self.player_index17
+            .intersects(PlayerIndex17::RightPantsLegEnabled)
     }
 
     fn hat_enabled(&self) -> bool {
-        self.player_byte0.intersects(PlayerByte0::HatEnabled)
+        self.player_index17.intersects(PlayerIndex17::HatEnabled)
     }
 
     fn main_hand(&self) -> MainHand {
@@ -421,7 +424,7 @@ impl PlayerMetadata for Player {
 }
 
 bitflags! {
-    pub struct PlayerByte0: u8 {
+    pub struct PlayerIndex17: u8 {
         const CapeEnabled = 0x01;
         const JacketEnabled = 0x02;
         const LeftSleeveEnabled = 0x04;
@@ -436,13 +439,21 @@ bitflags! {
 
 impl Encoder for EntityMetadata {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_u8(0x00)?;
         writer.write_u8(self.index0.0 .0)?;
+        writer.write_u8(0x01)?;
         writer.write_var_i32(self.air_ticks.into())?;
+        writer.write_u8(0x02)?;
         writer.write_option(&self.custom_name)?;
+        writer.write_u8(0x03)?;
         writer.write_bool(self.is_custom_name_visible)?;
+        writer.write_u8(0x04)?;
         writer.write_bool(self.is_silent)?;
+        writer.write_u8(0x05)?;
         writer.write_bool(self.has_no_gravity)?;
+        writer.write_u8(0x06)?;
         self.pose.encode_to_write(writer)?;
+        writer.write_u8(0x07)?;
         writer.write_var_i32(self.tick_frozen_is_powdered_snow.into())?;
         Ok(())
     }
@@ -457,6 +468,9 @@ impl Encoder for LivingEntityMetadata {
 
 impl Encoder for Player {
     fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        self.living_entity.encode_to_write(writer)?;
+        writer.write_f32(self.additional_hearts)?;
+        writer.write_var_i32(self.score)?;
         Ok(())
     }
 }

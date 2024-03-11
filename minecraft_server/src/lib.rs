@@ -1,3 +1,6 @@
+#![feature(negative_impls)]
+#![feature(auto_traits)]
+
 #![allow(warnings)]
 
 pub mod io;

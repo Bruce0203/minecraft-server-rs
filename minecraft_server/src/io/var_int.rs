@@ -9,19 +9,6 @@ use super::prelude::{Decoder, Encoder};
 #[derive(Deref, From, Into, Clone, Copy)]
 pub struct VarInt(i32);
 
-impl Decoder for VarInt {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
-        Ok(reader.read_var_i32()?.into())
-    }
-}
-
-impl Encoder for VarInt {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_i32(self.0)?;
-        Ok(())
-    }
-}
-
 pub fn read_var_i32_fast(buf: &[u8]) -> Result<(i32, usize)> {
     let mut val = 0;
     for i in 0..5 {

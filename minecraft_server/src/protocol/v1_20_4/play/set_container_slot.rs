@@ -1,7 +1,7 @@
 use std::io::{prelude::Write, Result};
 
 use crate::{
-    io::prelude::{Encoder, I16Write, NbtNetworkWrite, U8Write, VarIntWrite},
+    io::prelude::{OptionWrite, Encoder, I16Write, NbtNetworkWrite, U8Write, VarIntWrite},
     net::prelude::PacketWriter,
     server::slot::Slot,
 };
@@ -18,7 +18,7 @@ impl Encoder for SetContainerSlot {
         writer.write_u8(self.window_id)?;
         writer.write_var_i32(self.state_id)?;
         writer.write_i16(self.slot)?;
-        self.slot_data.encode_to_write(writer)?;
+        writer.write_option(&self.slot_data)?;
         Ok(())
     }
 }
