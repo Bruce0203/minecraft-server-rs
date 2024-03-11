@@ -39,18 +39,6 @@ impl<S: Server, P: PacketHandler<S> + Decoder> PacketReadHandler<S> for P {
     }
 }
 
-impl<D: Deref<Target = T> + PacketId, T: Sized + Encoder> Encoder for D {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        T::encode_to_write(self, writer)
-    }
-}
-
-impl<D: Deref<Target = T> + PacketId + From<T>, T: Sized + Decoder> Decoder for D {
-    fn decode_from_read<R: Read>(reader: &mut R) -> std::io::Result<D> {
-        Ok(T::decode_from_read(reader)?.into())
-    }
-}
-
 impl<D: Deref<Target = T>, T: Sized + PacketHandler<S>, S: super::prelude::Server> PacketHandler<S>
     for D
 {

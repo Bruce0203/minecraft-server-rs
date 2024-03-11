@@ -28,9 +28,7 @@ use crate::{
     },
     server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        metadata::metadata::EntityMeta,
-        prelude::{Chat, EntityMetadataValue, GameMode, GamePlayer, GameServer},
-        slot::Slot,
+        slot::Slot, prelude::{GameServer, GamePlayer, GameMode, Chat, Player},
     },
 };
 
@@ -173,7 +171,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         SetEntityMetadata {
             entity_id: 0,
-            metadata: vec![],
+            metadata: Box::new(Player::default()),
         }
         .send_packet(player);
         Ok(())

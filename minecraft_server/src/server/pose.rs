@@ -7,8 +7,9 @@ use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 
 #[derive(Clone, Copy)]
 #[repr(i32)]
-#[derive(FromPrimitive)]
+#[derive(FromPrimitive, Default)]
 pub enum Pose {
+    #[default]
     Standing = 0,
     FallFlying = 1,
     Sleeping = 2,

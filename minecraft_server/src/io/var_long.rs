@@ -6,19 +6,6 @@ use derive_more::{Deref, From, Into};
 #[derive(Deref, From, Into)]
 pub struct VarLong(i64);
 
-impl Encoder for VarLong {
-    fn encode_to_write<W: std::io::prelude::Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_long(self.0)?;
-        Ok(())
-    }
-}
-
-impl Decoder for VarLong {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
-        Ok(reader.read_var_long()?.into())
-    }
-}
-
 pub trait VarLongRead {
     fn read_var_long(&mut self) -> Result<i64>;
 }

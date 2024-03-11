@@ -4,8 +4,7 @@ use crate::io::prelude::Cache;
 
 use super::{
     chat::Chat,
-    metadata::entity_metadata::Player,
-    server_status::{Players, SamplePlayers, ServerStatus, ServerVersion},
+    server_status::{Players, SamplePlayers, ServerStatus, ServerVersion}, prelude::Player,
 };
 
 pub struct GameServer {

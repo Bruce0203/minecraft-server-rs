@@ -1,3 +1,5 @@
+use serde::de::value;
+
 use super::{
     encoding::{Decoder, Encoder},
     primitives::{BoolRead, WriteBool},
@@ -32,4 +34,5 @@ impl<W: std::io::Write> OptionWrite for W {
         Ok(())
     }
 }
+
 

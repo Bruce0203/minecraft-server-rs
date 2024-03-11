@@ -1,10 +1,11 @@
-pub mod hand;
 pub mod chat;
 pub mod coordinates;
 pub mod game_mode;
-mod player;
+pub mod hand;
 pub mod metadata;
 pub mod particle;
+mod player;
+pub mod pose;
 pub mod prelude;
 mod server;
 pub mod server_status;

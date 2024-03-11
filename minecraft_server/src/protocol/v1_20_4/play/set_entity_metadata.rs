@@ -1,4 +1,7 @@
-use std::io::{prelude::Write, Result};
+use std::{
+    fs::Metadata,
+    io::{prelude::Write, Result},
+};
 
 use uuid::Uuid;
 
@@ -11,21 +14,21 @@ use crate::{
     server::{
         chat::ChatNbtWrite,
         coordinates::{Direction, Position},
-        prelude::{Chat, EntityMeta},
+        prelude::{Chat, EntityMeta, EntityMetadata, Player},
         slot::Slot,
     },
 };
 
 pub struct SetEntityMetadata {
     pub entity_id: i32,
-    pub metadata: EntityMeta,
+    pub metadata: Box<dyn crate::server::prelude::Metadata>,
 }
 
 impl Decoder for SetEntityMetadata {
     fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
         Ok(SetEntityMetadata {
             entity_id: reader.read_var_i32()?,
-            metadata: EntityMeta::decode_from_read(reader)?,
+            metadata: Box::new(Player::default()),
         })
     }
 }
