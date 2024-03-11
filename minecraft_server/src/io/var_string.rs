@@ -1,13 +1,33 @@
 use derive_more::{Deref, From, Into};
+use std::io::prelude::Write;
 use std::io::{Error, ErrorKind, Result};
 
+use super::prelude::Decoder;
+use super::prelude::DecoderDeref;
+use super::prelude::Encoder;
+use super::prelude::EncoderDeref;
 use super::var_int::VarIntRead;
 
 use super::var_int::VarIntWrite;
 
 #[derive(Deref, From, Into, Clone)]
-pub struct VarString(String);
+pub struct VarString<const MAX_LENGTH: usize>(String);
 
+impl<const MAX_LENGTH: usize> !EncoderDeref for VarString<MAX_LENGTH> {}
+impl<const MAX_LENGTH: usize> !DecoderDeref for VarString<MAX_LENGTH> {}
+
+impl<const MAX_LENGTH: usize> Encoder for VarString<MAX_LENGTH> {
+    fn encode_to_buffer(&self, buf: &mut super::prelude::Buffer) -> Result<()> {
+        buf.write_var_string(self)?;
+        Ok(())
+    }
+}
+
+impl<const MAX_LENGTH: usize> Decoder for VarString<MAX_LENGTH> {
+    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_var_string::<MAX_LENGTH>()?.into())
+    }
+}
 pub trait VarStringRead {
     fn read_var_string<const MAX_LENGTH: usize>(&mut self) -> Result<String>;
 }

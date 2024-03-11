@@ -4,18 +4,17 @@ use std::io::Result;
 use std::io::Write;
 use std::ops::Deref;
 
-use super::prelude::Cache;
-use super::prelude::Identifier;
+use super::buffer::Buffer;
 
 pub trait Encoder {
     #[inline]
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()>;
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()>;
 
     #[inline]
     fn encode(&self) -> Result<Cursor<Vec<u8>>> {
-        let mut bytes = Cursor::new(Vec::new());
-        self.encode_to_write(&mut bytes)?;
-        Ok(bytes)
+        let mut buf = Buffer::new(vec![]);
+        self.encode_to_buffer(&mut buf)?;
+        Ok(buf)
     }
 }
 
@@ -27,8 +26,8 @@ pub trait Decoder: Sized {
 pub auto trait EncoderDeref {}
 
 impl<D: EncoderDeref + Deref<Target = T>, T: Sized + Encoder> Encoder for D {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        T::encode_to_write(self, writer)
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        T::encode_to_buffer(self, buf)
     }
 }
 
@@ -39,4 +38,3 @@ impl<D: DecoderDeref + Deref<Target = T> + From<T>, T: Sized + Decoder> Decoder 
         Ok(T::decode_from_read(reader)?.into())
     }
 }
-

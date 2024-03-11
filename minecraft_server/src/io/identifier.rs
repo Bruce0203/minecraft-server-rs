@@ -33,8 +33,8 @@ impl Decoder for Identifier {
 }
 
 impl Encoder for Identifier {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_var_string(&self.0)?;
+    fn encode_to_buffer(&self, buf: &mut super::prelude::Buffer) -> Result<()> {
+        buf.write_var_string(&self.0)?;
         Ok(())
     }
 }

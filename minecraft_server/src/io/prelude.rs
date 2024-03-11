@@ -1,3 +1,4 @@
+pub use super::buffer::*;
 pub use super::array::*;
 pub use super::cache::*;
 pub use super::encoding::*;

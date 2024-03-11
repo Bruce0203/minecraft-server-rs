@@ -1,3 +1,4 @@
+mod buffer;
 mod var_long;
 mod uuid;
 mod array;

@@ -31,13 +31,13 @@ impl<T: Encoder> Deref for Cache<T> {
 }
 
 impl<T: Encoder> Encoder for Cache<T> {
-    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut super::prelude::Buffer) -> Result<()> {
         let cache = unsafe { &mut *self.cache.get() };
         if let Some(cache) = cache {
-            writer.write_all(&cache)?;
+            buf.write_all(&cache)?;
         } else {
             let data = T::encode(self)?.into_inner();
-            writer.write_all(&data)?;
+            buf.write_all(&data)?;
             *cache = Some(data);
         }
         Ok(())
