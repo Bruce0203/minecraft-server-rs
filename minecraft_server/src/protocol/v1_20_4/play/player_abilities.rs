@@ -8,7 +8,7 @@ use bitflags::bitflags;
 use crate::{
     io::prelude::{Decoder, Encoder, F32Read, F32Write, U8Read, U8Write},
     net::prelude::{PacketId, Socket},
-    server::prelude::LoginPlayer,
+    server::prelude::GamePlayer,
 };
 
 pub struct PlayerAbilities {

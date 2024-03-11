@@ -4,16 +4,18 @@ use crate::io::prelude::Cache;
 
 use super::{
     chat::Chat,
+    metadata::entity_metadata::Player,
     server_status::{Players, SamplePlayers, ServerStatus, ServerVersion},
 };
 
-pub struct LoginServer {
+pub struct GameServer {
     pub server_status: Cache<ServerStatus>,
+    pub players: Vec<Player>,
 }
 
-impl LoginServer {
-    pub fn new() -> LoginServer {
-        LoginServer {
+impl GameServer {
+    pub fn new() -> GameServer {
+        GameServer {
             server_status: ServerStatus {
                 version: ServerVersion {
                     name: "1.20.4".to_string(),
@@ -30,6 +32,7 @@ impl LoginServer {
                 },
             }
             .into(),
+            players: Vec::with_capacity(128),
         }
     }
 }

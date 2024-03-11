@@ -1,8 +1,12 @@
+use derive_more::{Deref, From, Into};
 use std::io::{Error, ErrorKind, Result};
 
 use super::var_int::VarIntRead;
 
 use super::var_int::VarIntWrite;
+
+#[derive(Deref, From, Into, Clone)]
+pub struct VarString(String);
 
 pub trait VarStringRead {
     fn read_var_string<const MAX_LENGTH: usize>(&mut self) -> Result<String>;

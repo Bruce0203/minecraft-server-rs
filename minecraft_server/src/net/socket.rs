@@ -9,7 +9,7 @@ use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
-use crate::server::prelude::LoginServer;
+use crate::server::prelude::GameServer;
 
 use super::prelude::{SessionRelay, PacketId};
 

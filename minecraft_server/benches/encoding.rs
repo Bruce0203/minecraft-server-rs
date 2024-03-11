@@ -2,9 +2,11 @@ use std::{io::Cursor, net::SocketAddr, str::FromStr};
 
 use criterion::{criterion_group, criterion_main, BatchSize::PerIteration, Criterion};
 use minecraft_server::{
-    net::prelude::{Server, PacketWriter, Socket, SessionRelay},
-    protocol::v1_20_4::{handshake::{HandShake, NextState}, login::login_start::LoginStart},
-    server::prelude::{LoginServer, LoginPlayer},
+    net::prelude::{PacketWriter, Server, SessionRelay, Socket},
+    protocol::v1_20_4::{
+        handshake::{HandShake, NextState},
+        login::login_start::LoginStart,
+    }, server::prelude::{GameServer, GamePlayer},
 };
 use mio::{
     net::{TcpListener, TcpStream},
@@ -13,7 +15,7 @@ use mio::{
 use uuid::Uuid;
 fn encoding(c: &mut Criterion) {
     let mut listener = TcpListener::bind("0.0.0.0:0".parse().unwrap()).unwrap();
-    let mut server = LoginServer::new();
+    let mut server = GameServer::new();
     let mut client = &mut new_client(listener.local_addr().unwrap());
     let (client_stream, client_addr) = listener.accept().unwrap();
     assert_eq!(client_addr, client.addr);
@@ -46,7 +48,7 @@ fn encoding(c: &mut Criterion) {
     }
 }
 
-fn new_client(addr: SocketAddr) -> Socket<LoginPlayer> {
+fn new_client(addr: SocketAddr) -> Socket<GamePlayer> {
     Socket {
         stream: TcpStream::from_std(std::net::TcpStream::connect(addr).unwrap()),
         token: Token(0),
@@ -55,7 +57,7 @@ fn new_client(addr: SocketAddr) -> Socket<LoginPlayer> {
         read_buf: Cursor::new(Vec::from([0; 10_000])),
         write_buf: Cursor::new(Vec::from([0; 10_000])),
         packet_buf: Cursor::new(vec![]),
-        player_data: LoginPlayer::default(),
+        player_data: GamePlayer::default(),
     }
 }
 

@@ -11,7 +11,7 @@ use crate::{
             MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
         },
     },
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer},
 };
 
 pub struct LoginAcknowledged {}
@@ -23,11 +23,11 @@ impl Decoder for LoginAcknowledged {
 }
 
 
-impl PacketHandler<LoginServer> for LoginAcknowledged {
+impl PacketHandler<GameServer> for LoginAcknowledged {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        player: &mut Socket<LoginPlayer>,
+        server: &mut GameServer,
+        player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
 

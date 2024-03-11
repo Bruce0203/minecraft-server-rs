@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{
     io::prelude::{Encoder, VarIntSizedVecWrite, VarStringWrite as _, WriteBool},
     net::prelude::{PacketId, Socket},
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer},
 };
 
 pub struct LoginSuccess {

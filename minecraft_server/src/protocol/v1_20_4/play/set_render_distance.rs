@@ -4,7 +4,7 @@ use crate::io::prelude::Encoder;
 use crate::io::prelude::VarIntWrite;
 use crate::net::prelude::PacketId;
 use crate::net::prelude::Socket;
-use crate::server::prelude::LoginPlayer;
+use crate::server::prelude::GamePlayer;
 
 use super::set_default_position::SetDefaultPosition;
 

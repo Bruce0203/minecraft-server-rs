@@ -1,13 +1,20 @@
-macro_rules! protocols {
-    ($server:ty, $player:ty, $latest_protocol:ty, $(($protocol:ty, $protocol_id:expr), )*) => {
+macro_rules! protocol {
+    ($protocol:ty, $protocol_id:expr) => {
+        impl crate::net::prelude::ProtocolId for $protocol {
+            const PROTOCOL_ID: i32 = $protocol_id;
+        }
+    };
+}
+
+macro_rules! protocol_server {
+    ($server:ty, $player:ty, $latest_protocol:ty, $($protocol:ty, )*) => {
 
         $(
             impl crate::net::prelude::Protocol for $protocol {
-                const PROTOCOL_ID: i32 = $protocol_id;
                 type Player = $player;
                 type Server = $server;
             }
-            )*
+         )*
 
             impl crate::net::prelude::Server for $server {
                 type Player = $player;
@@ -17,11 +24,11 @@ macro_rules! protocols {
                         0 => {
                             <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         },
-                        <$latest_protocol as crate::net::prelude::Protocol>::PROTOCOL_ID => {
+                        <$latest_protocol as crate::net::prelude::ProtocolId>::PROTOCOL_ID => {
                             <$latest_protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }
                         $(
-                        <$protocol as crate::net::prelude::Protocol>::PROTOCOL_ID => {
+                        <$protocol as crate::net::prelude::ProtocolId>::PROTOCOL_ID => {
                             <$protocol as crate::net::prelude::PacketReadHandler<$server>>::handle_packet_read(self, player)?;
                         }
                         )*
@@ -76,6 +83,7 @@ macro_rules! packet_id {
     };
 }
 
-pub(crate) use protocols;
-pub(crate) use receiving_packets;
 pub(crate) use packet_id;
+pub(crate) use protocol;
+pub(crate) use protocol_server;
+pub(crate) use receiving_packets;

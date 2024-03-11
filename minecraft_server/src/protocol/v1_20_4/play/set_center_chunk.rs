@@ -2,7 +2,7 @@ use std::io::{Result, Write};
 
 use crate::io::prelude::VarIntWrite;
 use crate::net::prelude::Socket;
-use crate::server::prelude::LoginPlayer;
+use crate::server::prelude::GamePlayer;
 use crate::{io::prelude::Encoder, net::prelude::PacketId};
 
 pub struct SetCenterChunk {

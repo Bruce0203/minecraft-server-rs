@@ -1,9 +1,11 @@
-pub mod slot;
+pub mod hand;
 pub mod chat;
 pub mod coordinates;
 pub mod game_mode;
-mod game_player;
+mod player;
+pub mod metadata;
 pub mod particle;
 pub mod prelude;
 mod server;
 pub mod server_status;
+pub mod slot;

@@ -1,7 +1,7 @@
 use crate::{
     io::prelude::{Decoder, Encoder},
-    protocol::macros::{packet_id, protocols, receiving_packets},
-    server::prelude::{LoginPlayer, LoginServer},
+    protocol::macros::{packet_id, protocol, protocol_server, receiving_packets},
+    server::prelude::{GamePlayer, GameServer},
 };
 
 use super::{
@@ -30,18 +30,20 @@ use super::{
         set_container_property::SetContainerProperty,
         set_container_slot::SetContainerSlot,
         set_default_position::SetDefaultPosition,
+        set_entity_metadata::SetEntityMetadata,
         set_held_item::{C2SSetHeldItem, S2CSetHeldItem, SetHeldItem},
         set_render_distance::SetRenderDistance,
         set_simulation_distance::SetSimulationDistance,
         synchronize_player_position::SyncPlayerPosition,
         update_attributes::UpdateAttributes,
-        update_time::UpdateTime, set_entity_metadata::SetEntityMetadata,
+        update_time::UpdateTime,
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
 use crate::net::prelude::ConnectionState::*;
 
 pub struct V1_20_4;
+protocol!(V1_20_4, 765);
 
 packet_id!(
     V1_20_4,

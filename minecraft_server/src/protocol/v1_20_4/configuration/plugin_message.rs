@@ -3,7 +3,7 @@ use std::io::{BufRead, Cursor, Error, Read, Result};
 use crate::{
     io::prelude::{Decoder, VarStringRead},
     net::prelude::{PacketHandler, Socket},
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer},
 };
 
 use derive_more::{Deref, From};
@@ -35,11 +35,11 @@ impl Decoder for PluginMessage {
     }
 }
 
-impl PacketHandler<LoginServer> for PluginMessage {
+impl PacketHandler<GameServer> for PluginMessage {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        _player: &mut Socket<LoginPlayer>,
+        server: &mut GameServer,
+        _player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
         Ok(())
     }

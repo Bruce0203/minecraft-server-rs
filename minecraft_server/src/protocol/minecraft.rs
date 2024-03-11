@@ -1,7 +1,10 @@
-use crate::server::prelude::{LoginPlayer, LoginServer};
+use crate::server::prelude::{GamePlayer, GameServer};
 
-use super::{macros::protocols, v1_20_4::v1_20_4::V1_20_4};
+use super::{
+    macros::{protocol, protocol_server},
+    v1_20_4::v1_20_4::V1_20_4,
+};
 
 pub struct Minecraft;
 
-protocols!(LoginServer, LoginPlayer, V1_20_4, (V1_20_4, 765),);
+protocol_server!(GameServer, GamePlayer, V1_20_4, V1_20_4,);

@@ -6,7 +6,7 @@ use crate::io::prelude::VarIntSizedVecRead;
 use crate::io::prelude::VarIntSizedVecWrite;
 use crate::net::prelude::PacketId;
 use crate::net::prelude::Socket;
-use crate::server::prelude::LoginPlayer;
+use crate::server::prelude::GamePlayer;
 
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,

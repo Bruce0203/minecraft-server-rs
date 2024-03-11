@@ -6,7 +6,7 @@ use std::io::{
 
 use super::prelude::{Decoder, Encoder};
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct VarInt(i32);
 
 impl Decoder for VarInt {

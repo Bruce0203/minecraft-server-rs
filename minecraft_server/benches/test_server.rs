@@ -1,7 +1,7 @@
 use minecraft_server::{
     net::prelude::{PacketId, SessionRelay, Socket},
     protocol::v1_20_4::handshake::HandShake,
-    server::prelude::LoginPlayer,
+    server::prelude::GamePlayer,
 };
 use mio::{
     net::{TcpListener, TcpStream},
@@ -22,13 +22,13 @@ use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("test server", |b| {
         let listener = TcpListener::bind("0.0.0.0:0".parse().unwrap()).unwrap();
-        let player: Socket<LoginPlayer> = Socket::new::<100>(
+        let player: Socket<GamePlayer> = Socket::new::<100>(
             TcpStream::from_std(
                 std::net::TcpStream::connect(listener.local_addr().unwrap()).unwrap(),
             ),
             Token(0),
             listener.local_addr().unwrap(),
-            LoginPlayer::default(),
+            GamePlayer::default(),
         );
         let (stream, addr) = listener.accept().unwrap();
         assert_eq!(addr, player.addr);

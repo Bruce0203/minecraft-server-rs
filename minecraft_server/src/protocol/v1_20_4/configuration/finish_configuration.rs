@@ -17,6 +17,7 @@ use crate::{
             set_container_contents::SetContainerContent,
             set_container_slot::SetContainerSlot,
             set_default_position::SetDefaultPosition,
+            set_entity_metadata::SetEntityMetadata,
             set_held_item::{S2CSetHeldItem, SetHeldItem},
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
@@ -27,7 +28,8 @@ use crate::{
     },
     server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        prelude::{Chat, GameMode, LoginPlayer, LoginServer},
+        metadata::metadata::EntityMeta,
+        prelude::{Chat, EntityMetadataValue, GameMode, GamePlayer, GameServer},
         slot::Slot,
     },
 };
@@ -48,11 +50,11 @@ impl Decoder for FinishConfiguration {
     }
 }
 
-impl PacketHandler<LoginServer> for FinishConfiguration {
+impl PacketHandler<GameServer> for FinishConfiguration {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        player: &mut Socket<LoginPlayer>,
+        server: &mut GameServer,
+        player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Play;
         let login_play = LoginPlay {
@@ -169,11 +171,11 @@ impl PacketHandler<LoginServer> for FinishConfiguration {
             slot_data: Slot::None,
         }
         .send_packet(player)?;
-        //SetEntityMetadata {
-        //    entity_id: 0,
-        //    metadata: todo!(),
-        //}
-        //.send_packet(player);
+        SetEntityMetadata {
+            entity_id: 0,
+            metadata: vec![],
+        }
+        .send_packet(player);
         Ok(())
     }
 }

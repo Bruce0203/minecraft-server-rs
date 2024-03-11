@@ -7,11 +7,11 @@ use crate::{
     net::prelude::{PacketId, Socket},
     server::{
         chat::ChatStyle,
-        prelude::{LoginPlayer, LoginServer},
+        prelude::{GamePlayer, GameServer},
     },
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RegistryData {
     #[serde(rename = "minecraft:chat_type")]
     pub chat_type_registry: Registry<ChatType>,
@@ -21,27 +21,27 @@ pub struct RegistryData {
     pub dimension_type_registry: Registry<DimensionType>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Registry<E> {
     #[serde(rename = "type")]
     pub name: String,
     pub value: Vec<RegistryEntry<E>>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RegistryEntry<V: Sized> {
     pub name: String,
     pub id: i32,
     pub element: V,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ChatType {
     pub chat: Decoration,
     pub narration: Decoration,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Decoration {
     pub translation_key: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -49,7 +49,7 @@ pub struct Decoration {
     pub parameters: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct DamageType {
     pub message_id: String,
     pub scaling: String,
@@ -60,7 +60,7 @@ pub struct DamageType {
     pub death_message_type: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct DimensionType {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fixed_type: Option<i64>,
@@ -83,20 +83,20 @@ pub struct DimensionType {
     pub monster_spawn_block_light_limit: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MonsterSpawnLightLevel {
     #[serde(rename = "type")]
     pub name: String,
     pub value: IntegerDistribution,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct IntegerDistribution {
     pub min_inclusive: i32,
     pub max_inclusive: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Biome {
     pub has_precipitation: bool,
     pub temperature: f32,
@@ -106,7 +106,7 @@ pub struct Biome {
     pub effects: Effects,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Effects {
     pub fog_color: i32,
     pub water_color: i32,
@@ -130,25 +130,25 @@ pub struct Effects {
     pub music: Option<Music>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Particle {
     pub options: ParticleOptions,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ParticleOptions {
     pub name: String,
     pub value: crate::server::prelude::particle::Particle,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct AmbientSound {
     pub sound_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub range: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MoodSound {
     pub sound: String,
     pub tick_delay: i32,
@@ -156,13 +156,13 @@ pub struct MoodSound {
     pub offset: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct AdditionsSound {
     pub sound: String,
     pub tick_chance: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Music {
     pub sound: String,
     pub min_delay: i32,
@@ -179,4 +179,3 @@ impl Encoder for RegistryData {
         Ok(())
     }
 }
-

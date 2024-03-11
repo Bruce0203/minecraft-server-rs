@@ -3,7 +3,7 @@ use std::io::{prelude::Write, Result};
 use crate::io::prelude::{Encoder, F32Write};
 use crate::net::prelude::{PacketId, Socket};
 use crate::server::coordinates::Position;
-use crate::server::prelude::LoginPlayer;
+use crate::server::prelude::GamePlayer;
 
 pub struct SetDefaultPosition {
     pub location: Position,

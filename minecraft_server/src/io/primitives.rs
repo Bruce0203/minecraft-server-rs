@@ -3,6 +3,21 @@ use std::io::{Read, Result, Write};
 
 use super::prelude::{Decoder, Encoder};
 
+#[derive(Deref, From, Into, Clone, Copy)]
+pub struct Bool(bool);
+
+impl Encoder for Bool {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_bool(self.0)
+    }
+}
+
+impl Decoder for Bool {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_bool()?.into())
+    }
+}
+
 pub trait BoolRead {
     fn read_bool(&mut self) -> Result<bool>;
 }
@@ -26,7 +41,7 @@ impl<W: Write> WriteBool for W {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct U8(u8);
 
 impl Encoder for U8 {
@@ -58,7 +73,7 @@ impl<R: Read> U8Read for R {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct I8(i8);
 
 impl Encoder for I8 {
@@ -101,7 +116,7 @@ impl<W: Write> I8Write for W {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct U16(u16);
 
 impl Encoder for U16 {
@@ -140,7 +155,7 @@ impl<W: Write> U16Write for W {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct I16(i16);
 
 impl Encoder for I16 {
@@ -178,6 +193,20 @@ impl<W: Write> I16Write for W {
     }
 }
 
+#[derive(Deref, From, Into, Clone, Copy)]
+pub struct I64(i64);
+
+impl Encoder for I64 {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writer.write_i64(self.0)
+    }
+}
+
+impl Decoder for I64 {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_i64()?.into())
+    }
+}
 pub trait I64Read {
     fn read_i64(&mut self) -> Result<i64>;
 }
@@ -201,7 +230,7 @@ impl<W: Write> I64Write for W {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct U128(u128);
 
 impl Encoder for U128 {
@@ -239,7 +268,7 @@ impl<W: Write> U128Write for W {
     }
 }
 
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct F32(f32);
 
 impl Encoder for F32 {
@@ -277,8 +306,7 @@ impl<W: Write> F32Write for W {
     }
 }
 
-
-#[derive(Deref, From, Into)]
+#[derive(Deref, From, Into, Clone, Copy)]
 pub struct F64(f64);
 
 impl Encoder for F64 {

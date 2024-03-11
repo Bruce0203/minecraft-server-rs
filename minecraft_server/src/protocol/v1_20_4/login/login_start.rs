@@ -4,7 +4,7 @@ use std::io::{Cursor, Error, Result};
 use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
 use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::protocol::v1_20_4::login::login_success::LoginSuccess;
-use crate::server::prelude::{LoginPlayer, LoginServer};
+use crate::server::prelude::{GamePlayer, GameServer};
 use uuid::Uuid;
 
 pub struct LoginStart {
@@ -21,11 +21,11 @@ impl Decoder for LoginStart {
     }
 }
 
-impl PacketHandler<LoginServer> for LoginStart {
+impl PacketHandler<GameServer> for LoginStart {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        socket: &mut Socket<LoginPlayer>,
+        server: &mut GameServer,
+        socket: &mut Socket<GamePlayer>,
     ) -> Result<()> {
         println!(
             "LoginStart(name={:?}, player_uuid={:?})",

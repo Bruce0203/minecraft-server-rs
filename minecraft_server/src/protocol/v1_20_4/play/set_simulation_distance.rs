@@ -3,7 +3,7 @@ use std::io::{Result, Write};
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
     net::prelude::{PacketId, Socket},
-    server::prelude::LoginPlayer,
+    server::prelude::GamePlayer,
 };
 
 pub struct SetSimulationDistance {

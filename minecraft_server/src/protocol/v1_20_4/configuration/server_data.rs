@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use crate::io::prelude::{Encoder, NbtNetworkWrite, VarIntWrite, WriteBool};
 use crate::net::prelude::{PacketId, Socket};
-use crate::server::prelude::{Chat, LoginPlayer, LoginServer};
+use crate::server::prelude::{Chat, GamePlayer, GameServer};
 
 pub struct ServerData {
     pub message_of_the_day: Chat,

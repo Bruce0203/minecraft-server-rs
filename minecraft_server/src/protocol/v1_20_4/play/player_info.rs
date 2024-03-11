@@ -8,7 +8,7 @@ use crate::{
     net::prelude::{PacketId, Socket},
     server::{
         chat::ChatNbtWrite,
-        prelude::{GameMode, LoginPlayer},
+        prelude::{GameMode, GamePlayer},
     },
 };
 use uuid::Uuid;

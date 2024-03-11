@@ -1,7 +1,7 @@
 use crate::{
     io::prelude::{Encoder, I64Write},
     net::prelude::{PacketId, Socket},
-    server::prelude::LoginPlayer,
+    server::prelude::GamePlayer,
 };
 
 pub struct UpdateTime {

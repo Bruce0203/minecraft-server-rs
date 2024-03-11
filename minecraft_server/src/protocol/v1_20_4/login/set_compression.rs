@@ -3,7 +3,7 @@ use std::io::{Result, Write};
 use crate::{
     io::prelude::{Encoder, VarIntWrite},
     net::prelude::{PacketId, PacketWriter, Socket},
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer},
 };
 
 pub struct SetCompression {
@@ -18,7 +18,7 @@ impl Encoder for SetCompression {
 }
 
 
-pub fn set_compression(socket: &mut Socket<LoginPlayer>, compression_threshold: i32) -> Result<()> {
+pub fn set_compression(socket: &mut Socket<GamePlayer>, compression_threshold: i32) -> Result<()> {
     let set_compression = SetCompression {
         compression_threshold,
     };

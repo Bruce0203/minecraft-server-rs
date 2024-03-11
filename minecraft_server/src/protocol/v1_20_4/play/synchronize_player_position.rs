@@ -3,7 +3,7 @@ use std::io::{Result, Write};
 use crate::{
     io::prelude::{Encoder, U8Write, VarIntWrite},
     net::prelude::{PacketId, Socket},
-    server::{coordinates::Location, prelude::LoginPlayer},
+    server::{coordinates::Location, prelude::GamePlayer},
 };
 
 pub struct SyncPlayerPosition {

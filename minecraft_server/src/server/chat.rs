@@ -1,9 +1,9 @@
-use std::ops::Deref;
+use std::{io::prelude::Write, ops::Deref};
 
 use bitflags::bitflags;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-use crate::io::prelude::NbtNetworkWrite;
+use crate::io::prelude::{Encoder, NbtNetworkWrite};
 
 #[derive(Debug, Clone)]
 pub enum Chat {
@@ -326,6 +326,13 @@ pub trait ChatNbtRead {
 impl<W: std::io::Write> ChatNbtWrite for W {
     fn write_nbt_chat(&mut self, value: &Chat) -> std::io::Result<()> {
         self.write_network_nbt(value)?;
+        Ok(())
+    }
+}
+
+impl Encoder for Chat {
+    fn encode_to_write<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        writer.write_nbt_chat(self)?;
         Ok(())
     }
 }

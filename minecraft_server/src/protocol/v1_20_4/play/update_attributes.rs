@@ -7,7 +7,7 @@ use crate::{
         Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite,
     },
     net::prelude::{PacketId, Socket},
-    server::prelude::LoginPlayer,
+    server::prelude::GamePlayer,
 };
 
 pub struct UpdateAttributes {

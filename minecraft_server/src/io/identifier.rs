@@ -8,7 +8,7 @@ use super::{
     var_string::{VarStringRead, VarStringWrite},
 };
 
-#[derive(derive_more::Deref)]
+#[derive(derive_more::Deref, Clone)]
 pub struct Identifier(String);
 
 pub trait ToIdentifier {

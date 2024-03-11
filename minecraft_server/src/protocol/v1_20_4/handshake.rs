@@ -6,7 +6,7 @@ use crate::io::prelude::{
 };
 
 use crate::net::prelude::{ConnectionState, PacketHandler, PacketId, Socket};
-use crate::server::prelude::{LoginServer, LoginPlayer};
+use crate::server::prelude::{GameServer, GamePlayer};
 
 
 #[derive(Debug)]
@@ -68,8 +68,8 @@ impl Decoder for NextState {
     }
 }
 
-impl PacketHandler<LoginServer> for HandShake {
-    fn handle_packet(&self, server: &mut LoginServer, value: &mut Socket<LoginPlayer>) -> Result<()> {
+impl PacketHandler<GameServer> for HandShake {
+    fn handle_packet(&self, server: &mut GameServer, value: &mut Socket<GamePlayer>) -> Result<()> {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;

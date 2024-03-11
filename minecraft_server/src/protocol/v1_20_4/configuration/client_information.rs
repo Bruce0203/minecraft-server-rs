@@ -1,7 +1,7 @@
 use crate::{
     io::prelude::{BoolRead, Decoder, I8Read, U8Read, VarIntRead, VarStringRead},
     net::prelude::{PacketHandler, Socket},
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer, MainHand},
 };
 use bitflags::bitflags;
 use std::io::{Cursor, Error, Read, Result};
@@ -75,32 +75,13 @@ impl Decoder for ChatMode {
     }
 }
 
-#[derive(Debug)]
-pub enum MainHand {
-    Left,
-    Right,
-}
 
-impl Decoder for MainHand {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
-        Ok(match reader.read_var_i32()? {
-            0 => MainHand::Left,
-            1 => MainHand::Right,
-            n => {
-                return Err(Error::new(
-                    std::io::ErrorKind::InvalidInput,
-                    format!("not valid main hand: {}", n),
-                ))
-            }
-        })
-    }
-}
 
-impl PacketHandler<LoginServer> for ClientInformation {
+impl PacketHandler<GameServer> for ClientInformation {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        _player: &mut Socket<LoginPlayer>,
+        server: &mut GameServer,
+        _player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
         Ok(())
     }

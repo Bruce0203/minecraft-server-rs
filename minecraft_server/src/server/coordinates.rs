@@ -5,7 +5,7 @@ use std::io::{
 
 use crate::io::prelude::{Decoder, Encoder, F32Write, F64Write, I64Read};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Position {
     x: i64,
     y: i64,
@@ -92,6 +92,7 @@ impl Encoder for Location {
 }
 
 #[repr(i32)]
+#[derive(Clone)]
 pub enum Direction {
     Down = 0,
     Up = 1,

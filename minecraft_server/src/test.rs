@@ -1,6 +1,6 @@
-use crate::{net::prelude::Selector, server::prelude::LoginServer};
+use crate::{net::prelude::Selector, server::prelude::GameServer};
 
 #[test]
 fn test_mc_server() {
-    LoginServer::new().run::<100_000>();
+    GameServer::new().run::<100_000>();
 }

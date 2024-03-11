@@ -6,7 +6,7 @@ use crate::{
     net::prelude::{PacketId, Socket},
     server::{
         coordinates::Position,
-        prelude::{GameMode, LoginPlayer},
+        prelude::{GameMode, GamePlayer},
     },
 };
 

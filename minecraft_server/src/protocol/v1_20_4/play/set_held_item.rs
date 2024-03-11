@@ -1,7 +1,7 @@
 use crate::{
     io::prelude::{Encoder, U8Write},
     net::prelude::{PacketHandler, PacketId, Server, Socket},
-    server::prelude::{LoginPlayer, LoginServer},
+    server::prelude::{GamePlayer, GameServer},
 };
 use derive_more::{Deref, From};
 
@@ -23,11 +23,11 @@ impl Encoder for SetHeldItem {
     }
 }
 
-impl PacketHandler<LoginServer> for SetHeldItem {
+impl PacketHandler<GameServer> for SetHeldItem {
     fn handle_packet(
         &self,
-        server: &mut LoginServer,
-        player: &mut Socket<<LoginServer as Server>::Player>,
+        server: &mut GameServer,
+        player: &mut Socket<<GameServer as Server>::Player>,
     ) -> std::io::Result<()> {
         todo!()
     }
