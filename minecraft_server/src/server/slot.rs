@@ -18,13 +18,6 @@ pub struct SlotData {
 impl !EncoderDeref for SlotData {}
 impl !DecoderDeref for SlotData {}
 
-impl Encoder for Slot {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
-        buf.write_option(self)?;
-        Ok(())
-    }
-}
-
 impl Encoder for SlotData {
     fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         buf.write_var_i32(self.item_id)?;

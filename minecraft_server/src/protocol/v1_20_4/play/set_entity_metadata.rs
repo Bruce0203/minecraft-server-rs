@@ -14,20 +14,21 @@ use crate::{
     server::{
         chat::ChatNbtWrite,
         coordinates::{Direction, Position},
+        prelude::prelude::EntityMetadata,
         slot::Slot,
     },
 };
 
 pub struct SetEntityMetadata {
     pub entity_id: i32,
-    //pub metadata: Box<dyn crate::server::prelude::Metadata>,
+    pub metadata: EntityMetadata,
 }
 
 impl Decoder for SetEntityMetadata {
     fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
         Ok(SetEntityMetadata {
             entity_id: reader.read_var_i32()?,
-            //metadata: Box::new(Player::default()),
+            metadata: vec![].into(),
         })
     }
 }

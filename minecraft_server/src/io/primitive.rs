@@ -1,10 +1,15 @@
 use derive_more::{Deref, From, Into};
 use std::io::{Read, Result, Write};
 
-use super::prelude::{Decoder, Encoder};
+use super::prelude::{Buffer, Decoder, Encoder, EncoderDeref};
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct Bool(bool);
+impl !EncoderDeref for bool {}
+impl Encoder for bool {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_bool(*self)?;
+        Ok(())
+    }
+}
 
 pub trait BoolRead {
     fn read_bool(&mut self) -> Result<bool>;
@@ -29,8 +34,13 @@ impl<W: Write> WriteBool for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct U8(u8);
+impl !EncoderDeref for u8 {}
+impl Encoder for u8 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_u8(*self)?;
+        Ok(())
+    }
+}
 
 pub trait U8Read {
     fn read_u8(&mut self) -> Result<u8>;
@@ -48,8 +58,13 @@ impl<R: Read> U8Read for R {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct I8(i8);
+impl !EncoderDeref for i8 {}
+impl Encoder for i8 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_i8(*self)?;
+        Ok(())
+    }
+}
 
 pub trait I8Read {
     fn read_i8(&mut self) -> Result<i8>;
@@ -79,8 +94,13 @@ impl<W: Write> I8Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct U16(u16);
+impl !EncoderDeref for u16 {}
+impl Encoder for u16 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_u16(*self)?;
+        Ok(())
+    }
+}
 
 pub trait U16Read {
     fn read_u16(&mut self) -> Result<u16>;
@@ -105,8 +125,13 @@ impl<W: Write> U16Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct I16(i16);
+impl !EncoderDeref for i16 {}
+impl Encoder for i16 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_i16(*self)?;
+        Ok(())
+    }
+}
 
 pub trait I16Read {
     fn read_i16(&mut self) -> Result<i16>;
@@ -131,8 +156,13 @@ impl<W: Write> I16Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct I64(i64);
+impl !EncoderDeref for i64 {}
+impl Encoder for i64 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_i64(*self)?;
+        Ok(())
+    }
+}
 
 pub trait I64Read {
     fn read_i64(&mut self) -> Result<i64>;
@@ -157,8 +187,13 @@ impl<W: Write> I64Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct U128(u128);
+impl !EncoderDeref for u128 {}
+impl Encoder for u128 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_u128(*self)?;
+        Ok(())
+    }
+}
 
 pub trait U128Read {
     fn read_u128(&mut self) -> Result<u128>;
@@ -183,8 +218,13 @@ impl<W: Write> U128Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct F32(f32);
+impl !EncoderDeref for f32 {}
+impl Encoder for f32 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_f32(*self)?;
+        Ok(())
+    }
+}
 
 pub trait F32Read {
     fn read_f32(&mut self) -> Result<f32>;
@@ -209,8 +249,13 @@ impl<W: Write> F32Write for W {
     }
 }
 
-#[derive(Deref, From, Into, Clone, Copy)]
-pub struct F64(f64);
+impl !EncoderDeref for f64 {}
+impl Encoder for f64 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_f64(*self)?;
+        Ok(())
+    }
+}
 
 pub trait F64Read {
     fn read_f64(&mut self) -> Result<f64>;

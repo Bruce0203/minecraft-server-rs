@@ -1,16 +1,17 @@
 use crate::{
-    io::prelude::{Encoder, U8Write},
+    io::prelude::{Encoder, EncoderDeref, U8Write},
     net::prelude::{PacketHandler, PacketId, Server, Socket},
     server::prelude::{GamePlayer, GameServer},
 };
-use derive_more::{Deref, From};
+use derive_more::{Deref, From, Into};
 
-#[derive(Debug, Deref, From)]
+#[derive(Debug, Deref, From, Into)]
 pub struct C2SSetHeldItem(pub SetHeldItem);
 
-#[derive(Debug, Deref, From)]
+#[derive(Debug, Deref, From, Into)]
 pub struct S2CSetHeldItem(pub SetHeldItem);
 
+impl EncoderDeref for S2CSetHeldItem {}
 #[derive(Debug)]
 pub struct SetHeldItem {
     pub slot: u8,

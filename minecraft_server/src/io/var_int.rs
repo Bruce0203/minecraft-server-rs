@@ -4,10 +4,26 @@ use std::io::{
     Error, ErrorKind, Result,
 };
 
-use super::prelude::{Decoder, Encoder};
+use super::prelude::{Buffer, Decoder, DecoderDeref, Encoder, EncoderDeref};
 
 #[derive(Deref, From, Into, Clone, Copy)]
-pub struct VarInt(i32);
+pub struct VarInt(pub i32);
+
+impl !EncoderDeref for VarInt {}
+
+impl Encoder for VarInt {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_var_i32(self.0)?;
+        Ok(())
+    }
+}
+
+impl !DecoderDeref for VarInt {}
+impl Decoder for VarInt {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_var_i32()?.into())
+    }
+}
 
 pub fn read_var_i32_fast(buf: &[u8]) -> Result<(i32, usize)> {
     let mut val = 0;

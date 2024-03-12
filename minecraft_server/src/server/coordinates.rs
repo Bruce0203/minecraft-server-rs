@@ -3,7 +3,7 @@ use std::io::{
     Result,
 };
 
-use crate::io::prelude::{Decoder, Encoder, F32Write, F64Write, I64Read};
+use crate::io::prelude::{Buffer, Decoder, Encoder, F32Write, F64Write, I64Read, VarIntWrite};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Position {
@@ -19,7 +19,7 @@ impl Position {
 }
 
 impl Encoder for Position {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         let encoded =
             ((self.x & 0x3FFFFFF) << 38) | ((self.z & 0x3FFFFFF) << 12) | (self.y & 0xFFF);
         buf.write_all(&encoded.to_be_bytes())?;
@@ -56,7 +56,7 @@ pub struct FloatRotation {
 }
 
 impl Encoder for FloatRotation {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_f32(self.yaw)?;
         buf.write_f32(self.pitch)?;
         Ok(())
@@ -70,7 +70,7 @@ pub struct DoublePosition {
 }
 
 impl Encoder for DoublePosition {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_f64(self.x)?;
         buf.write_f64(self.y)?;
         buf.write_f64(self.z)?;
@@ -84,7 +84,7 @@ pub struct Location {
 }
 
 impl Encoder for Location {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         self.pos.encode_to_buffer(buf)?;
         self.rot.encode_to_buffer(buf)?;
         Ok(())
@@ -92,7 +92,7 @@ impl Encoder for Location {
 }
 
 #[repr(i32)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub enum Direction {
     Down = 0,
     Up = 1,
@@ -100,4 +100,23 @@ pub enum Direction {
     South = 3,
     West = 4,
     East = 5,
+}
+
+impl Encoder for Direction {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_var_i32(*self as i32)?;
+        Ok(())
+    }
+}
+
+pub struct Quaternion(f32, f32, f32, f32);
+
+impl Encoder for Quaternion {
+    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+        buf.write_f32(self.0)?;
+        buf.write_f32(self.1)?;
+        buf.write_f32(self.2)?;
+        buf.write_f32(self.3)?;
+        Ok(())
+    }
 }

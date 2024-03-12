@@ -6,7 +6,7 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, ToIdentifier},
+    io::prelude::{Decoder, Encoder, ToIdentifier, VarInt},
     net::prelude::{ConnectionState, PacketHandler, PacketId, PacketWriter, Server, Socket},
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
@@ -172,7 +172,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         SetEntityMetadata {
             entity_id: 0,
-            //metadata: Box::new(Player::default()),
+            metadata: vec![].into(),
         }
         .send_packet(player);
         Ok(())

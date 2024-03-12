@@ -19,7 +19,7 @@ pub trait PacketWriter<Player>: PacketId + Encoder {
     }
 }
 
-impl<P: Encoder + PacketId, T> PacketWriter<T> for P {}
+impl<P: Encoder + PacketId, Player> PacketWriter<Player> for P {}
 
 pub trait PacketHandler<Server: super::prelude::Server> {
     #[inline]
