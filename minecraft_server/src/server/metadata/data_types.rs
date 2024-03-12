@@ -12,9 +12,6 @@ use crate::io::prelude::{
 };
 use derive_more::{Deref, From, Into};
 
-pub struct Meta(Box<dyn Encoder>);
-pub trait Metadata: Encoder {}
-
 #[derive(Deref)]
 pub struct VarLong(I64);
 #[derive(Deref)]
@@ -106,3 +103,4 @@ impl Encoder for Quaternion {
         Ok(())
     }
 }
+
