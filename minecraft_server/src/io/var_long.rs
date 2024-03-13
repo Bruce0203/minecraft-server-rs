@@ -3,9 +3,6 @@ use std::io::{Read, Result};
 use super::prelude::{Decoder, Encoder};
 use derive_more::{Deref, From, Into};
 
-#[derive(Deref, From, Into)]
-pub struct VarLong(i64);
-
 pub trait VarLongRead {
     fn read_var_long(&mut self) -> Result<i64>;
 }

@@ -1,3 +1,4 @@
+#![feature(inline_const)]
 #![feature(negative_impls)]
 #![feature(auto_traits)]
 

@@ -42,6 +42,7 @@ impl OptionWrite for Buffer {
 }
 
 impl<T: Encoder> !EncoderDeref for Option<T> {}
+
 impl<T: Encoder> Encoder for Option<T> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         match self {
@@ -58,7 +59,8 @@ impl<T: Encoder> Encoder for Option<T> {
     }
 }
 
-impl<T: Decoder> !DecoderDeref for Option<T> {}
+impl<T: Decoder + DecoderDeref> !DecoderDeref for Option<T> {}
+
 impl<T: Decoder> Decoder for Option<T> {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(Some(T::decode_from_read(reader)?))
