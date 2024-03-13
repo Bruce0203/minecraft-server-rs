@@ -6,12 +6,9 @@ use std::{
 
 use mio::{net::TcpListener, Events, Interest, Poll, Token};
 
-use crate::{
-    io::fast_map::FastMap,
-    net::{prelude::SessionRelay, socket::Socket},
-};
+use crate::io::fast_map::FastMap;
 
-use super::prelude::Server;
+use super::prelude::{Server, Socket};
 
 pub trait Selector {
     fn run<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self);

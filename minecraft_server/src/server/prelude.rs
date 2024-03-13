@@ -1,3 +1,5 @@
+pub use super::session_relay::ConnectionState;
+pub use super::session_relay::SessionRelay;
 pub use super::metadata::prelude::*;
 pub use super::chat::Chat;
 pub use super::coordinates::*;

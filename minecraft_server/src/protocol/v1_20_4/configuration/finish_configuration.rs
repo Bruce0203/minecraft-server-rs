@@ -6,9 +6,7 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, ToIdentifier, VarInt},
-    net::prelude::{ConnectionState, PacketHandler, PacketId, PacketWriter, Server, Socket},
-    protocol::v1_20_4::{
+    io::prelude::{Decoder, Encoder, ToIdentifier, VarInt}, net::prelude::{PacketHandler, PacketWriter, Socket}, protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
             player_abilities::{PlayerAbilities, PlayerAbility},
@@ -25,12 +23,11 @@ use crate::{
             update_attributes::{AttributeProperty, UpdateAttributes},
             update_time::UpdateTime,
         },
-    },
-    server::{
+    }, server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        prelude::{Chat, GameMode, GamePlayer, GameServer},
+        prelude::{Chat, ConnectionState, GameMode, GamePlayer, GameServer},
         slot::Slot,
-    },
+    }
 };
 
 use super::server_data::ServerData;

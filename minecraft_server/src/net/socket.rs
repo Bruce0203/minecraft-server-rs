@@ -9,9 +9,9 @@ use mio::{net::TcpStream, Token};
 
 use crate::io::prelude::{Decoder, Encoder, VarIntRead, VarIntWrite};
 use crate::protocol::v1_20_4::v1_20_4::V1_20_4;
-use crate::server::prelude::GameServer;
+use crate::server::prelude::{GameServer, SessionRelay};
 
-use super::prelude::{SessionRelay, PacketId};
+use super::prelude::PacketId;
 
 pub struct Socket<Player> {
     pub stream: TcpStream,
@@ -110,10 +110,7 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    pub fn send_packet<E: Encoder + PacketId>(
-        &mut self,
-        encoder: &E,
-    ) -> Result<()> {
+    pub fn send_packet<E: Encoder + PacketId>(&mut self, encoder: &E) -> Result<()> {
         let mut write_buf = self.encode_to_packet(encoder)?;
         self.handle_write_packet(&mut write_buf)
     }

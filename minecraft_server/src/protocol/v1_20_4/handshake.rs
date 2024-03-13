@@ -5,8 +5,8 @@ use crate::io::prelude::{
     Decoder, Encoder, U16Read, U16Write, VarIntRead, VarIntWrite, VarStringRead, VarStringWrite,
 };
 
-use crate::net::prelude::{ConnectionState, PacketHandler, PacketId, Socket};
-use crate::server::prelude::{GamePlayer, GameServer};
+use crate::net::prelude::{PacketHandler, PacketId, Socket};
+use crate::server::prelude::{ConnectionState, GamePlayer, GameServer};
 
 #[derive(Debug)]
 pub struct HandShake {

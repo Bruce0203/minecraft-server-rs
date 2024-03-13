@@ -2,7 +2,7 @@ use std::io::{Cursor, Error, Result};
 
 use crate::{
     io::prelude::Decoder,
-    net::prelude::{ConnectionState, PacketHandler, Socket, PacketWriter},
+    net::prelude::{PacketHandler, PacketWriter, Socket},
     protocol::v1_20_4::configuration::{
         feature_flags::FeatureFlags,
         finish_configuration::FinishConfiguration,
@@ -11,7 +11,7 @@ use crate::{
             MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
         },
     },
-    server::prelude::{GamePlayer, GameServer},
+    server::prelude::{ConnectionState, GamePlayer, GameServer},
 };
 
 pub struct LoginAcknowledged {}
@@ -21,7 +21,6 @@ impl Decoder for LoginAcknowledged {
         Ok(LoginAcknowledged {})
     }
 }
-
 
 impl PacketHandler<GameServer> for LoginAcknowledged {
     fn handle_packet(

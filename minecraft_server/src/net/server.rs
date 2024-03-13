@@ -11,7 +11,10 @@ pub trait Server: Sized {
 
     fn read_packet(&mut self, player: &mut Socket<Self::Player>) -> Result<()>;
 
-    fn handle_read_event<const MAX_PACKET_BUFFER_SIZE: usize>(&mut self, player: &mut Socket<Self::Player>) -> Result<()> {
+    fn handle_read_event<const MAX_PACKET_BUFFER_SIZE: usize>(
+        &mut self,
+        player: &mut Socket<Self::Player>,
+    ) -> Result<()> {
         player.fill_read_buf_from_socket_stream::<MAX_PACKET_BUFFER_SIZE>()?;
         self.read_packet_from_read_buf(player)?;
         let write_buf = &player.write_buf.get_ref()[..player.write_buf.position() as usize];

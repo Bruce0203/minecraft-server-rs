@@ -40,7 +40,7 @@ use super::{
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
-use crate::net::prelude::ConnectionState::*;
+use crate::server::prelude::ConnectionState::*;
 
 pub struct V1_20_4;
 protocol!(V1_20_4, 765);
