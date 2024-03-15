@@ -1,6 +1,16 @@
 # Minecraft server (made with Rust)
 It is a project that eliminates the necessary hardware performance cost and optimizes the server from the bottom without the economic difficulty of purchasing expensive hosting servers to operate Minecraft servers
 
+# Roadmap
+
+- [x] server list ping
+- [ ] entity metadata
+- [ ] chunk, and palette
+- [ ] packet encryption 
+- [ ] packet compression
+- [ ] mojang login request
+- [ ] tick system 
+
 ## Why do I have to start this project and make something new
 No Minecraft server existed that satisfies the requirements below.
 
@@ -36,5 +46,7 @@ No Minecraft server existed that satisfies the requirements below.
 
 ## Why use the standard library's buffer Cursor<Vec<u8>> without using the BytesMut of bytes crate
 [click here](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
+
+--
 
 
