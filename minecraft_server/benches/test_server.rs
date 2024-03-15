@@ -1,5 +1,5 @@
 use minecraft_server::{
-    net::prelude::{PacketId, SessionRelay, Socket},
+    net::prelude::{PacketId, Socket},
     protocol::v1_20_4::handshake::HandShake,
     server::prelude::GamePlayer,
 };

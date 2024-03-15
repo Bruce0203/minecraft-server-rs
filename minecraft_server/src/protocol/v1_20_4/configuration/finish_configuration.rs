@@ -6,7 +6,9 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, ToIdentifier, VarInt}, net::prelude::{PacketHandler, PacketWriter, Socket}, protocol::v1_20_4::{
+    io::prelude::{Buffer, Decoder, Encoder, ToIdentifier, VarInt},
+    net::prelude::{PacketHandler, PacketWriter, Socket},
+    protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
             player_abilities::{PlayerAbilities, PlayerAbility},
@@ -23,11 +25,12 @@ use crate::{
             update_attributes::{AttributeProperty, UpdateAttributes},
             update_time::UpdateTime,
         },
-    }, server::{
+    },
+    server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        prelude::{Chat, ConnectionState, GameMode, GamePlayer, GameServer},
+        prelude::{Chat, ConnectionState, Entity, GameMode, GamePlayer, GameServer},
         slot::Slot,
-    }
+    },
 };
 
 use super::server_data::ServerData;
@@ -169,7 +172,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         SetEntityMetadata {
             entity_id: 0,
-            metadata: vec![].into(),
+            metadata: Entity::default(),
         }
         .send_packet(player);
         Ok(())
@@ -177,7 +180,7 @@ impl PacketHandler<GameServer> for FinishConfiguration {
 }
 
 impl Encoder for FinishConfiguration {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         Ok(())
     }
 }

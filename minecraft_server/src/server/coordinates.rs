@@ -50,7 +50,7 @@ fn position_encoding() {
 #[derive(derive_more::Deref)]
 pub struct Angle(pub u8);
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct FloatRotation {
     pub yaw: f32,
     pub pitch: f32,
@@ -93,7 +93,7 @@ impl Encoder for Location {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Direction {
     Down = 0,
     Up = 1,
@@ -110,7 +110,7 @@ impl Encoder for Direction {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Quaternion(f32, f32, f32, f32);
 
 impl Encoder for Quaternion {

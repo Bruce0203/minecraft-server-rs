@@ -1,17 +1,23 @@
-use std::io::Result;
+use std::{
+    io::{Error, Result},
+    ops::{Deref, Index, IndexMut},
+};
 
-use crate::io::prelude::{Buffer, Encoder, Identifier, U8Write, VarInt, VarIntWrite};
+use crate::{
+    io::prelude::{Buffer, Encoder, Identifier, U8Write, VarInt, VarIntWrite},
+    protocol::v1_20_4::play::set_entity_metadata::SetEntityMetadata,
+};
 use bitflags::bitflags;
-use derive_more::{Deref, From, Into};
+use derive_more::{Deref, DerefMut, From, Into};
 use dyn_clone::DynClone;
 use uuid::Uuid;
 
 use super::prelude::EntityMetadataValue;
 
-#[derive(Deref, From, Into)]
-pub struct EntityMetadata(Vec<Option<EntityMetadataValue>>);
+#[derive(Debug, Deref, DerefMut, From, Into)]
+pub struct EntityMetadata<const LEN: usize>([Option<EntityMetadataValue>; LEN]);
 
-impl Encoder for EntityMetadata {
+impl<const LEN: usize> Encoder for EntityMetadata<LEN> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         let mut i = 0;
         for metadata in self.iter() {
@@ -27,37 +33,68 @@ impl Encoder for EntityMetadata {
     }
 }
 
-impl EntityMetadata {
-    pub fn with_capacity<const LENGTH: usize>() -> EntityMetadata {
-        EntityMetadata(Vec::from(const { [EntityMetadataValue::NONE; LENGTH] }))
-    }
-}
-
-#[derive(Deref, From, Into)]
-pub struct Entity(pub EntityMetadata);
-
-impl Entity {
-    pub fn new() -> Entity {
-        Entity(EntityMetadata::with_capacity::<7>())
+impl<const LEN: usize> EntityMetadata<LEN> {
+    pub fn new() -> EntityMetadata<LEN> {
+        EntityMetadata(const { [EntityMetadataValue::NONE; LEN] })
     }
 
-    pub fn get_entity_byte(&mut self) -> EntityMetadataValue {
-        let b = EntityMetadataValue::Byte(EntityByte::Default.bits());
-        if let Some(some) = unsafe { self.0 .0.get_unchecked_mut(0) } {
-            some.clone()
+    pub fn get_or_else<'a, F: FnOnce() -> (EntityMetadataValue)>(
+        &'a mut self,
+        index: usize,
+        f: F,
+    ) -> EntityMetadataValue {
+        if let Some(value) = &self[index] {
+            value.clone()
         } else {
-            let value = EntityMetadataValue::Byte(EntityByte::Default.bits());
-            unsafe { self.0 .0[0] = Some(value.clone()) };
+            let value = f();
+            self[index] = Some(value.clone());
             value
         }
     }
 }
 
-pub struct LivingEntity(EntityMetadata);
+impl<const LEN: usize> Index<usize> for EntityMetadata<LEN> {
+    type Output = Option<EntityMetadataValue>;
 
-impl LivingEntity {
-    pub fn new() -> LivingEntity {
-        LivingEntity(EntityMetadata::with_capacity::<14>())
+    fn index(&self, index: usize) -> &Self::Output {
+        if let Some(value) = self.0.get(index) {
+            value
+        } else {
+            &None
+        }
+    }
+}
+
+impl<const LEN: usize> IndexMut<usize> for EntityMetadata<LEN> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.as_mut().get_mut(index).expect("out of index")
+    }
+}
+
+#[derive(Deref, DerefMut, From, Into)]
+pub struct Entity(pub EntityMetadata<7>);
+
+impl Entity {
+    pub fn get_entity_byte(&mut self) -> u8 {
+        let a = if let Some(some) = unsafe { self.0 .0.get_unchecked_mut(0) } {
+            some.clone()
+        } else {
+            let value = EntityMetadataValue::Byte(EntityByte::Default.bits());
+            unsafe { self.0 .0[0] = Some(value.clone()) };
+            value
+        };
+        match a {
+            EntityMetadataValue::Byte(value) => return value,
+            _ => panic!(),
+        }
+    }
+}
+
+impl Default for Entity {
+    fn default() -> Self {
+        let mut meta = EntityMetadata::<7>::new();
+        meta[0] = Some(EntityMetadataValue::Byte(0));
+        Entity(meta)
     }
 }
 
@@ -71,6 +108,15 @@ bitflags! {
         const HasGlowingEffect = 0x40;
         const IsFlyingWithElytra = 0x80;
         const None = 0;
-        const Default = 0;
+        const Default = Self::None.bits();
     }
+}
+
+#[test]
+fn test_metadata() {
+    let mut meta = EntityMetadata::<2>::new();
+    println!("{:#?}", meta[0]);
+    //meta[0] = None;
+    //println!("{:?}", meta[0]);
+    meta[0] = Some(EntityMetadataValue::Byte(0));
 }

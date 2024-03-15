@@ -6,7 +6,6 @@ use crate::{
 use bitflags::bitflags;
 use std::io::{Cursor, Error, Read, Result};
 
-
 #[derive(Debug, derive_more::Deref, derive_more::From)]
 pub struct ClientInformationConfiguration(ClientInformation);
 #[derive(Debug, derive_more::Deref, derive_more::From)]
@@ -74,8 +73,6 @@ impl Decoder for ChatMode {
         })
     }
 }
-
-
 
 impl PacketHandler<GameServer> for ClientInformation {
     fn handle_packet(

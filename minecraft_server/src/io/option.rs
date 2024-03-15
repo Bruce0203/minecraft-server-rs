@@ -59,7 +59,7 @@ impl<T: Encoder> Encoder for Option<T> {
     }
 }
 
-impl<T: Decoder + DecoderDeref> !DecoderDeref for Option<T> {}
+impl<T: Decoder> !DecoderDeref for Option<T> {}
 
 impl<T: Decoder> Decoder for Option<T> {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {

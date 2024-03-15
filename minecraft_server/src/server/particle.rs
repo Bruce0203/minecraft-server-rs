@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Particle {
     id: i32,
     long_distance: bool,
@@ -15,5 +15,5 @@ pub struct Particle {
     data: ParticleData,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ParticleData {}

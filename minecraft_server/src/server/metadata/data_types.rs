@@ -17,7 +17,7 @@ use crate::{
 };
 
 #[repr(i32)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum EntityMetadataValue {
     Byte(u8) = 0,
     VarInt(i32) = 1,
@@ -53,41 +53,43 @@ impl EntityMetadataValue {
     pub const NONE: std::option::Option<EntityMetadataValue> = None;
 
     pub fn get_metadata_type_id(&self) -> i32 {
+        use EntityMetadataValue::*;
         match self {
-            EntityMetadataValue::Byte(_) => 0,
-            EntityMetadataValue::VarInt(_) => 1,
-            EntityMetadataValue::VarLong(_) => 2,
-            EntityMetadataValue::Float(_) => 3,
-            EntityMetadataValue::String(_) => 4,
-            EntityMetadataValue::Chat(_) => 5,
-            EntityMetadataValue::OptionalChat(_) => 6,
-            EntityMetadataValue::Slot(_) => 7,
-            EntityMetadataValue::Boolean(_) => 8,
-            EntityMetadataValue::Rotation(_) => 9,
-            EntityMetadataValue::Position(_) => 10,
-            EntityMetadataValue::OptionalPosition(_) => 11,
-            EntityMetadataValue::Direction(_) => 12,
-            EntityMetadataValue::OptionalUuid(_) => 13,
-            EntityMetadataValue::BlockState(_) => 14,
-            EntityMetadataValue::OptionalBlockState(_) => 15,
-            EntityMetadataValue::Nbt(_) => 16,
-            EntityMetadataValue::Particle(_) => 17,
-            EntityMetadataValue::VillagerData(_, _, _) => 18,
-            EntityMetadataValue::OptionalVarInt(_) => 19,
-            EntityMetadataValue::Pose(_) => 20,
-            EntityMetadataValue::CatVariant(_) => 21,
-            EntityMetadataValue::FrogVariant(_) => 22,
-            EntityMetadataValue::OptionalGlobalPosition(_) => 23,
-            EntityMetadataValue::PaintingVariant(_) => 24,
-            EntityMetadataValue::SnifferState(_) => 25,
-            EntityMetadataValue::Vector3(_, _, _) => 26,
-            EntityMetadataValue::Quaternion(_) => 27,
+            Byte(_) => 0,
+            VarInt(_) => 1,
+            VarLong(_) => 2,
+            Float(_) => 3,
+            String(_) => 4,
+            Chat(_) => 5,
+            OptionalChat(_) => 6,
+            Slot(_) => 7,
+            Boolean(_) => 8,
+            Rotation(_) => 9,
+            Position(_) => 10,
+            OptionalPosition(_) => 11,
+            Direction(_) => 12,
+            OptionalUuid(_) => 13,
+            BlockState(_) => 14,
+            OptionalBlockState(_) => 15,
+            Nbt(_) => 16,
+            Particle(_) => 17,
+            VillagerData(_, _, _) => 18,
+            OptionalVarInt(_) => 19,
+            Pose(_) => 20,
+            CatVariant(_) => 21,
+            FrogVariant(_) => 22,
+            OptionalGlobalPosition(_) => 23,
+            PaintingVariant(_) => 24,
+            SnifferState(_) => 25,
+            Vector3(_, _, _) => 26,
+            Quaternion(_) => 27,
         }
     }
 }
 
 impl Encoder for EntityMetadataValue {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        use EntityMetadataValue::*;
         match self {
             EntityMetadataValue::Byte(value) => {
                 buf.write_u8(*value)?;
@@ -108,7 +110,7 @@ impl Encoder for EntityMetadataValue {
                 value.encode_to_buffer(buf)?;
             }
             EntityMetadataValue::OptionalChat(value) => {
-                todo!()
+                //value.encode_to_buffer(buf)?;
             }
             EntityMetadataValue::Slot(value) => {
                 value.encode_to_buffer(buf)?;

@@ -27,6 +27,6 @@ num-traits = "0.2"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "matching_many_items"
+name = "entity_metadata"
 harness = false
 

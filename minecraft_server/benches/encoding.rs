@@ -2,11 +2,12 @@ use std::{io::Cursor, net::SocketAddr, str::FromStr};
 
 use criterion::{criterion_group, criterion_main, BatchSize::PerIteration, Criterion};
 use minecraft_server::{
-    net::prelude::{PacketWriter, Server, SessionRelay, Socket},
+    net::prelude::{PacketWriter, Server, Socket},
     protocol::v1_20_4::{
         handshake::{HandShake, NextState},
         login::login_start::LoginStart,
-    }, server::prelude::{GameServer, GamePlayer},
+    },
+    server::prelude::{GamePlayer, GameServer, SessionRelay},
 };
 use mio::{
     net::{TcpListener, TcpStream},
