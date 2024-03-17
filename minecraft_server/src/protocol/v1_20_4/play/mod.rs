@@ -1,3 +1,5 @@
+pub mod change_difficulty;
+pub mod set_health;
 pub mod set_container_property;
 pub mod player_abilities;
 pub mod player_info;

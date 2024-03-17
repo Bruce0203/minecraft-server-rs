@@ -11,6 +11,7 @@ use crate::{
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
+            change_difficulty::{Difficulty, S2CChangeDifficulty},
             player_abilities::{PlayerAbilities, PlayerAbility},
             player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
             set_center_chunk::SetCenterChunk,
@@ -18,6 +19,7 @@ use crate::{
             set_container_slot::SetContainerSlot,
             set_default_position::SetDefaultPosition,
             set_entity_metadata::SetEntityMetadata,
+            set_health::SetHealth,
             set_held_item::{S2CSetHeldItem, SetHeldItem},
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
@@ -28,7 +30,7 @@ use crate::{
     },
     server::{
         coordinates::{DoublePosition, FloatRotation, Location, Position},
-        prelude::{Chat, ConnectionState, Entity, GameMode, GamePlayer, GameServer},
+        prelude::{Chat, ConnectionState, EntityMeta, GameMode, GamePlayer, GameServer},
         slot::Slot,
     },
 };
@@ -172,9 +174,25 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         SetEntityMetadata {
             entity_id: 0,
-            metadata: Entity::default(),
+            metadata: EntityMeta::default(),
         }
-        .send_packet(player);
+        .send_packet(player)?;
+        SetHealth {
+            health: 20.0,
+            food: 20,
+            food_saturation: 5.0,
+        }
+        .send_packet(player)?;
+        UpdateTime {
+            world_age: 1000,
+            time_of_day: 100,
+        }
+        .send_packet(player)?;
+        S2CChangeDifficulty {
+            new_difficulty: Difficulty::Easy,
+            difficulty_locked: false,
+        }
+        .send_packet(player)?;
         Ok(())
     }
 }

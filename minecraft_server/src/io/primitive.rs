@@ -1,7 +1,7 @@
 use derive_more::{Deref, From, Into};
 use std::io::{Read, Result, Write};
 
-use super::prelude::{Buffer, Decoder, Encoder, EncoderDeref};
+use super::prelude::{Buffer, Decoder, DecoderDeref, Encoder, EncoderDeref};
 
 impl !EncoderDeref for bool {}
 impl Encoder for bool {
@@ -161,6 +161,13 @@ impl Encoder for i64 {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_i64(*self)?;
         Ok(())
+    }
+}
+
+impl !DecoderDeref for i64 {}
+impl Decoder for i64 {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(reader.read_i64()?)
     }
 }
 

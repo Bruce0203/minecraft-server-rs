@@ -1,104 +1,107 @@
-use std::{
-    io::{Error, Result},
-    ops::{Deref, Index, IndexMut},
-};
+use std::io::Result;
+
+use bitflags::bitflags;
 
 use crate::{
-    io::prelude::{Buffer, Encoder, Identifier, U8Write, VarInt, VarIntWrite},
-    protocol::v1_20_4::play::set_entity_metadata::SetEntityMetadata,
+    io::prelude::{
+        Buffer, Encoder, OptionWrite, U8Write, VarIntWrite, VarString, VarStringWrite, WriteBool,
+    },
+    server::prelude::{Chat, Pose},
 };
-use bitflags::bitflags;
-use derive_more::{Deref, DerefMut, From, Into};
-use dyn_clone::DynClone;
-use uuid::Uuid;
 
-use super::prelude::EntityMetadataValue;
+use super::prelude::{MetadataEncoder, MetadataField, MetadataType};
+use derive_more::Deref;
 
-#[derive(Debug, Deref, DerefMut, From, Into)]
-pub struct EntityMetadata<const LEN: usize>([Option<EntityMetadataValue>; LEN]);
+#[derive(Default)]
+pub struct EntityMeta {
+    entity_byte: Option<EntityByte>,
+    air_ticks: Option<i32>,
+    custom_name: Option<VarString<32767>>,
+    is_custom_name_visible: Option<i32>,
+    is_silent: Option<bool>,
+    has_no_gravity: Option<bool>,
+    pose: Option<Pose>,
+    ticks_frozen_in_powdered_snow: Option<i32>,
+}
 
-impl<const LEN: usize> Encoder for EntityMetadata<LEN> {
+impl Encoder for EntityMeta {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        let mut i = 0;
-        for metadata in self.iter() {
-            if let Some(metadata) = metadata {
-                buf.write_u8(i)?;
-                buf.write_var_i32(metadata.get_metadata_type_id())?;
-                metadata.encode_to_buffer(buf)?;
-            }
-            i += 1;
+        if let Some(entity_byte) = &self.entity_byte {
+            buf.write_u8(0)?;
+            buf.write_u8(entity_byte.bits())?;
         }
-        buf.write_u8(0xff)?;
+        if let Some(air_ticks) = self.air_ticks {
+            buf.write_u8(1)?;
+            buf.write_var_i32(air_ticks)?;
+        }
+        if let Some(custom_name) = &self.custom_name {
+            buf.write_var_string(custom_name)?;
+        }
+        if let Some(is_custom_name_visible) = self.is_custom_name_visible {
+            buf.write_var_i32(is_custom_name_visible)?;
+        }
+        if let Some(is_silent) = self.is_silent {
+            buf.write_bool(is_silent)?;
+        }
+        if let Some(has_no_gravity) = self.has_no_gravity {
+            buf.write_bool(has_no_gravity)?;
+        }
+        if let Some(pose) = self.pose {
+            pose.encode_to_buffer(buf)?;
+        }
+        if let Some(ticks_frozen_in_powdered_snow) = self.ticks_frozen_in_powdered_snow {
+            buf.write_var_i32(ticks_frozen_in_powdered_snow)?;
+        }
         Ok(())
     }
 }
 
-impl<const LEN: usize> EntityMetadata<LEN> {
-    pub fn new() -> EntityMetadata<LEN> {
-        EntityMetadata(const { [EntityMetadataValue::NONE; LEN] })
+impl EntityMeta {
+    pub fn get_entity_byte(&self) -> &EntityByte {
+        self.entity_byte
+            .as_ref()
+            .unwrap_or_else(|| &EntityByte::Default)
     }
 
-    pub fn get_or_else<'a, F: FnOnce() -> (EntityMetadataValue)>(
-        &'a mut self,
-        index: usize,
-        f: F,
-    ) -> EntityMetadataValue {
-        if let Some(value) = &self[index] {
-            value.clone()
+    pub fn set_entity_byte(&mut self, entity_byte: EntityByte) {
+        self.entity_byte = Some(entity_byte);
+    }
+
+    pub fn get_air_ticks(&self) -> i32 {
+        self.air_ticks.unwrap_or_else(|| 300)
+    }
+
+    const EMPTY_STRING: &String = &String::new();
+    pub fn get_custom_name(&self) -> String {
+        if let Some(value) = &self.custom_name {
+            value.to_string()
         } else {
-            let value = f();
-            self[index] = Some(value.clone());
-            value
+            String::default()
         }
     }
 }
 
-impl<const LEN: usize> Index<usize> for EntityMetadata<LEN> {
-    type Output = Option<EntityMetadataValue>;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        if let Some(value) = self.0.get(index) {
-            value
-        } else {
-            &None
-        }
+impl MetadataType for EntityByte {
+    fn get_type_id(&self) -> i32 {
+        0
     }
 }
 
-impl<const LEN: usize> IndexMut<usize> for EntityMetadata<LEN> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        self.as_mut().get_mut(index).expect("out of index")
+impl MetadataField for EntityByte {
+    fn get_index(&self) -> u8 {
+        0
     }
 }
 
-#[derive(Deref, DerefMut, From, Into)]
-pub struct Entity(pub EntityMetadata<7>);
-
-impl Entity {
-    pub fn get_entity_byte(&mut self) -> u8 {
-        let a = if let Some(some) = unsafe { self.0 .0.get_unchecked_mut(0) } {
-            some.clone()
-        } else {
-            let value = EntityMetadataValue::Byte(EntityByte::Default.bits());
-            unsafe { self.0 .0[0] = Some(value.clone()) };
-            value
-        };
-        match a {
-            EntityMetadataValue::Byte(value) => return value,
-            _ => panic!(),
-        }
-    }
-}
-
-impl Default for Entity {
-    fn default() -> Self {
-        let mut meta = EntityMetadata::<7>::new();
-        meta[0] = Some(EntityMetadataValue::Byte(0));
-        Entity(meta)
+impl Encoder for EntityByte {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_u8(self.bits())?;
+        Ok(())
     }
 }
 
 bitflags! {
+    #[derive(Deref)]
     pub struct EntityByte: u8 {
         const IsOnFire = 0x00;
         const IsCrouching = 0x02;
@@ -110,13 +113,4 @@ bitflags! {
         const None = 0;
         const Default = Self::None.bits();
     }
-}
-
-#[test]
-fn test_metadata() {
-    let mut meta = EntityMetadata::<2>::new();
-    println!("{:#?}", meta[0]);
-    //meta[0] = None;
-    //println!("{:?}", meta[0]);
-    meta[0] = Some(EntityMetadataValue::Byte(0));
 }

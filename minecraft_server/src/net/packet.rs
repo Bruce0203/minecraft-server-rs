@@ -21,10 +21,9 @@ pub trait PacketWriter<Player>: PacketId + Encoder {
 
 impl<P: Encoder + PacketId, Player> PacketWriter<Player> for P {}
 
-pub trait PacketHandler<Server: super::prelude::Server> {
+pub trait PacketHandler<S: Server> {
     #[inline]
-    fn handle_packet(&self, server: &mut Server, player: &mut Socket<Server::Player>)
-        -> Result<()>;
+    fn handle_packet(&self, server: &mut S, player: &mut Socket<S::Player>) -> Result<()>;
 }
 
 pub trait PacketReadHandler<S: Server> {
@@ -39,14 +38,8 @@ impl<S: Server, P: PacketHandler<S> + Decoder> PacketReadHandler<S> for P {
     }
 }
 
-impl<D: Deref<Target = T>, T: Sized + PacketHandler<S>, S: super::prelude::Server> PacketHandler<S>
-    for D
-{
-    fn handle_packet(
-        &self,
-        server: &mut S,
-        player: &mut Socket<<S as Server>::Player>,
-    ) -> Result<()> {
+impl<D: Deref<Target = T>, T: Sized + PacketHandler<S>, S: Server> PacketHandler<S> for D {
+    fn handle_packet(&self, server: &mut S, player: &mut Socket<S::Player>) -> Result<()> {
         T::handle_packet(self, server, player)
     }
 }

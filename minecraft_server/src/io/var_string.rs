@@ -11,7 +11,7 @@ use super::var_int::VarIntRead;
 use super::var_int::VarIntWrite;
 
 #[derive(Debug, Deref, From, Into, Clone)]
-pub struct VarString<const MAX_LENGTH: usize>(String);
+pub struct VarString<const MAX_LENGTH: usize>(pub String);
 
 impl<const MAX_LENGTH: usize> !EncoderDeref for VarString<MAX_LENGTH> {}
 impl<const MAX_LENGTH: usize> !DecoderDeref for VarString<MAX_LENGTH> {}

@@ -25,16 +25,16 @@ pub trait Decoder: Sized {
 
 pub auto trait EncoderDeref {}
 
-impl<D: EncoderDeref + Deref<Target = T>, T: Sized + Encoder> Encoder for D {
-    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        T::encode_to_buffer(self, buf)
-    }
-}
-
 pub auto trait DecoderDeref {}
 
 impl<D: DecoderDeref + Deref<Target = T> + From<T>, T: Sized + Decoder> Decoder for D {
     fn decode_from_read<R: Read>(reader: &mut R) -> std::io::Result<D> {
         Ok(T::decode_from_read(reader)?.into())
+    }
+}
+
+impl<D: EncoderDeref + Deref<Target = T>, T: Sized + Encoder> Encoder for D {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        T::encode_to_buffer(self, buf)
     }
 }

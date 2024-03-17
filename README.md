@@ -49,4 +49,5 @@ No Minecraft server existed that satisfies the requirements below.
 
 --
 
+[![image](https://wiki.vg/resources/assets/licenses/cc-by-sa.png)](https://creativecommons.org/licenses/by-sa/3.0/)
 

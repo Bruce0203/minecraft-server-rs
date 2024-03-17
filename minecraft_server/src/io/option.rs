@@ -5,9 +5,11 @@ use std::{
 
 use serde::de::value;
 
+use crate::server::prelude::Chat;
+
 use super::{
     encoding::{Decoder, Encoder},
-    prelude::{Buffer, DecoderDeref, EncoderDeref},
+    prelude::{Buffer, DecoderDeref, EncoderDeref, VarInt},
     primitive::{BoolRead, U8Write, WriteBool},
 };
 
@@ -43,6 +45,8 @@ impl OptionWrite for Buffer {
 
 impl<T: Encoder> !EncoderDeref for Option<T> {}
 
+impl<T: Encoder> EncoderDeref for Box<T> {}
+
 impl<T: Encoder> Encoder for Option<T> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         match self {
@@ -65,4 +69,19 @@ impl<T: Decoder> Decoder for Option<T> {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(Some(T::decode_from_read(reader)?))
     }
+}
+
+#[test]
+fn encode_option() {
+    let opt = Some(VarInt(0));
+    let mut box_opt = Box::new(opt.clone());
+    let mut box_opt = &Box::new(opt.clone());
+    let mut opt_box = Some(Box::new(VarInt(0)));
+    let mut opt_box = &Some(Box::new(VarInt(0)));
+    let mut buf = Buffer::new(vec![]);
+    opt.encode_to_buffer(&mut buf).unwrap();
+    opt_box.encode_to_buffer(&mut buf).unwrap();
+    box_opt.encode_to_buffer(&mut buf).unwrap();
+    let chat = &Some(Box::new(Chat::from("".to_string())));
+    chat.encode_to_buffer(&mut buf).unwrap();
 }

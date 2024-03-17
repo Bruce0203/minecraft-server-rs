@@ -1,3 +1,3 @@
 mod macros;
-pub mod minecraft;
+pub mod protocols;
 pub mod v1_20_4;

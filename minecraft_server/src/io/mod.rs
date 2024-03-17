@@ -1,3 +1,4 @@
+mod bitset;
 mod array;
 mod buffer;
 mod cache;

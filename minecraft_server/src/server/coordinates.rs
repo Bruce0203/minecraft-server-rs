@@ -111,6 +111,18 @@ impl Encoder for Direction {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct Vector3(f32, f32, f32);
+
+impl Encoder for Vector3 {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_f32(self.0)?;
+        buf.write_f32(self.1)?;
+        buf.write_f32(self.2)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Quaternion(f32, f32, f32, f32);
 
 impl Encoder for Quaternion {

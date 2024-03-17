@@ -1,3 +1,5 @@
+pub mod generic_test;
+pub mod chunk;
 pub mod chat;
 pub mod coordinates;
 pub mod game_mode;

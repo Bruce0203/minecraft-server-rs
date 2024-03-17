@@ -1,3 +1,4 @@
+pub use super::bitset::*;
 pub use super::array::*;
 pub use super::buffer::*;
 pub use super::cache::*;

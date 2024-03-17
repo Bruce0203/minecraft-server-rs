@@ -23,20 +23,7 @@ use super::{
         login_success::LoginSuccess, set_compression::SetCompression,
     },
     play::{
-        player_abilities::PlayerAbilities,
-        player_info::PlayerInfoUpdate,
-        set_center_chunk::SetCenterChunk,
-        set_container_contents::SetContainerContent,
-        set_container_property::SetContainerProperty,
-        set_container_slot::SetContainerSlot,
-        set_default_position::SetDefaultPosition,
-        set_entity_metadata::SetEntityMetadata,
-        set_held_item::{C2SSetHeldItem, S2CSetHeldItem, SetHeldItem},
-        set_render_distance::SetRenderDistance,
-        set_simulation_distance::SetSimulationDistance,
-        synchronize_player_position::SyncPlayerPosition,
-        update_attributes::UpdateAttributes,
-        update_time::UpdateTime,
+        change_difficulty::S2CChangeDifficulty, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_property::SetContainerProperty, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_health::SetHealth, set_held_item::{C2SSetHeldItem, S2CSetHeldItem, SetHeldItem}, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, synchronize_player_position::SyncPlayerPosition, update_attributes::UpdateAttributes, update_time::UpdateTime
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
@@ -82,6 +69,8 @@ packet_id!(
     (0x14, SetContainerProperty),
     (0x15, SetContainerSlot),
     (0x56, SetEntityMetadata),
+    (0x5B, SetHealth),
+    (0x0B, S2CChangeDifficulty),
 );
 
 receiving_packets!(
