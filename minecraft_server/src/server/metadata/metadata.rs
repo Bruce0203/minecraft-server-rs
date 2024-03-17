@@ -101,7 +101,7 @@ impl Encoder for (Identifier, Position) {
     }
 }
 
-#[derive(Deref)]
+#[derive(Deref, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct BlockState(VarInt);
 
 impl Encoder for BlockState {

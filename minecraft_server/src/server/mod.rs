@@ -1,3 +1,5 @@
+pub mod light;
+pub mod palette;
 pub mod generic_test;
 pub mod chunk;
 pub mod chat;
