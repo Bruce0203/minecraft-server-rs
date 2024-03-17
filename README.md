@@ -47,7 +47,7 @@ No Minecraft server existed that satisfies the requirements below.
 ## Why use the standard library's buffer Cursor<Vec<u8>> without using the BytesMut of bytes crate
 [click here](https://github.com/Bruce0203/BytesMut_vs_Cursor_Vec_benchmark)
 
---
+---
 
 [![image](https://wiki.vg/resources/assets/licenses/cc-by-sa.png)](https://creativecommons.org/licenses/by-sa/3.0/)
 
