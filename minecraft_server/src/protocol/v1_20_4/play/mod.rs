@@ -1,3 +1,6 @@
+pub mod update_light;
+pub mod keep_alive;
+pub mod system_chat_message;
 pub mod change_difficulty;
 pub mod set_health;
 pub mod set_container_property;

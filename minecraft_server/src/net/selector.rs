@@ -59,7 +59,7 @@ fn start_loop_with_listener<S: Server, const MAX_PACKET_BUFFER_SIZE: usize>(
             if token_index != SERVER_TOKEN_INDEX {
                 let player = connection_pool.get(token_index);
 
-                if let Err(err) = server.handle_read_event::<MAX_PACKET_BUFFER_SIZE>(player) {
+                if let Err(err) = player.handle_read_event::<MAX_PACKET_BUFFER_SIZE, _>(server) {
                     if err.kind() == ErrorKind::BrokenPipe {
                         println!("conneciton closed[{}]: {}", err.kind(), err);
                         connection_pool.remove(token_index);

@@ -1,4 +1,5 @@
 use derive_more::{Deref, From, Into};
+use num_traits::ToBytes;
 use std::io::{Read, Result, Write};
 
 use super::prelude::{Buffer, Decoder, DecoderDeref, Encoder, EncoderDeref};
@@ -153,6 +154,29 @@ impl<W: Write> I16Write for W {
     fn write_i16(&mut self, value: i16) -> Result<()> {
         self.write_all(&value.to_be_bytes())?;
         Ok(())
+    }
+}
+
+pub trait I32Write {
+    fn write_i32(&mut self, value: i32) -> Result<()>;
+}
+
+pub trait I32Read {
+    fn read_i32(&mut self) -> Result<i32>;
+}
+
+impl<W: Write> I32Write for W {
+    fn write_i32(&mut self, value: i32) -> Result<()> {
+        self.write_all(&value.to_be_bytes())?;
+        Ok(())
+    }
+}
+
+impl<R: Read> I32Read for R {
+    fn read_i32(&mut self) -> Result<i32> {
+        let mut buf = [0; 4];
+        self.read_exact(&mut buf)?;
+        Ok(i32::from_be_bytes(buf))
     }
 }
 

@@ -6,26 +6,39 @@ use std::{
 use serde::{ser::SerializeSeq, Deserialize, Serialize};
 
 use crate::io::prelude::{
-    BitSet, BitSetWrite, Buffer, Encoder, I16Write, NbtNetworkWrite, U16Write, U8Write,
+    BitSet, BitSetWrite, Buffer, Encoder, I16Write, I32Write, NbtNetworkWrite, U16Write, U8Write,
     VarIntSizedVecWrite, VarIntWrite,
 };
 
 use super::{light::Light, palette::Palette};
 
 pub struct Chunk {
-    x: i32,
-    z: i32,
-    heightmaps: HeightMaps,
-    sections: Vec<ChunkSection>,
-    block_entities: Vec<BlockEntity>,
-    light: Light,
+    pub x: i32,
+    pub z: i32,
+    pub heightmaps: HeightMaps,
+    pub sections: Vec<ChunkSection>,
+    pub block_entities: Vec<BlockEntity>,
+    pub light: Light,
+}
+
+impl Chunk {
+    pub fn new(x: i32, z: i32) -> Chunk {
+        Chunk {
+            x,
+            z,
+            heightmaps: HeightMaps::new(),
+            sections: Vec::from([const { ChunkSection::new() }; 24]),
+            block_entities: vec![],
+            light: Light::new(),
+        }
+    }
 }
 
 impl Encoder for Chunk {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        buf.write_var_i32(self.x)?;
-        buf.write_var_i32(self.z)?;
-        buf.write_network_nbt(&self.heightmaps)?;
+        buf.write_i32(self.x)?;
+        buf.write_i32(self.z)?;
+        self.heightmaps.encode_to_buffer(buf)?;
         let mut buf2 = Buffer::new(vec![]);
         self.sections.encode_to_buffer(&mut buf2)?;
         buf.write_var_i32(buf2.get_ref().len() as i32)?;
@@ -34,6 +47,18 @@ impl Encoder for Chunk {
         self.light.encode_to_buffer(buf)?;
         Ok(())
     }
+}
+
+#[test]
+fn test_chunk() {
+    let chunk = Chunk::new(0, 0);
+    println!("{:?}", *chunk.sections.encode().unwrap().get_ref());
+    println!("{:?}", chunk.sections.encode().unwrap().get_ref().len());
+}
+
+pub struct ChunkSection {
+    block_states: Palette,
+    biomes: Palette,
 }
 
 impl Encoder for Vec<ChunkSection> {
@@ -46,25 +71,21 @@ impl Encoder for Vec<ChunkSection> {
     }
 }
 
-pub struct ChunkSection {
-    block_states: Palette,
-    biomes: Palette,
+impl ChunkSection {
+    pub const fn new() -> ChunkSection {
+        ChunkSection {
+            block_states: Palette::new(0),
+            biomes: Palette::new(0),
+        }
+    }
 }
 
 impl Encoder for ChunkSection {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_i16(0)?;
         self.block_states.encode_to_buffer(buf)?;
         self.biomes.encode_to_buffer(buf)?;
         Ok(())
-    }
-}
-
-const fn data_array_size(default_bits_per_entry: usize, max_bits_per_entry: usize) -> usize {
-    if default_bits_per_entry != 0 {
-        let values_per_long = 64 / default_bits_per_entry;
-        (max_bits_per_entry + values_per_long - 1) / values_per_long
-    } else {
-        max_bits_per_entry - 1
     }
 }
 
@@ -76,13 +97,38 @@ pub struct ChunkPos {
 
 #[derive(Serialize)]
 pub struct HeightMaps {
+    #[serde(serialize_with = "nbt::i64_array")]
     #[serde(rename = "MOTION_BLOCKING")]
-    motion_blocking: LongArray<37>,
-    world_surface: LongArray<37>,
+    pub motion_blocking: Vec<i64>,
+    #[serde(serialize_with = "nbt::i64_array")]
+    #[serde(rename = "WORLD_SURFACE")]
+    pub world_surface: Vec<i64>,
+}
+
+impl HeightMaps {
+    pub fn new() -> HeightMaps {
+        HeightMaps {
+            motion_blocking: Vec::from([0; 37]),
+            world_surface: Vec::from([0; 37]),
+        }
+    }
+}
+
+impl Encoder for HeightMaps {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_network_nbt(&self)?;
+        Ok(())
+    }
 }
 
 #[derive(derive_more::Deref)]
 pub struct LongArray<const LEN: usize>([i64; LEN]);
+
+impl<const LEN: usize> LongArray<LEN> {
+    pub fn new() -> LongArray<LEN> {
+        LongArray([0; LEN])
+    }
+}
 
 impl<const LEN: usize> Serialize for LongArray<LEN> {
     fn serialize<S>(&self, serializer: S) -> std::prelude::v1::Result<S::Ok, S::Error>
@@ -98,6 +144,12 @@ impl<const LEN: usize> Serialize for LongArray<LEN> {
 }
 
 pub struct ByteArray<const LEN: usize>([u8; LEN]);
+
+impl<const LEN: usize> ByteArray<LEN> {
+    pub fn new() -> ByteArray<LEN> {
+        ByteArray([0; LEN])
+    }
+}
 
 impl<const LEN: usize> Serialize for ByteArray<LEN> {
     fn serialize<S>(&self, serializer: S) -> std::prelude::v1::Result<S::Ok, S::Error>

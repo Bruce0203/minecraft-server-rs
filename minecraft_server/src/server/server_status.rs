@@ -45,28 +45,6 @@ pub struct SamplePlayer {
     id: Uuid,
 }
 
-#[ignore]
-#[test]
-fn serde_ser_server_status() {
-    let model = ServerStatus {
-        version: ServerVersion {
-            name: "1.20.4".to_string(),
-            protocol: 765,
-        },
-        description: Chat::from("A Minecraft Server".to_string()),
-        favicon: None,
-        enforce_secure_chat: true,
-        previews_chat: true,
-        players: Players {
-            max: 20,
-            online: 0,
-            sample: SamplePlayers::new(),
-        },
-    };
-    let result = serde_json::to_string(&model).unwrap();
-    println!("{}", result);
-}
-
 impl Encoder for ServerStatus {
     fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         let server_status_data = serde_json::to_string(&self)?;

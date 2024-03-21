@@ -1,5 +1,7 @@
+use std::io::prelude::Read;
 use std::io::{prelude::Write, Cursor, Error, Result};
 
+use crate::io::prelude::Decoder;
 use crate::io::prelude::Encoder;
 use crate::io::prelude::Identifier;
 use crate::io::prelude::VarIntSizedVecRead;
@@ -8,6 +10,7 @@ use crate::net::prelude::PacketId;
 use crate::net::prelude::Socket;
 use crate::server::prelude::GamePlayer;
 
+#[derive(Debug)]
 pub struct FeatureFlags {
     pub feature_flags: Vec<Identifier>,
 }
@@ -26,5 +29,13 @@ impl Encoder for FeatureFlags {
     fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         buf.write_var_int_sized_vec(&self.feature_flags)?;
         Ok(())
+    }
+}
+
+impl Decoder for FeatureFlags {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(FeatureFlags {
+            feature_flags: reader.read_var_int_sized_vec()?,
+        })
     }
 }

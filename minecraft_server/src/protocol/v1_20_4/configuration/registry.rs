@@ -1,9 +1,9 @@
-use std::io::{Cursor, Result, Write};
+use std::io::{prelude::Read, Cursor, Result, Write};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    io::prelude::Encoder,
+    io::prelude::{Decoder, Encoder, NbtNetworkRead},
     net::prelude::{PacketId, Socket},
     server::{
         chat::ChatStyle,
@@ -13,12 +13,15 @@ use crate::{
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RegistryData {
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "minecraft:chat_type")]
-    pub chat_type_registry: Registry<ChatType>,
+    pub chat_type_registry: Option<Registry<ChatType>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "minecraft:worldgen/biome")]
-    pub biome_registry: Registry<Biome>,
+    pub biome_registry: Option<Registry<Biome>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "minecraft:dimension_type")]
-    pub dimension_type_registry: Registry<DimensionType>,
+    pub dimension_type_registry: Option<Registry<DimensionType>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -177,5 +180,11 @@ impl Encoder for RegistryData {
         buf.write_all(&[10])?;
         buf.write_all(&buffer.get_ref()[3..])?;
         Ok(())
+    }
+}
+
+impl Decoder for RegistryData {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(NbtNetworkRead::read_network_nbt(reader)?)
     }
 }

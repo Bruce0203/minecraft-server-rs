@@ -1,6 +1,7 @@
 use std::{
-    io::{Cursor, Error, Result, Write},
+    io::{Cursor, Error, Read, Result, Write},
     str::FromStr,
+    vec,
 };
 
 use uuid::Uuid;
@@ -12,6 +13,7 @@ use crate::{
         login::login_play::LoginPlay,
         play::{
             change_difficulty::{Difficulty, S2CChangeDifficulty},
+            keep_alive::{KeepAlive, KeepAlivePlayS2c},
             player_abilities::{PlayerAbilities, PlayerAbility},
             player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
             set_center_chunk::SetCenterChunk,
@@ -24,12 +26,17 @@ use crate::{
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
             synchronize_player_position::SyncPlayerPosition,
+            system_chat_message::SystemChatMessage,
             update_attributes::{AttributeProperty, UpdateAttributes},
+            update_light::UpdateLight,
             update_time::UpdateTime,
         },
     },
     server::{
+        chunk::{Chunk, HeightMaps, LongArray},
         coordinates::{DoublePosition, FloatRotation, Location, Position},
+        light::Light,
+        metadata::prelude::{EntityMetadata, PlayerByte, PlayerMeta},
         prelude::{Chat, ConnectionState, EntityMeta, GameMode, GamePlayer, GameServer},
         slot::Slot,
     },
@@ -46,7 +53,7 @@ impl FinishConfiguration {
 }
 
 impl Decoder for FinishConfiguration {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(FinishConfiguration {})
     }
 }
@@ -172,9 +179,12 @@ impl PacketHandler<GameServer> for FinishConfiguration {
             slot_data: Slot::None,
         }
         .send_packet(player)?;
+        let mut meta = PlayerMeta::default();
+        //meta.living_entity.health = Some(20.0);
+        //meta.player_byte = Some(PlayerByte::all());
         SetEntityMetadata {
             entity_id: 0,
-            metadata: EntityMeta::default(),
+            metadata: EntityMetadata(Box::new(meta)),
         }
         .send_packet(player)?;
         SetHealth {
@@ -193,6 +203,29 @@ impl PacketHandler<GameServer> for FinishConfiguration {
             difficulty_locked: false,
         }
         .send_packet(player)?;
+        let chunk_view_distance = 8;
+        for x in -chunk_view_distance..chunk_view_distance {
+            for z in -chunk_view_distance..chunk_view_distance {
+                UpdateLight {
+                    x,
+                    z,
+                    light: Light::new(),
+                }
+                .send_packet(player)?;
+            }
+        }
+        for x in -chunk_view_distance..chunk_view_distance {
+            for z in -chunk_view_distance..chunk_view_distance {
+                Chunk::new(x, z).send_packet(player)?;
+            }
+        }
+        SystemChatMessage {
+            content: Chat::from("hello!".to_string()),
+            overlay: false,
+        }
+        .send_packet(player)?;
+        KeepAlivePlayS2c(KeepAlive { id: 0 }).send_packet(player);
+        KeepAlivePlayS2c(KeepAlive { id: 1 }).send_packet(player);
         Ok(())
     }
 }

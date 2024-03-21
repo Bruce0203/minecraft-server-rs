@@ -1,19 +1,28 @@
-use std::io::{Result, Write};
+use std::io::{prelude::Read, Result, Write};
 
 use crate::{
-    io::prelude::{Encoder, VarIntWrite},
-    net::prelude::{PacketId, PacketWriter, Socket},
+    io::prelude::{Buffer, Decoder, Encoder, VarIntRead, VarIntWrite},
+    net::prelude::{PacketHandler, PacketId, PacketWriter, Socket},
     server::prelude::{GamePlayer, GameServer},
 };
 
+#[derive(Debug)]
 pub struct SetCompression {
     pub compression_threshold: i32,
 }
 
 impl Encoder for SetCompression {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_var_i32(self.compression_threshold)?;
         Ok(())
+    }
+}
+
+impl Decoder for SetCompression {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(SetCompression {
+            compression_threshold: VarIntRead::read_var_i32(reader)?,
+        })
     }
 }
 

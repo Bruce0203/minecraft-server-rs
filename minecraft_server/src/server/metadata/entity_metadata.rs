@@ -1,4 +1,4 @@
-use std::io::Result;
+use std::io::{Result, Write};
 
 use bitflags::bitflags;
 
@@ -14,42 +14,56 @@ use derive_more::Deref;
 
 #[derive(Default)]
 pub struct EntityMeta {
-    entity_byte: Option<EntityByte>,
-    air_ticks: Option<i32>,
-    custom_name: Option<VarString<32767>>,
-    is_custom_name_visible: Option<i32>,
-    is_silent: Option<bool>,
-    has_no_gravity: Option<bool>,
-    pose: Option<Pose>,
-    ticks_frozen_in_powdered_snow: Option<i32>,
+    pub entity_byte: Option<EntityByte>,
+    pub air_ticks: Option<i32>,
+    pub custom_name: Option<Option<VarString<32767>>>,
+    pub is_custom_name_visible: Option<i32>,
+    pub is_silent: Option<bool>,
+    pub has_no_gravity: Option<bool>,
+    pub pose: Option<Pose>,
+    pub ticks_frozen_in_powdered_snow: Option<i32>,
 }
 
 impl Encoder for EntityMeta {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         if let Some(entity_byte) = &self.entity_byte {
             buf.write_u8(0)?;
+            buf.write_u8(0)?;
             buf.write_u8(entity_byte.bits())?;
         }
         if let Some(air_ticks) = self.air_ticks {
             buf.write_u8(1)?;
+            buf.write_u8(1)?;
             buf.write_var_i32(air_ticks)?;
         }
         if let Some(custom_name) = &self.custom_name {
-            buf.write_var_string(custom_name)?;
+            buf.write_u8(2)?;
+            buf.write_u8(5)?;
+            buf.write_option(custom_name)?;
         }
         if let Some(is_custom_name_visible) = self.is_custom_name_visible {
+            buf.write_u8(3)?;
+            buf.write_u8(8)?;
             buf.write_var_i32(is_custom_name_visible)?;
         }
         if let Some(is_silent) = self.is_silent {
+            buf.write_u8(4)?;
+            buf.write_u8(8)?;
             buf.write_bool(is_silent)?;
         }
         if let Some(has_no_gravity) = self.has_no_gravity {
+            buf.write_u8(5)?;
+            buf.write_u8(8)?;
             buf.write_bool(has_no_gravity)?;
         }
         if let Some(pose) = self.pose {
+            buf.write_u8(6)?;
+            buf.write_u8(20)?;
             pose.encode_to_buffer(buf)?;
         }
         if let Some(ticks_frozen_in_powdered_snow) = self.ticks_frozen_in_powdered_snow {
+            buf.write_u8(7)?;
+            buf.write_u8(1)?;
             buf.write_var_i32(ticks_frozen_in_powdered_snow)?;
         }
         Ok(())
@@ -72,17 +86,17 @@ impl EntityMeta {
     }
 
     const EMPTY_STRING: &String = &String::new();
-    pub fn get_custom_name(&self) -> String {
+    pub fn get_custom_name<'a>(&'a self) -> &'a Option<VarString<32767>> {
         if let Some(value) = &self.custom_name {
-            value.to_string()
+            &value
         } else {
-            String::default()
+            &None
         }
     }
 }
 
 impl MetadataType for EntityByte {
-    fn get_type_id(&self) -> i32 {
+    fn get_type_id() -> i32 {
         0
     }
 }

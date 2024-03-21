@@ -1,24 +1,29 @@
-use std::io::{Result, Write};
+use std::io::{Read, Result, Write};
 
 use uuid::Uuid;
 
 use crate::{
-    io::prelude::{Encoder, VarIntSizedVecWrite, VarStringWrite as _, WriteBool},
+    io::prelude::{
+        BoolRead, Decoder, Encoder, OptionRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarString,
+        VarStringRead, VarStringWrite as _, WriteBool,
+    },
     net::prelude::{PacketId, Socket},
     server::prelude::{GamePlayer, GameServer},
 };
 
+#[derive(Debug)]
 pub struct LoginSuccess {
     pub uuid: Uuid,
     pub username: String,
     pub properties: Vec<LoginProperty>,
 }
 
+#[derive(Debug)]
 pub struct LoginProperty {
-    pub name: String,
-    pub value: String,
+    pub name: VarString<32767>,
+    pub value: VarString<32767>,
     pub is_signed: bool,
-    pub signature: Option<String>,
+    pub signature: Option<VarString<32767>>,
 }
 
 impl Encoder for LoginSuccess {
@@ -39,5 +44,26 @@ impl Encoder for LoginProperty {
             buf.write_var_string(signature)?;
         }
         Ok(())
+    }
+}
+
+impl Decoder for LoginProperty {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(LoginProperty {
+            name: VarString::decode_from_read(reader)?,
+            value: VarString::decode_from_read(reader)?,
+            is_signed: BoolRead::read_bool(reader)?,
+            signature: OptionRead::read_option(reader)?,
+        })
+    }
+}
+
+impl Decoder for LoginSuccess {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(LoginSuccess {
+            uuid: Uuid::decode_from_read(reader)?,
+            username: VarStringRead::read_var_string::<16>(reader)?,
+            properties: VarIntSizedVecRead::read_var_int_sized_vec(reader)?,
+        })
     }
 }

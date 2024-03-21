@@ -1,19 +1,21 @@
 use crate::{
     io::prelude::{Decoder, Encoder},
+    net::prelude::PacketHandler,
     protocol::macros::{packet_id, protocol, protocol_server, receiving_packets},
-    server::prelude::{GamePlayer, GameServer},
+    server::{
+        chunk::Chunk,
+        prelude::{GamePlayer, GameServer},
+    },
 };
 
 use super::{
     configuration::{
-        client_information::{
-            ClientInformation, ClientInformationConfiguration, ClientInformationPlay,
-        },
+        client_information::{ClientInformation, ClientInformationConf, ClientInformationPlay},
         feature_flags::FeatureFlags,
         finish_configuration::FinishConfiguration,
         plugin_message::{
-            C2SPluginMessageConfiguration, C2SPluginMessagePlay, PluginMessage,
-            S2CPluginMessageConfiguration, S2CPluginMessagePlay,
+            PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayC2s,
+            PluginMessagePlayS2c,
         },
         registry::RegistryData,
         server_data::ServerData,
@@ -23,17 +25,34 @@ use super::{
         login_success::LoginSuccess, set_compression::SetCompression,
     },
     play::{
-        change_difficulty::S2CChangeDifficulty, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_property::SetContainerProperty, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_health::SetHealth, set_held_item::{C2SSetHeldItem, S2CSetHeldItem, SetHeldItem}, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, synchronize_player_position::SyncPlayerPosition, update_attributes::UpdateAttributes, update_time::UpdateTime
+        change_difficulty::S2CChangeDifficulty,
+        keep_alive::{KeepAliveConfC2s, KeepAliveConfS2c, KeepAlivePlayC2s, KeepAlivePlayS2c},
+        player_abilities::PlayerAbilities,
+        player_info::PlayerInfoUpdate,
+        set_center_chunk::SetCenterChunk,
+        set_container_contents::SetContainerContent,
+        set_container_property::SetContainerProperty,
+        set_container_slot::SetContainerSlot,
+        set_default_position::SetDefaultPosition,
+        set_entity_metadata::SetEntityMetadata,
+        set_health::SetHealth,
+        set_held_item::{C2SSetHeldItem, S2CSetHeldItem, SetHeldItem},
+        set_render_distance::SetRenderDistance,
+        set_simulation_distance::SetSimulationDistance,
+        synchronize_player_position::SyncPlayerPosition,
+        system_chat_message::SystemChatMessage,
+        update_attributes::UpdateAttributes,
+        update_light::UpdateLight,
+        update_time::UpdateTime,
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
 use crate::server::prelude::ConnectionState::*;
 
-pub struct V1_20_4;
-protocol!(V1_20_4, 765);
+pub struct MinecraftServerV1_20_4;
+protocol!(MinecraftServerV1_20_4, 765);
 
 packet_id!(
-    V1_20_4,
     (0x00, super::handshake::HandShake),
     (0x00, StatusResponse<'_>),
     (0x00, StatusRequest),
@@ -43,12 +62,12 @@ packet_id!(
     (0x03, SetCompression),
     (0x02, LoginSuccess),
     (0x03, LoginAcknowledged),
-    (0x00, ClientInformationConfiguration),
+    (0x00, ClientInformationConf),
     (0x09, ClientInformationPlay),
-    (0x18, S2CPluginMessagePlay),
-    (0x00, S2CPluginMessageConfiguration),
-    (0x10, C2SPluginMessagePlay),
-    (0x01, C2SPluginMessageConfiguration),
+    (0x18, PluginMessagePlayS2c),
+    (0x00, PluginMessageConfS2c),
+    (0x10, PluginMessagePlayC2s),
+    (0x01, PluginMessageConfC2s),
     (0x02, FinishConfiguration),
     (0x08, FeatureFlags),
     (0x3E, SyncPlayerPosition),
@@ -71,19 +90,27 @@ packet_id!(
     (0x56, SetEntityMetadata),
     (0x5B, SetHealth),
     (0x0B, S2CChangeDifficulty),
+    (0x25, Chunk),
+    (0x69, SystemChatMessage),
+    (0x15, KeepAlivePlayC2s),
+    (0x03, KeepAliveConfS2c),
+    (0x24, KeepAlivePlayS2c),
+    (0x03, KeepAliveConfC2s),
+    (0x28, UpdateLight),
 );
 
 receiving_packets!(
-    V1_20_4,
+    MinecraftServerV1_20_4,
     (HandShake, super::handshake::HandShake),
     (Status, StatusRequest),
     (Status, PingRequest),
     (Login, LoginStart),
     (Login, LoginAcknowledged),
-    (Confgiuration, ClientInformationConfiguration),
+    (Confgiuration, ClientInformationConf),
     (Play, ClientInformationPlay),
-    (Play, C2SPluginMessagePlay),
-    (Confgiuration, C2SPluginMessageConfiguration),
+    (Play, PluginMessagePlayC2s),
+    (Confgiuration, PluginMessageConfC2s),
     (Confgiuration, FinishConfiguration),
     //(Play, C2SSetHeldItem),
+    //(Play, KeepAlivePlayC2s),
 );

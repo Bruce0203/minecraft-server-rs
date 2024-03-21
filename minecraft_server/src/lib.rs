@@ -17,3 +17,4 @@ pub mod net;
 #[macro_use]
 pub mod protocol;
 pub mod server;
+pub mod client;

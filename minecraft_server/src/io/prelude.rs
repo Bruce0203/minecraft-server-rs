@@ -9,5 +9,6 @@ pub use super::option::*;
 pub use super::primitive::*;
 pub use super::uuid::*;
 pub use super::var_int::*;
+pub use super::var_int::read_var_i32_fast;
 pub use super::var_string::*;
 pub use super::var_long::*;

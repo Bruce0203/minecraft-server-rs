@@ -4,6 +4,7 @@ use std::io::{Cursor, Error, Result};
 use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
 use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::protocol::v1_20_4::login::login_success::LoginSuccess;
+use crate::protocol::v1_20_4::login::set_compression;
 use crate::server::prelude::{GamePlayer, GameServer};
 use uuid::Uuid;
 
@@ -36,7 +37,7 @@ impl PacketHandler<GameServer> for LoginStart {
             username: self.name.to_owned(),
             properties: Vec::new(),
         };
-        //set_compression::set_compression(socket, 20)?;
+        //set_compression::set_compression(socket, 256)?;
         login_success.send_packet(socket)?;
         Ok(())
     }

@@ -1,7 +1,7 @@
-use std::io::{Cursor, Error, Result};
+use std::io::{prelude::Read, Cursor, Error, Result};
 
 use crate::{
-    io::prelude::Decoder,
+    io::prelude::{Buffer, Decoder, Encoder},
     net::prelude::{PacketHandler, PacketWriter, Socket},
     protocol::v1_20_4::configuration::{
         feature_flags::FeatureFlags,
@@ -16,8 +16,14 @@ use crate::{
 
 pub struct LoginAcknowledged {}
 
+impl Encoder for LoginAcknowledged {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        Ok(())
+    }
+}
+
 impl Decoder for LoginAcknowledged {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
         Ok(LoginAcknowledged {})
     }
 }
@@ -31,7 +37,7 @@ impl PacketHandler<GameServer> for LoginAcknowledged {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
 
         let registry_data = RegistryData {
-            chat_type_registry: Registry {
+            chat_type_registry: Some(Registry {
                 name: "minecraft:chat_type".to_string(),
                 value: vec![RegistryEntry {
                     name: "minecraft:chat".to_string(),
@@ -49,8 +55,8 @@ impl PacketHandler<GameServer> for LoginAcknowledged {
                         },
                     },
                 }],
-            },
-            biome_registry: Registry {
+            }),
+            biome_registry: Some(Registry {
                 name: "minecraft:worldgen/biome".to_string(),
                 value: vec![RegistryEntry {
                     name: "minecraft:plains".to_string(),
@@ -76,8 +82,8 @@ impl PacketHandler<GameServer> for LoginAcknowledged {
                         },
                     },
                 }],
-            },
-            dimension_type_registry: Registry {
+            }),
+            dimension_type_registry: Some(Registry {
                 name: "minecraft:dimension_type".to_string(),
                 value: vec![RegistryEntry {
                     name: "minecraft:overworld".to_string(),
@@ -109,7 +115,7 @@ impl PacketHandler<GameServer> for LoginAcknowledged {
                         monster_spawn_block_light_limit: 0,
                     },
                 }],
-            },
+            }),
         };
         registry_data.send_packet(player)?;
         let feature_flags = FeatureFlags {

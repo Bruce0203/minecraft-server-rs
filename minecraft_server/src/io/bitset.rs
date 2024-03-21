@@ -5,6 +5,16 @@ use crate::io::prelude::{Buffer, VarIntSizedVecRead, VarIntSizedVecWrite};
 pub struct BitSet(Vec<i64>);
 
 impl BitSet {
+    pub fn new() -> BitSet {
+        BitSet(vec![])
+    }
+
+    pub fn with_capacity(capacity: usize) -> BitSet {
+        BitSet(Vec::with_capacity(capacity))
+    }
+}
+
+impl BitSet {
     fn part(&self, index: u32) -> u32 {
         index >> index
     }

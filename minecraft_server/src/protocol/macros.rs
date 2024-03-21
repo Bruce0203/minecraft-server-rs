@@ -54,13 +54,19 @@ macro_rules! receiving_packets {
                 let bytes = &mut player.packet_buf;
                 let packet_id = crate::io::prelude::VarIntRead::read_var_i32(bytes)?;
                 let connection_state = &player.session_relay.connection_state;
+                println!("{:?}[{}]", connection_state, packet_id);
                 match (connection_state, packet_id) {
                     $(
                         ($connection_state, <$typ as crate::net::prelude::PacketId>::PACKET_ID) => {
-                        <$typ as crate::net::prelude::PacketReadHandler<<$protocol as crate::net::prelude::Protocol>::Server>>::handle_packet_read(server, player)?;
+                            use crate::net::prelude::PacketHandler;
+                            use crate::net::prelude::Protocol;
+                            use crate::io::prelude::Decoder;
+                            let packet = <$typ>::decode_from_read(bytes)?;
+                        <$typ as PacketHandler<<$protocol as Protocol>::Server>>::handle_packet(&packet, server, player)?;
                     }
                     )*
                     _ => {
+                        println!("packet id not exists");
                         return Err(std::io::Error::new(
                             std::io::ErrorKind::InvalidInput,
                             format!("{:?}[{:#04X?}] not exists", connection_state, packet_id),
@@ -74,7 +80,7 @@ macro_rules! receiving_packets {
 }
 
 macro_rules! packet_id {
-    ($protocol:ty, $(($packet_id:expr, $typ:ty), )*) => {
+    ($(($packet_id:expr, $typ:ty), )*) => {
         $(
             impl crate::net::prelude::PacketId for $typ {
                 const PACKET_ID: i32 = $packet_id;

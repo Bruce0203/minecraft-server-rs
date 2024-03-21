@@ -13,9 +13,19 @@ use crate::{
 };
 use derive_more::Deref;
 
+pub struct EntityMetadata(pub Box<dyn Encoder>);
+
+impl Encoder for EntityMetadata {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        self.0.encode_to_buffer(buf)?;
+        buf.write_u8(0xff)?;
+        Ok(())
+    }
+}
+
 pub trait MetadataType: Encoder {
     #[inline(always)]
-    fn get_type_id(&self) -> i32;
+    fn get_type_id() -> i32;
 }
 
 pub trait MetadataField: MetadataType {
@@ -36,8 +46,8 @@ impl<E: MetadataType> MetadataField for MetadataEncoder<E> {
 }
 
 impl<E: MetadataType> MetadataType for MetadataEncoder<E> {
-    fn get_type_id(&self) -> i32 {
-        self.metadata.get_type_id()
+    fn get_type_id() -> i32 {
+        E::get_type_id()
     }
 }
 
@@ -46,7 +56,7 @@ impl<E: Encoder + MetadataType> !EncoderDeref for MetadataEncoder<E> {}
 impl<E: Encoder + MetadataType> Encoder for MetadataEncoder<E> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_u8(self.index as u8)?;
-        buf.write_var_i32(self.metadata.get_type_id())?;
+        buf.write_var_i32(E::get_type_id())?;
         E::encode_to_buffer(&self.metadata, buf)?;
         Ok(())
     }
@@ -56,7 +66,7 @@ macro_rules! metadata_types {
     ($(($typ:ty, $id:expr),)*) => {
         $(
         impl MetadataType for $typ {
-            fn get_type_id(&self) -> i32 {
+            fn get_type_id() -> i32 {
                 $id
             }
         }

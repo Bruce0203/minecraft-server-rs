@@ -114,3 +114,10 @@ fn test_var_i32() {
     test(vec![0xff, 0xff, 0xff, 0xff, 0x0f], -1);
     test(vec![0x80, 0x80, 0x80, 0x80, 0x08], -2147483648);
 }
+
+#[test]
+fn test_vari32() {
+    let vec: Vec<u8> = vec![-64i8 as u8, 1];
+    let mut buf = Buffer::new(vec);
+    println!("{}", buf.read_var_i32().unwrap());
+}
