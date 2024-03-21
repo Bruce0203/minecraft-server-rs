@@ -4,7 +4,7 @@ use flate2::write::ZlibDecoder;
 
 use crate::io::prelude::{Decoder, VarIntRead};
 
-use super::prelude::{PacketHandler, Socket};
+use super::{prelude::PacketHandler, socket::Socket};
 
 pub trait Server: Sized {
     type Player: Default;

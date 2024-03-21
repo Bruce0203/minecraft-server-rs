@@ -1,3 +1,5 @@
+#![feature(type_alias_impl_trait)]
+#![feature(associated_type_bounds)]
 #![feature(associated_const_equality)]
 #![feature(adt_const_params)]
 #![feature(generic_const_exprs)]

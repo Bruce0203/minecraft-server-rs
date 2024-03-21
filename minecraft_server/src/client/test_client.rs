@@ -7,12 +7,15 @@ use std::{
     vec,
 };
 
-use mio::Token;
+use mio::{net::TcpStream, Token};
 use rand::{distributions::Alphanumeric, Rng};
 use uuid::Uuid;
 
 use crate::{
-    net::prelude::{PacketHandler, PacketWriter, ProtocolId, Socket},
+    net::{
+        prelude::{PacketHandler, PacketWriter, ProtocolId},
+        socket::Socket,
+    },
     protocol::{
         macros::{protocol, protocol_server, receiving_packets},
         v1_20_4::{
@@ -21,10 +24,12 @@ use crate::{
                     ChatMode, ClientInformation, ClientInformationConf, DisplaySkinParts,
                 },
                 feature_flags::FeatureFlags,
+                finish_configuration::{FinishConfigurationC2s, FinishConfigurationS2c},
                 plugin_message::{
                     PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayS2c,
                 },
                 registry::RegistryData,
+                update_tags::UpdateTags,
             },
             handshake::{HandShake, NextState},
             login::{
@@ -52,6 +57,8 @@ receiving_packets!(
     (ConnectionState::Confgiuration, FeatureFlags),
     (ConnectionState::Confgiuration, KeepAliveConfS2c),
     (ConnectionState::Confgiuration, RegistryData),
+    (ConnectionState::Confgiuration, UpdateTags),
+    (ConnectionState::Confgiuration, FinishConfigurationS2c),
 );
 
 #[derive(Default)]
@@ -69,10 +76,14 @@ protocol_server!(
 #[test]
 fn test_client() {
     let addr = env::var("MY_IP").unwrap().parse().unwrap();
-    let mut stream = mio::net::TcpStream::from_std(std::net::TcpStream::connect(addr).unwrap());
+    let mut stream = std::net::TcpStream::connect(addr).unwrap();
     let server = &mut ClientPool {};
-    let mut player =
-        &mut Socket::new::<MAX_PACKET_BUFFER_SIZE>(stream, Token(1), addr, Client::default());
+    let mut player = &mut Socket::new::<MAX_PACKET_BUFFER_SIZE>(
+        TcpStream::from_std(stream),
+        Token(1),
+        addr,
+        Client::default(),
+    );
     HandShake {
         protocol_version: MinecraftClientV1_20_4::PROTOCOL_ID,
         server_address: addr.to_string(),
@@ -95,7 +106,6 @@ fn test_client() {
     send_written_packets(player);
     read_packets(player, server);
     LoginAcknowledged {}.send_packet(player).unwrap();
-    send_written_packets(player);
     PluginMessageConfC2s(PluginMessage {
         channel: "minecraft:brand".to_string(),
         data: "vanilla".to_string().into(),
@@ -201,4 +211,20 @@ fn read_packets(player: &mut Socket<Client>, server: &mut ClientPool) {
     player
         .handle_read_event::<MAX_PACKET_BUFFER_SIZE, _>(server)
         .unwrap();
+}
+
+impl PacketHandler<ClientPool> for UpdateTags {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("UpdateTags!");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for FinishConfigurationS2c {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("FinishConfiguration");
+        FinishConfigurationC2s.send_packet(player)?;
+        player.session_relay.connection_state = ConnectionState::Play;
+        Ok(())
+    }
 }

@@ -39,15 +39,15 @@ impl Encoder for Identifier {
     }
 }
 
-pub trait ReadIdentifier {
+pub trait IdentifierRead {
     fn read_identifier(&mut self) -> Result<Identifier>;
 }
 
-pub trait WriteIdentifier {
+pub trait IdentifierWrite {
     fn write_identifier(&mut self, value: Identifier) -> Result<()>;
 }
 
-impl<R: Read> ReadIdentifier for R {
+impl<R: Read> IdentifierRead for R {
     fn read_identifier(&mut self) -> Result<Identifier> {
         Ok(Identifier(self.read_var_string::<32767>()?))
     }

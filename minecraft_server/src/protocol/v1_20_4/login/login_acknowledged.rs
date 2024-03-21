@@ -5,7 +5,7 @@ use crate::{
     net::prelude::{PacketHandler, PacketWriter, Socket},
     protocol::v1_20_4::configuration::{
         feature_flags::FeatureFlags,
-        finish_configuration::FinishConfiguration,
+        finish_configuration::FinishConfigurationS2c,
         registry::{
             Biome, ChatType, Decoration, DimensionType, Effects, IntegerDistribution,
             MonsterSpawnLightLevel, Registry, RegistryData, RegistryEntry,
@@ -122,7 +122,7 @@ impl PacketHandler<GameServer> for LoginAcknowledged {
             feature_flags: Vec::new(),
         };
         feature_flags.send_packet(player)?;
-        let finish_configuration = FinishConfiguration::new();
+        let finish_configuration = FinishConfigurationS2c;
         finish_configuration.send_packet(player)?;
         Ok(())
     }

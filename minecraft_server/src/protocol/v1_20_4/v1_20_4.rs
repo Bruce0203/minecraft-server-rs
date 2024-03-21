@@ -10,15 +10,10 @@ use crate::{
 
 use super::{
     configuration::{
-        client_information::{ClientInformation, ClientInformationConf, ClientInformationPlay},
-        feature_flags::FeatureFlags,
-        finish_configuration::FinishConfiguration,
-        plugin_message::{
+        client_information::{ClientInformation, ClientInformationConf, ClientInformationPlay}, feature_flags::FeatureFlags, finish_configuration::{FinishConfigurationC2s, FinishConfigurationS2c}, plugin_message::{
             PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayC2s,
             PluginMessagePlayS2c,
-        },
-        registry::RegistryData,
-        server_data::ServerData,
+        }, registry::RegistryData, server_data::ServerData, update_tags::UpdateTags
     },
     login::{
         login_acknowledged::LoginAcknowledged, login_play::LoginPlay, login_start::LoginStart,
@@ -64,11 +59,13 @@ packet_id!(
     (0x03, LoginAcknowledged),
     (0x00, ClientInformationConf),
     (0x09, ClientInformationPlay),
+    (0x09, UpdateTags),
     (0x18, PluginMessagePlayS2c),
     (0x00, PluginMessageConfS2c),
     (0x10, PluginMessagePlayC2s),
     (0x01, PluginMessageConfC2s),
-    (0x02, FinishConfiguration),
+    (0x02, FinishConfigurationS2c),
+    (0x02, FinishConfigurationC2s),
     (0x08, FeatureFlags),
     (0x3E, SyncPlayerPosition),
     (0x62, UpdateTime),
@@ -110,7 +107,7 @@ receiving_packets!(
     (Play, ClientInformationPlay),
     (Play, PluginMessagePlayC2s),
     (Confgiuration, PluginMessageConfC2s),
-    (Confgiuration, FinishConfiguration),
+    (Confgiuration, FinishConfigurationC2s),
     //(Play, C2SSetHeldItem),
     //(Play, KeepAlivePlayC2s),
 );

@@ -44,21 +44,33 @@ use crate::{
 
 use super::server_data::ServerData;
 
-pub struct FinishConfiguration {}
+pub struct FinishConfigurationC2s;
+pub struct FinishConfigurationS2c;
 
-impl FinishConfiguration {
-    pub fn new() -> FinishConfiguration {
-        FinishConfiguration {}
-    }
-}
-
-impl Decoder for FinishConfiguration {
+impl Decoder for FinishConfigurationC2s {
     fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
-        Ok(FinishConfiguration {})
+        Ok(FinishConfigurationC2s)
+    }
+}
+impl Encoder for FinishConfigurationC2s {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        Ok(())
     }
 }
 
-impl PacketHandler<GameServer> for FinishConfiguration {
+impl Encoder for FinishConfigurationS2c {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl Decoder for FinishConfigurationS2c {
+    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+        Ok(FinishConfigurationS2c)
+    }
+}
+
+impl PacketHandler<GameServer> for FinishConfigurationC2s {
     fn handle_packet(
         &self,
         server: &mut GameServer,
@@ -226,12 +238,6 @@ impl PacketHandler<GameServer> for FinishConfiguration {
         .send_packet(player)?;
         KeepAlivePlayS2c(KeepAlive { id: 0 }).send_packet(player);
         KeepAlivePlayS2c(KeepAlive { id: 1 }).send_packet(player);
-        Ok(())
-    }
-}
-
-impl Encoder for FinishConfiguration {
-    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         Ok(())
     }
 }

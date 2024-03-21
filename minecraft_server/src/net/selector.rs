@@ -4,7 +4,10 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use mio::{net::TcpListener, Events, Interest, Poll, Token};
+use mio::{
+    net::{TcpListener, TcpStream},
+    Events, Interest, Poll, Token,
+};
 
 use crate::io::fast_map::FastMap;
 

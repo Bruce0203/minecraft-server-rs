@@ -2,7 +2,7 @@ use std::io::Write;
 
 use crate::{
     io::prelude::{
-        Decoder, Encoder, I64Write, Identifier, ReadIdentifier, U8Write, VarIntSizedVecWrite,
+        Decoder, Encoder, I64Write, Identifier, IdentifierRead, U8Write, VarIntSizedVecWrite,
         VarIntWrite, WriteBool,
     },
     net::prelude::{PacketId, Socket},

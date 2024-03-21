@@ -1,6 +1,6 @@
-mod protocol;
-mod server;
 mod packet;
-mod socket;
 pub mod prelude;
+mod protocol;
 mod selector;
+mod server;
+pub mod socket;

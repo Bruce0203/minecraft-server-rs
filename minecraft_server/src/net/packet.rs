@@ -5,7 +5,7 @@ use std::{
 
 use crate::io::prelude::{Decoder, Encoder};
 
-use super::{prelude::Server, socket::Socket};
+use super::{prelude::Socket, server::Server};
 
 pub trait PacketId: Sized {
     const PACKET_ID: i32;

@@ -3,7 +3,7 @@ pub use super::array::*;
 pub use super::buffer::*;
 pub use super::cache::*;
 pub use super::encoding::*;
-pub use super::identifier::{Identifier, ReadIdentifier, ToIdentifier, WriteIdentifier};
+pub use super::identifier::{Identifier, IdentifierRead, ToIdentifier, IdentifierWrite};
 pub use super::nbt::*;
 pub use super::option::*;
 pub use super::primitive::*;
