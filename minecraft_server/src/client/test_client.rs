@@ -1,5 +1,6 @@
 use std::{
     backtrace::Backtrace,
+    env,
     io::{Cursor, Result, Write},
     str::FromStr,
     time::{SystemTime, UNIX_EPOCH},
@@ -64,10 +65,10 @@ protocol_server!(
     MinecraftClientV1_20_4,
 );
 
-#[test]
 #[ignore]
+#[test]
 fn test_client() {
-    let addr = "158.180.88.171:25565".parse().unwrap();
+    let addr = env::var("MY_IP").unwrap().parse().unwrap();
     let mut stream = mio::net::TcpStream::from_std(std::net::TcpStream::connect(addr).unwrap());
     let server = &mut ClientPool {};
     let mut player =
