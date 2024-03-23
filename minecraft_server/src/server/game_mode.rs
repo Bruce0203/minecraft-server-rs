@@ -1,6 +1,6 @@
 use std::io::{Error, Read, Result, Write};
 
-use crate::io::prelude::VarIntWrite;
+use crate::io::prelude::{Buffer, VarIntWrite};
 use crate::io::prelude::{Decoder, Encoder, VarIntRead};
 
 pub enum GameMode {
@@ -23,7 +23,7 @@ impl Encoder for GameMode {
 }
 
 impl Decoder for GameMode {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(match reader.read_var_i32()? {
             0 => GameMode::Survival,
             1 => GameMode::Creative,

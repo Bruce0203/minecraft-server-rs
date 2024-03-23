@@ -95,7 +95,7 @@ pub struct ChunkPos {
     z: i32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct HeightMaps {
     #[serde(serialize_with = "nbt::i64_array")]
     #[serde(rename = "MOTION_BLOCKING")]
@@ -116,7 +116,7 @@ impl HeightMaps {
 
 impl Encoder for HeightMaps {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        buf.write_network_nbt(&self)?;
+        buf.write_network_nbt(self)?;
         Ok(())
     }
 }
@@ -182,5 +182,5 @@ impl Encoder for BlockEntity {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct BlockEntityNbt {}

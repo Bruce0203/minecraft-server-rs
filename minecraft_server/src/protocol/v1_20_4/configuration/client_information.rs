@@ -31,7 +31,7 @@ impl Encoder for ClientInformationPlay {
 }
 
 impl Decoder for ClientInformationPlay {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(ClientInformationPlay(ClientInformation::decode_from_read(
             reader,
         )?))
@@ -39,7 +39,7 @@ impl Decoder for ClientInformationPlay {
 }
 
 impl Decoder for ClientInformationConf {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(ClientInformationConf(ClientInformation::decode_from_read(
             reader,
         )?))
@@ -73,7 +73,7 @@ impl Encoder for ClientInformation {
 }
 
 impl Decoder for ClientInformation {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(ClientInformation {
             locale: VarString::<16>::decode_from_read(reader)?,
             view_distance: reader.read_i8()?,
@@ -116,7 +116,7 @@ pub enum ChatMode {
 }
 
 impl Decoder for ChatMode {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(match reader.read_var_i32()? {
             0 => Self::Enabled,
             1 => Self::CommandOnly,
@@ -148,6 +148,7 @@ impl PacketHandler<GameServer> for ClientInformation {
         server: &mut GameServer,
         _player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
+        println!("{:#?}", self);
         Ok(())
     }
 }

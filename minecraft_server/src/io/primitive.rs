@@ -190,7 +190,7 @@ impl Encoder for i64 {
 
 impl !DecoderDeref for i64 {}
 impl Decoder for i64 {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(reader.read_i64()?)
     }
 }

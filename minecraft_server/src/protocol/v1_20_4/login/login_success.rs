@@ -4,8 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{
-        BoolRead, Decoder, Encoder, OptionRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarString,
-        VarStringRead, VarStringWrite as _, WriteBool,
+        BoolRead, Buffer, Decoder, Encoder, OptionRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarString, VarStringRead, VarStringWrite as _, WriteBool
     },
     net::prelude::{PacketId, Socket},
     server::prelude::{GamePlayer, GameServer},
@@ -48,7 +47,7 @@ impl Encoder for LoginProperty {
 }
 
 impl Decoder for LoginProperty {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(LoginProperty {
             name: VarString::decode_from_read(reader)?,
             value: VarString::decode_from_read(reader)?,
@@ -59,7 +58,7 @@ impl Decoder for LoginProperty {
 }
 
 impl Decoder for LoginSuccess {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(LoginSuccess {
             uuid: Uuid::decode_from_read(reader)?,
             username: VarStringRead::read_var_string::<16>(reader)?,

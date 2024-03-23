@@ -12,6 +12,7 @@ use rand::{distributions::Alphanumeric, Rng};
 use uuid::Uuid;
 
 use crate::{
+    io::prelude::{Buffer, Encoder},
     net::{
         prelude::{PacketHandler, PacketWriter, ProtocolId},
         socket::Socket,
@@ -192,6 +193,7 @@ impl PacketHandler<ClientPool> for KeepAliveConfS2c {
 
 impl PacketHandler<ClientPool> for RegistryData {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        //println!("{:?}", self);
         println!("RegistryData!!");
         Ok(())
     }

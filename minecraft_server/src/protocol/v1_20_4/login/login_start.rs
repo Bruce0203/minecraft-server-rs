@@ -1,7 +1,9 @@
 use std::io::prelude::Write;
 use std::io::{Cursor, Error, Result};
 
-use crate::io::prelude::{Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite};
+use crate::io::prelude::{
+    Buffer, Decoder, Encoder, U128Read, UuidWrite, VarStringRead, VarStringWrite,
+};
 use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::protocol::v1_20_4::login::login_success::LoginSuccess;
 use crate::protocol::v1_20_4::login::set_compression;
@@ -14,7 +16,7 @@ pub struct LoginStart {
 }
 
 impl Decoder for LoginStart {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(LoginStart {
             name: reader.read_var_string::<16>()?,
             player_uuid: Uuid::from_u128(reader.read_u128()?),

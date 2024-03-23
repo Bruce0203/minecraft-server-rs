@@ -43,7 +43,7 @@ impl Encoder for Tag {
 }
 
 impl Decoder for UpdateTags {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(UpdateTags {
             tags: VarIntSizedVecRead::read_var_int_sized_vec(reader)?,
         })
@@ -51,7 +51,7 @@ impl Decoder for UpdateTags {
 }
 
 impl Decoder for Tags {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(Tags {
             registry: IdentifierRead::read_identifier(reader)?,
             tag: Tag::decode_from_read(reader)?,
@@ -60,7 +60,7 @@ impl Decoder for Tags {
 }
 
 impl Decoder for Tag {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(Tag {
             name: IdentifierRead::read_identifier(reader)?,
             entries: reader.read_var_int_sized_vec()?,

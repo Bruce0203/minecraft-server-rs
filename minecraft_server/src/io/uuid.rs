@@ -37,7 +37,7 @@ impl Encoder for Uuid {
 impl !DecoderDeref for Uuid {}
 
 impl Decoder for Uuid {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(reader.read_uuid()?)
     }
 }

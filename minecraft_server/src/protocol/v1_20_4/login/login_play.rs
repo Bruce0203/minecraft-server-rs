@@ -2,8 +2,7 @@ use std::io::Write;
 
 use crate::{
     io::prelude::{
-        Decoder, Encoder, I64Write, Identifier, IdentifierRead, U8Write, VarIntSizedVecWrite,
-        VarIntWrite, WriteBool,
+        Buffer, Decoder, Encoder, I64Write, Identifier, IdentifierRead, U8Write, VarIntSizedVecWrite, VarIntWrite, WriteBool
     },
     net::prelude::{PacketId, Socket},
     server::{
@@ -47,7 +46,7 @@ impl Encoder for DeathLocation {
 }
 
 impl Decoder for DeathLocation {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> std::io::Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> std::io::Result<Self> {
         Ok(DeathLocation {
             death_dimension_name: reader.read_identifier()?,
             death_location: Position::decode_from_read(reader)?,

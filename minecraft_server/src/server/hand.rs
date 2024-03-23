@@ -10,7 +10,7 @@ pub enum MainHand {
 }
 
 impl Decoder for MainHand {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(match reader.read_var_i32()? {
             0 => MainHand::Left,
             1 => MainHand::Right,

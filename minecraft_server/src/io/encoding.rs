@@ -20,7 +20,7 @@ pub trait Encoder {
 
 pub trait Decoder: Sized {
     #[inline]
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self>;
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self>;
 }
 
 pub auto trait EncoderDeref {}
@@ -28,7 +28,7 @@ pub auto trait EncoderDeref {}
 pub auto trait DecoderDeref {}
 
 impl<D: DecoderDeref + Deref<Target = T> + From<T>, T: Sized + Decoder> Decoder for D {
-    fn decode_from_read<R: Read>(reader: &mut R) -> std::io::Result<D> {
+    fn decode_from_read(reader: &mut Buffer) -> std::io::Result<D> {
         Ok(T::decode_from_read(reader)?.into())
     }
 }

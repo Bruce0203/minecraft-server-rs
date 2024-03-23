@@ -2,6 +2,7 @@ use derive_more::{Deref, From, Into};
 use std::io::prelude::Write;
 use std::io::{Error, ErrorKind, Result};
 
+use super::buffer::Buffer;
 use super::prelude::Decoder;
 use super::prelude::DecoderDeref;
 use super::prelude::Encoder;
@@ -24,7 +25,7 @@ impl<const MAX_LENGTH: usize> Encoder for VarString<MAX_LENGTH> {
 }
 
 impl<const MAX_LENGTH: usize> Decoder for VarString<MAX_LENGTH> {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(reader.read_var_string::<MAX_LENGTH>()?.into())
     }
 }

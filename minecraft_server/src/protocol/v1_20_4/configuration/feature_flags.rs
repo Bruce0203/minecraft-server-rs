@@ -1,7 +1,7 @@
 use std::io::prelude::Read;
 use std::io::{prelude::Write, Cursor, Error, Result};
 
-use crate::io::prelude::Decoder;
+use crate::io::prelude::{Buffer, Decoder};
 use crate::io::prelude::Encoder;
 use crate::io::prelude::Identifier;
 use crate::io::prelude::VarIntSizedVecRead;
@@ -33,7 +33,7 @@ impl Encoder for FeatureFlags {
 }
 
 impl Decoder for FeatureFlags {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(FeatureFlags {
             feature_flags: reader.read_var_int_sized_vec()?,
         })

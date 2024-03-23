@@ -19,7 +19,7 @@ impl Encoder for SetCompression {
 }
 
 impl Decoder for SetCompression {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(SetCompression {
             compression_threshold: VarIntRead::read_var_i32(reader)?,
         })

@@ -3,7 +3,7 @@ use std::io::{prelude::Read, Cursor, Result, Write};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    io::prelude::{Decoder, Encoder, NbtNetworkRead},
+    io::prelude::{Buffer, Decoder, Encoder, NbtNetworkRead, NbtNetworkWrite},
     net::prelude::{PacketId, Socket},
     server::{
         chat::ChatStyle,
@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RegistryData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "minecraft:chat_type")]
@@ -22,29 +22,42 @@ pub struct RegistryData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "minecraft:dimension_type")]
     pub dimension_type_registry: Option<Registry<DimensionType>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "minecraft:trim_material")]
+    pub trim_material_registry: Option<Registry<TrimMaterial>>,
+    #[serde(rename = "minecraft:trim_pattern")]
+    pub trim_pattern_registry: Option<Registry<TrimPattern>>,
+    #[serde(rename = "minecraft:damage_type")]
+    pub damage_type_registry: Option<Registry<DamageType>>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Registry<E> {
     #[serde(rename = "type")]
     pub name: String,
     pub value: Vec<RegistryEntry<E>>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RegistryEntry<V: Sized> {
     pub name: String,
     pub id: i32,
     pub element: V,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct TrimPattern {}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct TrimMaterial {}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ChatType {
     pub chat: Decoration,
     pub narration: Decoration,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Decoration {
     pub translation_key: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -52,18 +65,18 @@ pub struct Decoration {
     pub parameters: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DamageType {
     pub message_id: String,
     pub scaling: String,
-    pub exhausition: f32,
+    pub exhaustion: f32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub effects: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub death_message_type: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DimensionType {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fixed_type: Option<i64>,
@@ -86,20 +99,20 @@ pub struct DimensionType {
     pub monster_spawn_block_light_limit: i32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MonsterSpawnLightLevel {
     #[serde(rename = "type")]
     pub name: String,
     pub value: IntegerDistribution,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct IntegerDistribution {
     pub min_inclusive: i32,
     pub max_inclusive: i32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Biome {
     pub has_precipitation: bool,
     pub temperature: f32,
@@ -109,7 +122,7 @@ pub struct Biome {
     pub effects: Effects,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Effects {
     pub fog_color: i32,
     pub water_color: i32,
@@ -133,25 +146,25 @@ pub struct Effects {
     pub music: Option<Music>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Particle {
     pub options: ParticleOptions,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ParticleOptions {
     pub name: String,
     pub value: crate::server::prelude::particle::Particle,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AmbientSound {
     pub sound_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub range: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MoodSound {
     pub sound: String,
     pub tick_delay: i32,
@@ -159,13 +172,13 @@ pub struct MoodSound {
     pub offset: f64,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AdditionsSound {
     pub sound: String,
     pub tick_chance: f64,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Music {
     pub sound: String,
     pub min_delay: i32,
@@ -174,17 +187,14 @@ pub struct Music {
 }
 
 impl Encoder for RegistryData {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
-        let mut buffer = Cursor::new(Vec::new());
-        nbt::to_writer(&mut buffer, self, Some(""))?;
-        buf.write_all(&[10])?;
-        buf.write_all(&buffer.get_ref()[3..])?;
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_network_nbt(self)?;
         Ok(())
     }
 }
 
 impl Decoder for RegistryData {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(NbtNetworkRead::read_network_nbt(reader)?)
     }
 }

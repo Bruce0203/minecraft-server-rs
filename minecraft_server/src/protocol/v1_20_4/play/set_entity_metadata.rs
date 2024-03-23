@@ -7,8 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{
-        Decoder, Encoder, F32Write, I64Write, Identifier, U8Read, U8Write, VarIntRead,
-        VarIntSizedVecRead, VarIntWrite, VarStringWrite,
+        Buffer, Decoder, Encoder, F32Write, I64Write, Identifier, U8Read, U8Write, VarIntRead, VarIntSizedVecRead, VarIntWrite, VarStringWrite
     },
     protocol::v1_20_4::configuration::registry::Particle,
     server::{
@@ -26,7 +25,7 @@ pub struct SetEntityMetadata {
 }
 
 impl Decoder for SetEntityMetadata {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(SetEntityMetadata {
             entity_id: reader.read_var_i32()?,
             metadata: EntityMetadata(Box::new(EntityMeta::default())),

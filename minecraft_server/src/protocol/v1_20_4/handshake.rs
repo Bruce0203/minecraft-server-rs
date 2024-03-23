@@ -2,7 +2,8 @@ use std::io::prelude::Write;
 use std::io::{Cursor, Error, ErrorKind, Read, Result};
 
 use crate::io::prelude::{
-    Decoder, Encoder, U16Read, U16Write, VarIntRead, VarIntWrite, VarStringRead, VarStringWrite,
+    Buffer, Decoder, Encoder, U16Read, U16Write, VarIntRead, VarIntWrite, VarStringRead,
+    VarStringWrite,
 };
 
 use crate::net::prelude::{PacketHandler, PacketId, Socket};
@@ -17,7 +18,7 @@ pub struct HandShake {
 }
 
 impl Decoder for HandShake {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(HandShake {
             protocol_version: reader.read_var_i32()?,
             server_address: reader.read_var_string::<255>()?,
@@ -53,7 +54,7 @@ impl Encoder for NextState {
 }
 
 impl Decoder for NextState {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(match reader.read_var_i32()? {
             1 => NextState::Status,
             2 => NextState::Login,

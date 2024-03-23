@@ -4,9 +4,7 @@ use std::io::{
 };
 
 use super::{
-    encoding::{Decoder, Encoder},
-    prelude::{DecoderDeref, EncoderDeref},
-    var_string::{VarStringRead, VarStringWrite},
+    buffer::Buffer, encoding::{Decoder, Encoder}, prelude::{DecoderDeref, EncoderDeref}, var_string::{VarStringRead, VarStringWrite}
 };
 
 #[derive(Debug, derive_more::Deref, Clone)]
@@ -27,7 +25,7 @@ impl !DecoderDeref for Identifier {}
 impl !EncoderDeref for Identifier {}
 
 impl Decoder for Identifier {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(Identifier(reader.read_var_string::<32767>()?))
     }
 }

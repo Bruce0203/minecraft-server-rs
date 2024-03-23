@@ -1,3 +1,4 @@
+pub mod acknowledge_finish_configuration;
 pub mod update_tags;
 pub mod client_information;
 pub mod feature_flags;

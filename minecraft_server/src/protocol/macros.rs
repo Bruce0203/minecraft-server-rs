@@ -54,7 +54,7 @@ macro_rules! receiving_packets {
                 let bytes = &mut player.packet_buf;
                 let packet_id = crate::io::prelude::VarIntRead::read_var_i32(bytes)?;
                 let connection_state = &player.session_relay.connection_state;
-                println!("{:?}[{}]", connection_state, packet_id);
+                println!("read: {:?}[{}]", connection_state, packet_id);
                 match (connection_state, packet_id) {
                     $(
                         ($connection_state, <$typ as crate::net::prelude::PacketId>::PACKET_ID) => {

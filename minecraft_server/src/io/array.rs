@@ -23,9 +23,8 @@ impl<E: Encoder> VarIntSizedVecWrite<E> for Buffer {
     }
 }
 
-impl<D, R> VarIntSizedVecRead<D> for R
+impl<D> VarIntSizedVecRead<D> for Buffer
 where
-    R: Read,
     D: Decoder,
 {
     fn read_var_int_sized_vec(&mut self) -> Result<Vec<D>> {

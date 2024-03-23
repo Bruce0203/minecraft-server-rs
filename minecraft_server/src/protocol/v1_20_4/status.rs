@@ -1,6 +1,6 @@
 use std::io::{Cursor, Error, Read, Result, Write};
 
-use crate::io::prelude::{Cache, Decoder, Encoder, I64Read};
+use crate::io::prelude::{Buffer, Cache, Decoder, Encoder, I64Read};
 
 use crate::net::prelude::{PacketHandler, PacketId, PacketWriter, Socket};
 use crate::server::prelude::{GamePlayer, GameServer};
@@ -10,7 +10,7 @@ use crate::server::server_status::ServerStatus;
 pub struct StatusRequest {}
 
 impl Decoder for StatusRequest {
-    fn decode_from_read<R: std::io::prelude::Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(StatusRequest {})
     }
 }
@@ -52,7 +52,7 @@ pub struct PingRequest {
 }
 
 impl Decoder for PingRequest {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PingRequest {
             payload: reader.read_i64()?,
         })

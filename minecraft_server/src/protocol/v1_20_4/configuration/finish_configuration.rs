@@ -48,7 +48,7 @@ pub struct FinishConfigurationC2s;
 pub struct FinishConfigurationS2c;
 
 impl Decoder for FinishConfigurationC2s {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(FinishConfigurationC2s)
     }
 }
@@ -65,7 +65,7 @@ impl Encoder for FinishConfigurationS2c {
 }
 
 impl Decoder for FinishConfigurationS2c {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(FinishConfigurationS2c)
     }
 }
@@ -215,7 +215,7 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
             difficulty_locked: false,
         }
         .send_packet(player)?;
-        let chunk_view_distance = 8;
+        let chunk_view_distance = 10;
         for x in -chunk_view_distance..chunk_view_distance {
             for z in -chunk_view_distance..chunk_view_distance {
                 UpdateLight {
@@ -238,6 +238,7 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
         .send_packet(player)?;
         KeepAlivePlayS2c(KeepAlive { id: 0 }).send_packet(player);
         KeepAlivePlayS2c(KeepAlive { id: 1 }).send_packet(player);
+
         Ok(())
     }
 }

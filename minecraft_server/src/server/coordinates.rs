@@ -28,7 +28,7 @@ impl Encoder for Position {
 }
 
 impl Decoder for Position {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         let long = reader.read_i64()?;
         Ok(Position {
             x: (long >> 38),

@@ -27,7 +27,7 @@ impl Encoder for PluginMessageConfC2s {
 }
 
 impl Decoder for PluginMessageConfC2s {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PluginMessageConfC2s(PluginMessage::decode_from_read(
             reader,
         )?))
@@ -47,7 +47,7 @@ impl Encoder for PluginMessagePlayC2s {
 }
 
 impl Decoder for PluginMessagePlayC2s {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PluginMessagePlayC2s(PluginMessage::decode_from_read(
             reader,
         )?))
@@ -67,7 +67,7 @@ impl Encoder for PluginMessageConfS2c {
 }
 
 impl Decoder for PluginMessageConfS2c {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PluginMessageConfS2c(PluginMessage::decode_from_read(
             reader,
         )?))
@@ -84,7 +84,7 @@ impl Encoder for PluginMessagePlayS2c {
 }
 
 impl Decoder for PluginMessagePlayS2c {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PluginMessagePlayS2c(PluginMessage::decode_from_read(
             reader,
         )?))
@@ -109,7 +109,7 @@ impl Encoder for PluginMessage {
 }
 
 impl Decoder for PluginMessage {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         let channel = reader.read_var_string::<32767>()?;
         Ok(PluginMessage {
             channel,

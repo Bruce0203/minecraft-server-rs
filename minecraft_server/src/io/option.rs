@@ -21,7 +21,7 @@ pub trait OptionWrite {
     fn write_option<E: Encoder>(&mut self, value: &Option<E>) -> Result<()>;
 }
 
-impl<R: Read> OptionRead for R {
+impl OptionRead for Buffer {
     fn read_option<D: Decoder>(&mut self) -> Result<Option<D>> {
         Ok(if self.read_bool()? {
             Some(D::decode_from_read(self)?)
@@ -66,7 +66,7 @@ impl<T: Encoder> Encoder for Option<T> {
 impl<T: Decoder> !DecoderDeref for Option<T> {}
 
 impl<T: Decoder> Decoder for Option<T> {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(Some(T::decode_from_read(reader)?))
     }
 }

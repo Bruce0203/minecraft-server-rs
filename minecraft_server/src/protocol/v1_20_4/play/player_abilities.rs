@@ -6,7 +6,7 @@ use std::io::{
 use bitflags::bitflags;
 
 use crate::{
-    io::prelude::{Decoder, Encoder, F32Read, F32Write, U8Read, U8Write},
+    io::prelude::{Buffer, Decoder, Encoder, F32Read, F32Write, U8Read, U8Write},
     net::prelude::{PacketId, Socket},
     server::prelude::GamePlayer,
 };
@@ -38,7 +38,7 @@ impl Encoder for PlayerAbilities {
 }
 
 impl Decoder for PlayerAbilities {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(PlayerAbilities {
             flags: PlayerAbility::from_bits_truncate(reader.read_u8()?),
             flying_speed: reader.read_f32()?,

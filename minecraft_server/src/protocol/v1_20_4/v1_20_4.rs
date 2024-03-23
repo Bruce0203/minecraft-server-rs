@@ -1,7 +1,10 @@
 use crate::{
     io::prelude::{Decoder, Encoder},
     net::prelude::PacketHandler,
-    protocol::macros::{packet_id, protocol, protocol_server, receiving_packets},
+    protocol::{
+        macros::{packet_id, protocol, protocol_server, receiving_packets},
+        v1_20_4::configuration::acknowledge_finish_configuration::AcknowledgeFinishConfiguration,
+    },
     server::{
         chunk::Chunk,
         prelude::{GamePlayer, GameServer},
@@ -10,10 +13,16 @@ use crate::{
 
 use super::{
     configuration::{
-        client_information::{ClientInformation, ClientInformationConf, ClientInformationPlay}, feature_flags::FeatureFlags, finish_configuration::{FinishConfigurationC2s, FinishConfigurationS2c}, plugin_message::{
+        client_information::{ClientInformation, ClientInformationConf, ClientInformationPlay},
+        feature_flags::FeatureFlags,
+        finish_configuration::{FinishConfigurationC2s, FinishConfigurationS2c},
+        plugin_message::{
             PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayC2s,
             PluginMessagePlayS2c,
-        }, registry::RegistryData, server_data::ServerData, update_tags::UpdateTags
+        },
+        registry::RegistryData,
+        server_data::ServerData,
+        update_tags::UpdateTags,
     },
     login::{
         login_acknowledged::LoginAcknowledged, login_play::LoginPlay, login_start::LoginStart,
@@ -94,6 +103,7 @@ packet_id!(
     (0x24, KeepAlivePlayS2c),
     (0x03, KeepAliveConfC2s),
     (0x28, UpdateLight),
+    (0x02, AcknowledgeFinishConfiguration),
 );
 
 receiving_packets!(
@@ -109,5 +119,6 @@ receiving_packets!(
     (Confgiuration, PluginMessageConfC2s),
     (Confgiuration, FinishConfigurationC2s),
     //(Play, C2SSetHeldItem),
-    //(Play, KeepAlivePlayC2s),
+    (Play, KeepAlivePlayC2s),
+    (Confgiuration, AcknowledgeFinishConfiguration),
 );

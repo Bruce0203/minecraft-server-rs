@@ -21,7 +21,7 @@ impl Encoder for VarInt {
 impl !DecoderDeref for VarInt {}
 
 impl Decoder for VarInt {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(reader.read_var_i32()?.into())
     }
 }

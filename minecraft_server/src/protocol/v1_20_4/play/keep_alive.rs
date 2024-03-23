@@ -46,7 +46,7 @@ impl Encoder for KeepAlivePlayC2s {
 }
 
 impl Decoder for KeepAlivePlayC2s {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(KeepAlivePlayC2s(KeepAlive {
             id: reader.read_i64()?,
         }))
@@ -54,7 +54,7 @@ impl Decoder for KeepAlivePlayC2s {
 }
 
 impl Decoder for KeepAliveConfC2s {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(KeepAliveConfC2s(KeepAlive::decode_from_read(reader)?))
     }
 }
@@ -72,7 +72,7 @@ impl Encoder for KeepAliveConfS2c {
 }
 
 impl Decoder for KeepAliveConfS2c {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(KeepAliveConfS2c(KeepAlive::decode_from_read(reader)?))
     }
 }
@@ -90,7 +90,7 @@ impl Encoder for KeepAlive {
 }
 
 impl Decoder for KeepAlive {
-    fn decode_from_read<R: Read>(reader: &mut R) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(KeepAlive {
             id: reader.read_i64()?,
         })
