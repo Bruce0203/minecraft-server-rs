@@ -1,8 +1,10 @@
-use std::io::Write;
+use std::io::{Read, Write};
 
 use crate::{
     io::prelude::{
-        Buffer, Decoder, Encoder, I64Write, Identifier, IdentifierRead, U8Write, VarIntSizedVecWrite, VarIntWrite, WriteBool
+        BoolRead, Buffer, Decoder, Encoder, I32Read, I64Read, I64Write, Identifier, IdentifierRead,
+        OptionRead, U8Write, VarIntRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarIntWrite,
+        WriteBool,
     },
     net::prelude::{PacketId, Socket},
     server::{
@@ -11,6 +13,7 @@ use crate::{
     },
 };
 
+#[derive(Debug)]
 pub struct LoginPlay {
     pub entity_id: i32,
     pub is_hardcore: bool,
@@ -32,6 +35,7 @@ pub struct LoginPlay {
     pub portal_cooldown: i32,
 }
 
+#[derive(Debug)]
 pub struct DeathLocation {
     pub death_dimension_name: Identifier,
     pub death_location: Position,
@@ -83,5 +87,30 @@ impl Encoder for LoginPlay {
         }
         buf.write_var_i32(self.portal_cooldown)?;
         Ok(())
+    }
+}
+
+impl Decoder for LoginPlay {
+    fn decode_from_read(reader: &mut Buffer) -> std::io::Result<Self> {
+        Ok(LoginPlay {
+            entity_id: reader.read_i32()?,
+            is_hardcore: reader.read_bool()?,
+            dimension_names: reader.read_var_int_sized_vec()?,
+            max_players: reader.read_var_i32()?,
+            view_distance: reader.read_var_i32()?,
+            simulation_distance: reader.read_var_i32()?,
+            reduce_debug_info: reader.read_bool()?,
+            enable_respawn_screen: reader.read_bool()?,
+            do_limited_crafting: reader.read_bool()?,
+            dimension_type: reader.read_identifier()?,
+            dimension_name: reader.read_identifier()?,
+            hashed_seed: reader.read_i64()?,
+            game_mode: GameMode::decode_from_read(reader)?,
+            previous_game_mode: reader.read_option()?,
+            is_debug: reader.read_bool()?,
+            is_flat: reader.read_bool()?,
+            death_location: reader.read_option()?,
+            portal_cooldown: reader.read_var_i32()?,
+        })
     }
 }

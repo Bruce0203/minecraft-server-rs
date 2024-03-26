@@ -4,7 +4,10 @@ use std::io::{
 };
 
 use super::{
-    buffer::Buffer, encoding::{Decoder, Encoder}, prelude::{DecoderDeref, EncoderDeref}, var_string::{VarStringRead, VarStringWrite}
+    buffer::Buffer,
+    encoding::{Decoder, Encoder},
+    prelude::{DecoderDeref, EncoderDeref},
+    var_string::{VarStringRead, VarStringWrite},
 };
 
 #[derive(Debug, derive_more::Deref, Clone)]
@@ -47,6 +50,8 @@ pub trait IdentifierWrite {
 
 impl<R: Read> IdentifierRead for R {
     fn read_identifier(&mut self) -> Result<Identifier> {
-        Ok(Identifier(self.read_var_string::<32767>()?))
+        let value = Ok(Identifier(self.read_var_string::<32767>()?));
+        println!("{:?}", value);
+        value
     }
 }

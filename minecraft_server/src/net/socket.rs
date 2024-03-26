@@ -52,12 +52,14 @@ impl<Player> Socket<Player> {
             if self.session_relay.compression_threshold > decompressed_len {
                 Ok(())
             } else {
+                println!("process packet decompression!");
                 let mut d = ZlibDecoder::new(Cursor::new(
                     &self.packet_buf.get_ref()[self.packet_buf.position() as usize..],
                 ));
                 let mut new_vec = Vec::with_capacity(decompressed_len as usize);
                 d.read_to_end(&mut new_vec)?;
                 self.packet_buf = Cursor::new(new_vec);
+                println!("process packet decompression! end");
                 Ok(())
             }
         }
@@ -119,12 +121,12 @@ impl<Player> Socket<Player> {
         self.handle_write_packet(&mut write_buf)
     }
 
-    pub fn handle_read_event<const MAX_PACKET_BUFFER_SIZE: usize, S: Server<Player = Player>>(
-        &mut self,
-        server: &mut S,
-    ) -> Result<()> {
+    pub fn handle_read_event<S: Server<Player = Player>>(&mut self, server: &mut S) -> Result<()>
+    where
+        [(); { S::MAX_PACKET_BUFFER_SIZE }]:,
+    {
         let player = self;
-        player.fill_read_buf_from_socket_stream::<MAX_PACKET_BUFFER_SIZE>()?;
+        player.fill_read_buf_from_socket_stream::<{ S::MAX_PACKET_BUFFER_SIZE }>()?;
         player.read_packet_from_read_buf(server)?;
         let write_buf = &player.write_buf.get_ref()[..player.write_buf.position() as usize];
         player.stream.write_all(write_buf)?;
@@ -132,17 +134,16 @@ impl<Player> Socket<Player> {
         Ok(())
     }
 
-    fn process_packet_read<
-        const MAX_PACKET_BUFFER_SIZE: usize,
-        S: Server<Player = Player>,
-        Packet: Decoder + PacketHandler<S>,
-    >(
+    fn process_packet_read<S: Server<Player = Player>, Packet: Decoder + PacketHandler<S>>(
         &mut self,
         player: &mut Socket<Player>,
         server: &mut S,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        [(); { S::MAX_PACKET_BUFFER_SIZE }]:,
+    {
         Packet::decode_from_read(&mut player.packet_buf)?;
-        self.handle_read_event::<MAX_PACKET_BUFFER_SIZE, _>(server)?;
+        self.handle_read_event(server)?;
         Ok(())
     }
 
@@ -154,18 +155,24 @@ impl<Player> Socket<Player> {
         let read_len = player.read_buf.position();
         player.read_buf.set_position(0);
         let mut do_read = || -> Result<()> {
+            println!("handle read start");
             while player.read_buf.position() != read_len {
                 let packet_len = player.read_buf.read_var_i32()?;
                 let pos = player.read_buf.position() as usize;
                 player.packet_buf = Cursor::new(Vec::from(
                     &player.read_buf.get_ref()[pos..pos + packet_len as usize],
                 ));
-
                 player.read_buf.read_exact(player.packet_buf.get_mut())?;
+                if player.packet_buf.get_ref().len() == 0 {
+                    return Err(Error::new(ErrorKind::BrokenPipe, "read zero size buffer"));
+                }
+                println!("start read");
                 player.process_decompression()?;
+                println!("read end");
                 S::read_packet(server, player)?;
             }
             player.read_buf.set_position(0);
+            println!("handle read end");
             Ok(())
         };
         if let Err(err) = do_read() {

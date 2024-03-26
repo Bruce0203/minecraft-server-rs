@@ -3,6 +3,7 @@ use std::io::{Error, Read, Result, Write};
 use crate::io::prelude::{Buffer, VarIntWrite};
 use crate::io::prelude::{Decoder, Encoder, VarIntRead};
 
+#[derive(Debug)]
 pub enum GameMode {
     Survival,
     Creative,

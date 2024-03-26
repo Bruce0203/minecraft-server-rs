@@ -3,18 +3,21 @@ use std::{
     env,
     io::{Cursor, Result, Write},
     str::FromStr,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
     vec,
 };
 
-use mio::{net::TcpStream, Token};
+use mio::{net::TcpStream, Interest, Registry, Token};
 use rand::{distributions::Alphanumeric, Rng};
 use uuid::Uuid;
 
 use crate::{
     io::prelude::{Buffer, Encoder},
     net::{
-        prelude::{PacketHandler, PacketWriter, ProtocolId},
+        prelude::{
+            MaxPacketBufferSize, PacketHandler, PacketWriter, ProtocolId, Selector, SelectorTicker,
+            SelectorUpdateListener, Server, SocketSelector,
+        },
         socket::Socket,
     },
     protocol::{
@@ -34,8 +37,9 @@ use crate::{
             },
             handshake::{HandShake, NextState},
             login::{
-                login_acknowledged::LoginAcknowledged, login_start::LoginStart,
-                login_success::LoginSuccess, set_compression::SetCompression,
+                login_acknowledged::LoginAcknowledged, login_play::LoginPlay,
+                login_start::LoginStart, login_success::LoginSuccess,
+                set_compression::SetCompression,
             },
             play::keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c},
             v1_20_4::MinecraftServerV1_20_4,
@@ -60,11 +64,20 @@ receiving_packets!(
     (ConnectionState::Confgiuration, RegistryData),
     (ConnectionState::Confgiuration, UpdateTags),
     (ConnectionState::Confgiuration, FinishConfigurationS2c),
+    (ConnectionState::Play, LoginPlay),
 );
 
 #[derive(Default)]
 pub struct Client {}
-pub struct ClientPool {}
+
+pub struct ClientPool {
+    pub start_time: SystemTime,
+    pub last_tick_time: SystemTime,
+}
+
+impl MaxPacketBufferSize for ClientPool {
+    const MAX_PACKET_BUFFER_SIZE: usize = 100_000;
+}
 
 protocol_server!(
     ClientPool,
@@ -76,67 +89,12 @@ protocol_server!(
 #[ignore]
 #[test]
 fn test_client() {
-    let addr = env::var("MY_IP").unwrap().parse().unwrap();
-    let mut stream = std::net::TcpStream::connect(addr).unwrap();
-    let server = &mut ClientPool {};
-    let mut player = &mut Socket::new::<MAX_PACKET_BUFFER_SIZE>(
-        TcpStream::from_std(stream),
-        Token(1),
-        addr,
-        Client::default(),
-    );
-    HandShake {
-        protocol_version: MinecraftClientV1_20_4::PROTOCOL_ID,
-        server_address: addr.to_string(),
-        server_port: addr.port(),
-        next_state: NextState::Login,
-    }
-    .send_packet(player)
-    .unwrap();
-    let random_hash_of_player_name: String = rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(7)
-        .map(char::from)
-        .collect();
-    player.session_relay.connection_state = ConnectionState::Login;
-    LoginStart {
-        name: format!("Test_{}", random_hash_of_player_name),
-        player_uuid: Uuid::new_v4(),
-    }
-    .send_packet(player);
-    send_written_packets(player);
-    read_packets(player, server);
-    LoginAcknowledged {}.send_packet(player).unwrap();
-    PluginMessageConfC2s(PluginMessage {
-        channel: "minecraft:brand".to_string(),
-        data: "vanilla".to_string().into(),
-    })
-    .send_packet(player)
-    .unwrap();
-    send_written_packets(player);
-    ClientInformationConf(ClientInformation {
-        locale: "ko_KR".to_string().into(),
-        view_distance: 2,
-        chat_mode: ChatMode::Enabled,
-        chat_colors: true,
-        display_skin_parts: DisplaySkinParts::None,
-        main_hand: MainHand::Right,
-        enable_text_filtering: true,
-        allow_server_listings: true,
-    });
-    send_written_packets(player);
-    read_packets(player, server);
-    //KeepAliveConfC2s(KeepAlive {
-    //    id: SystemTime::now()
-    //        .duration_since(UNIX_EPOCH)
-    //        .unwrap()
-    //        .as_millis() as i64,
-    //})
-    //.send_packet(player)
-    //.unwrap();
-    // send_written_packets(player);
-    // println!("bruh");
-    // read_packets(player, server);
+    let server = ClientPool {
+        start_time: SystemTime::now(),
+        last_tick_time: SystemTime::UNIX_EPOCH,
+    };
+    let mut selector = SocketSelector::new(server);
+    selector.run();
 }
 
 impl PacketHandler<ClientPool> for FeatureFlags {
@@ -150,7 +108,7 @@ impl PacketHandler<ClientPool> for PluginMessageConfS2c {
     fn handle_packet(
         &self,
         server: &mut ClientPool,
-        player: &mut Socket<<ClientPool as crate::net::prelude::Server>::Player>,
+        player: &mut Socket<<ClientPool as Server>::Player>,
     ) -> Result<()> {
         println!("{:?}", self);
         Ok(())
@@ -161,7 +119,7 @@ impl PacketHandler<ClientPool> for PluginMessagePlayS2c {
     fn handle_packet(
         &self,
         server: &mut ClientPool,
-        player: &mut Socket<<ClientPool as crate::net::prelude::Server>::Player>,
+        player: &mut Socket<<ClientPool as Server>::Player>,
     ) -> Result<()> {
         println!("{:?}", self);
         Ok(())
@@ -170,8 +128,24 @@ impl PacketHandler<ClientPool> for PluginMessagePlayS2c {
 
 impl PacketHandler<ClientPool> for LoginSuccess {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("{:?}", self);
         player.session_relay.connection_state = ConnectionState::Confgiuration;
+        LoginAcknowledged {}.send_packet(player)?;
+        PluginMessageConfC2s(PluginMessage {
+            channel: "minecraft:brand".to_string(),
+            data: "vanilla".to_string().into(),
+        })
+        .send_packet(player)?;
+        ClientInformationConf(ClientInformation {
+            locale: "ko_KR".to_string().into(),
+            view_distance: 2,
+            chat_mode: ChatMode::Enabled,
+            chat_colors: true,
+            display_skin_parts: DisplaySkinParts::None,
+            main_hand: MainHand::Right,
+            enable_text_filtering: true,
+            allow_server_listings: true,
+        })
+        .send_packet(player)?;
         Ok(())
     }
 }
@@ -204,15 +178,11 @@ fn send_written_packets(player: &mut Socket<Client>) {
         .stream
         .write_all(&player.write_buf.get_ref()[..player.write_buf.position() as usize])
         .unwrap();
-    let write_buf = &player.write_buf.get_ref()[..player.write_buf.position() as usize];
-    println!("{:?}", write_buf);
     player.write_buf = Cursor::new(vec![]);
 }
 
 fn read_packets(player: &mut Socket<Client>, server: &mut ClientPool) {
-    player
-        .handle_read_event::<MAX_PACKET_BUFFER_SIZE, _>(server)
-        .unwrap();
+    player.handle_read_event(server).unwrap();
 }
 
 impl PacketHandler<ClientPool> for UpdateTags {
@@ -228,5 +198,57 @@ impl PacketHandler<ClientPool> for FinishConfigurationS2c {
         FinishConfigurationC2s.send_packet(player)?;
         player.session_relay.connection_state = ConnectionState::Play;
         Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for LoginPlay {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("LoginPlay!!!: {:?}", self);
+        Ok(())
+    }
+}
+
+impl SelectorUpdateListener<ClientPool> for ClientPool {
+    fn on_update(selector: &mut SocketSelector<ClientPool>) {
+        let tick = Duration::from_millis(50);
+        let now = SystemTime::now();
+        if now.duration_since(selector.server.last_tick_time).unwrap() >= tick {
+            selector.on_tick();
+            selector.server.last_tick_time = now;
+        }
+    }
+
+    fn on_init(selector: &mut SocketSelector<ClientPool>) {
+        let addr = env::var("MY_IP").unwrap().parse().unwrap();
+        selector
+            .connect_client(addr, |player| {
+                HandShake {
+                    protocol_version: MinecraftClientV1_20_4::PROTOCOL_ID,
+                    server_address: addr.to_string(),
+                    server_port: addr.port(),
+                    next_state: NextState::Login,
+                }
+                .send_packet(player)?;
+                let random_hash_of_player_name: String = rand::thread_rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(7)
+                    .map(char::from)
+                    .collect();
+                player.session_relay.connection_state = ConnectionState::Login;
+                LoginStart {
+                    name: format!("Test_{}", random_hash_of_player_name),
+                    player_uuid: Uuid::new_v4(),
+                }
+                .send_packet(player)?;
+                send_written_packets(player);
+                Ok(())
+            })
+            .unwrap();
+    }
+}
+
+impl SelectorTicker for SocketSelector<ClientPool> {
+    fn on_tick(&mut self) {
+        println!("tick");
     }
 }

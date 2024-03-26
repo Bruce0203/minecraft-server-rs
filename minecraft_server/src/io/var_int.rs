@@ -6,7 +6,7 @@ use std::io::{
 
 use super::prelude::{Buffer, Decoder, DecoderDeref, Encoder, EncoderDeref};
 
-#[derive(Deref, From, Into, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Deref, From, Into, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct VarInt(pub i32);
 
 impl !EncoderDeref for VarInt {}

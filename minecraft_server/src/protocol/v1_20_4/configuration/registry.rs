@@ -1,4 +1,4 @@
-use std::io::{prelude::Read, Cursor, Result, Write};
+use std::io::{prelude::Read, Result, Write};
 
 use serde::{Deserialize, Serialize};
 
@@ -195,6 +195,6 @@ impl Encoder for RegistryData {
 
 impl Decoder for RegistryData {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        Ok(NbtNetworkRead::read_network_nbt(reader)?)
+        todo!()
     }
 }

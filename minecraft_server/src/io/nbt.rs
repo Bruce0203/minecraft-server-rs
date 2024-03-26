@@ -1,9 +1,10 @@
 use std::{
     fmt::Debug,
-    io::{Cursor, Read, Result, Write},
+    io::{Cursor, Error, ErrorKind, Read, Result, Write},
 };
 
 use serde::{de::DeserializeOwned, Serialize};
+use simdnbt::borrow::NbtCompound;
 
 use super::buffer::Buffer;
 
@@ -23,18 +24,17 @@ impl NbtNetworkWrite for Buffer {
 }
 
 pub trait NbtNetworkRead {
-    fn read_network_nbt<D: DeserializeOwned + Debug>(&mut self) -> Result<D>;
+    fn read_network_nbt<'a, D: TryFrom<NbtCompound<'a>, Error = Error>>(&'a mut self) -> Result<D>;
 }
 
 impl NbtNetworkRead for Buffer {
-    fn read_network_nbt<D: DeserializeOwned + Debug>(&mut self) -> Result<D> {
-        let mut buf = [0; 1];
-        self.read_exact(&mut buf)?;
-        assert_eq!(buf[0], 10);
-        let mut cloned = self.clone();
-        let value2 = nbt::Value::from_reader(10, &mut cloned);
-        let value = nbt::from_reader(self)?;
-        //println!("{:#?}", value2);
-        Ok(value)
+    fn read_network_nbt<'a, D: TryFrom<NbtCompound<'a>, Error = Error>>(&'a mut self) -> Result<D> {
+        let mut buf = Cursor::new(&self.get_ref()[..]);
+        buf.set_position(self.position());
+        let mut value = match NbtCompound::read(&mut buf) {
+            Ok(value) => value,
+            Err(err) => Err(Error::new(ErrorKind::InvalidInput, err))?,
+        };
+        Ok(D::try_from(value)?)
     }
 }

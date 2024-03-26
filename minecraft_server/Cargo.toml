@@ -20,6 +20,7 @@ delegate = "0.12.0"
 dyn-clone = "1.0.17"
 smart-default = "0.7.1"
 rand = "0.8.5"
+simdnbt = "0.4.2"
 
 [dev-dependencies]
 criterion = "0.5.1"
@@ -29,6 +30,6 @@ num-traits = "0.2"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "new_string"
+name = "encoding"
 harness = false
 
