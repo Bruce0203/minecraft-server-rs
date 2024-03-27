@@ -3,7 +3,9 @@ use std::io::{
     Result,
 };
 
-use crate::io::prelude::{Buffer, Decoder, Encoder, F32Write, F64Write, I64Read, VarIntWrite};
+use crate::io::prelude::{
+    Buffer, Decoder, Encoder, F32Read, F32Write, F64Read, F64Write, I64Read, VarIntWrite,
+};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Position {
@@ -64,6 +66,26 @@ impl Encoder for FloatRotation {
     }
 }
 
+impl Decoder for FloatRotation {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(FloatRotation {
+            yaw: reader.read_f32()?,
+            pitch: reader.read_f32()?,
+        })
+    }
+}
+
+impl Decoder for DoublePosition {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(DoublePosition {
+            x: reader.read_f64()?,
+            y: reader.read_f64()?,
+            z: reader.read_f64()?,
+        })
+    }
+}
+
+#[derive(Debug)]
 pub struct DoublePosition {
     pub x: f64,
     pub y: f64,
@@ -79,6 +101,7 @@ impl Encoder for DoublePosition {
     }
 }
 
+#[derive(Debug)]
 pub struct Location {
     pub pos: DoublePosition,
     pub rot: FloatRotation,
@@ -92,6 +115,14 @@ impl Encoder for Location {
     }
 }
 
+impl Decoder for Location {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(Location {
+            pos: DoublePosition::decode_from_read(reader)?,
+            rot: FloatRotation::decode_from_read(reader)?,
+        })
+    }
+}
 #[repr(i32)]
 #[derive(Debug, Copy, Clone)]
 pub enum Direction {

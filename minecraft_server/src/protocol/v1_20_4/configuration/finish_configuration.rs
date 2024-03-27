@@ -12,7 +12,7 @@ use crate::{
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
-            change_difficulty::{Difficulty, S2CChangeDifficulty},
+            change_difficulty::{Difficulty, ChangeDifficultyS2c},
             keep_alive::{KeepAlive, KeepAlivePlayS2c},
             player_abilities::{PlayerAbilities, PlayerAbility},
             player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
@@ -22,7 +22,7 @@ use crate::{
             set_default_position::SetDefaultPosition,
             set_entity_metadata::SetEntityMetadata,
             set_health::SetHealth,
-            set_held_item::{S2CSetHeldItem, SetHeldItem},
+            set_held_item::{SetHeldItemS2c, SetHeldItem},
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
             synchronize_player_position::SyncPlayerPosition,
@@ -35,6 +35,7 @@ use crate::{
     server::{
         chunk::{Chunk, HeightMaps, LongArray},
         coordinates::{DoublePosition, FloatRotation, Location, Position},
+        game_mode::GameModeOrUndefined,
         light::Light,
         metadata::prelude::{EntityMetadata, PlayerByte, PlayerMeta},
         prelude::{Chat, ConnectionState, EntityMeta, GameMode, GamePlayer, GameServer},
@@ -91,7 +92,7 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
             dimension_name: "minecraft:overworld".to_identifier(),
             hashed_seed: 0,
             game_mode: GameMode::Creative,
-            previous_game_mode: None,
+            previous_game_mode: GameModeOrUndefined(None),
             is_debug: false,
             is_flat: true,
             death_location: None,
@@ -104,7 +105,7 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
             field_of_view_modifier: 0.1,
         };
         player_abilities.send_packet(player)?;
-        S2CSetHeldItem(SetHeldItem { slot: 0 }).send_packet(player)?;
+        SetHeldItemS2c(SetHeldItem { slot: 0 }).send_packet(player)?;
         SetDefaultPosition {
             location: Position::new(0, 0, 0),
             angle: 0.0,
@@ -210,7 +211,7 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
             time_of_day: 100,
         }
         .send_packet(player)?;
-        S2CChangeDifficulty {
+        ChangeDifficultyS2c {
             new_difficulty: Difficulty::Easy,
             difficulty_locked: false,
         }

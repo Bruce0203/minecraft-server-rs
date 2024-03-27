@@ -13,22 +13,7 @@ use crate::{
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RegistryData {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "minecraft:chat_type")]
-    pub chat_type_registry: Option<Registry<ChatType>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "minecraft:worldgen/biome")]
-    pub biome_registry: Option<Registry<Biome>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "minecraft:dimension_type")]
-    pub dimension_type_registry: Option<Registry<DimensionType>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "minecraft:trim_material")]
-    pub trim_material_registry: Option<Registry<TrimMaterial>>,
-    #[serde(rename = "minecraft:trim_pattern")]
-    pub trim_pattern_registry: Option<Registry<TrimPattern>>,
-    #[serde(rename = "minecraft:damage_type")]
-    pub damage_type_registry: Option<Registry<DamageType>>,
+    //TODO wip
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -188,13 +173,12 @@ pub struct Music {
 
 impl Encoder for RegistryData {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        buf.write_network_nbt(self)?;
         Ok(())
     }
 }
 
 impl Decoder for RegistryData {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        todo!()
+        Ok(RegistryData {})
     }
 }

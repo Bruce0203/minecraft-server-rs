@@ -47,7 +47,6 @@ impl Encoder for Tag {
 
 impl Decoder for UpdateTags {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        println!("hi");
         Ok(UpdateTags {
             tags: VarIntSizedVecRead::read_var_int_sized_vec(reader)?,
         })

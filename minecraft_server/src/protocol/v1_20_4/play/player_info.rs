@@ -2,8 +2,8 @@ use std::io::prelude::Write;
 
 use crate::{
     io::prelude::{
-        Encoder, I64Write, OptionWrite, U128Write, U8Write, VarIntSizedVecWrite, VarIntWrite,
-        VarStringWrite, WriteBool,
+        Decoder, Encoder, I64Write, OptionWrite, U128Write, U8Write, VarIntSizedVecWrite,
+        VarIntWrite, VarStringWrite, WriteBool,
     },
     net::prelude::{PacketId, Socket},
     server::{
@@ -139,5 +139,12 @@ impl Encoder for PlayerInfoUpdate {
             }
         }
         Ok(())
+    }
+}
+
+impl Decoder for PlayerInfoUpdate {
+    fn decode_from_read(reader: &mut crate::io::prelude::Buffer) -> std::io::Result<Self> {
+        //TODO wip
+        Ok(PlayerInfoUpdate { players: vec![] })
     }
 }

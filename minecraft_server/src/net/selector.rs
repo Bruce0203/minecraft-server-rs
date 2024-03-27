@@ -140,7 +140,9 @@ where
             let player = socket_selector.connection_pool.get(token_index);
             if let Err(err) = player.handle_read_event(&mut socket_selector.server) {
                 if err.kind() == ErrorKind::BrokenPipe {
+                    println!("err");
                     println!("conneciton closed[{}]: {}", err.kind(), err);
+                    player.stream.shutdown(std::net::Shutdown::Both);
                     socket_selector.connection_pool.remove(token_index);
                 }
             }

@@ -11,6 +11,7 @@ use crate::{
     server::prelude::GamePlayer,
 };
 
+#[derive(Debug)]
 pub struct PlayerAbilities {
     pub flags: PlayerAbility,
     pub flying_speed: f32,

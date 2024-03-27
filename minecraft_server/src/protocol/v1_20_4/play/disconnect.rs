@@ -1,7 +1,7 @@
 use std::io::Result;
 
 use crate::{
-    io::prelude::{Buffer, Decoder, Encoder, ReadOnlyBuffer},
+    io::prelude::{Buffer, Decoder, Encoder},
     server::chat::Chat,
 };
 
@@ -17,7 +17,7 @@ impl Encoder for Disconnect {
 }
 
 impl Decoder for Disconnect {
-    fn decode_from_read(reader: &mut ReadOnlyBuffer) -> Result<Self> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
         Ok(Disconnect {
             reason: Chat::decode_from_read(reader)?,
         })

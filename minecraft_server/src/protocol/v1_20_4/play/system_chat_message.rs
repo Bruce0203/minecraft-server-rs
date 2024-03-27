@@ -1,7 +1,7 @@
 use std::io::Result;
 
 use crate::{
-    io::prelude::{Buffer, Encoder, WriteBool},
+    io::prelude::{BoolRead, Buffer, Decoder, Encoder, WriteBool},
     server::chat::{Chat, ChatNbtWrite},
 };
 
@@ -15,5 +15,14 @@ impl Encoder for SystemChatMessage {
         buf.write_nbt_chat(&self.content)?;
         buf.write_bool(self.overlay)?;
         Ok(())
+    }
+}
+
+impl Decoder for SystemChatMessage {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(SystemChatMessage {
+            content: Chat::decode_from_read(reader)?,
+            overlay: reader.read_bool()?,
+        })
     }
 }

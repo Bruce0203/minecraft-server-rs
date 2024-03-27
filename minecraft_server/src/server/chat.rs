@@ -3,7 +3,7 @@ use std::{io::prelude::Write, ops::Deref};
 use bitflags::bitflags;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-use crate::io::prelude::{Buffer, Encoder, NbtNetworkWrite};
+use crate::io::prelude::{Buffer, Decoder, Encoder, NbtNetworkWrite};
 
 #[derive(Debug, Clone)]
 pub enum Chat {
@@ -334,5 +334,11 @@ impl Encoder for Chat {
     fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> std::io::Result<()> {
         buf.write_nbt_chat(self)?;
         Ok(())
+    }
+}
+
+impl Decoder for Chat {
+    fn decode_from_read(reader: &mut Buffer) -> std::io::Result<Self> {
+        Ok(Chat::from("chat".to_string()))
     }
 }

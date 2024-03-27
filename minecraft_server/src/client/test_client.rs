@@ -33,6 +33,7 @@ use crate::{
                     PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayS2c,
                 },
                 registry::RegistryData,
+                server_data::ServerData,
                 update_tags::UpdateTags,
             },
             handshake::{HandShake, NextState},
@@ -41,14 +42,23 @@ use crate::{
                 login_start::LoginStart, login_success::LoginSuccess,
                 set_compression::SetCompression,
             },
-            play::keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c},
+            play::{
+                change_difficulty::ChangeDifficultyS2c,
+                entity_event::EntityEvent,
+                keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c},
+                player_abilities::PlayerAbilities,
+                player_info::PlayerInfoUpdate,
+                set_held_item::SetHeldItemS2c,
+                synchronize_player_position::SyncPlayerPosition,
+                system_chat_message::SystemChatMessage,
+                update_receipe_book::UpdateReceipeBook,
+                update_receipes::UpdateReceipes,
+            },
             v1_20_4::MinecraftServerV1_20_4,
         },
     },
     server::prelude::{ConnectionState, GamePlayer, GameServer, MainHand},
 };
-
-const MAX_PACKET_BUFFER_SIZE: usize = 100_000;
 
 pub struct MinecraftClientV1_20_4;
 protocol!(MinecraftClientV1_20_4, MinecraftServerV1_20_4::PROTOCOL_ID);
@@ -65,6 +75,16 @@ receiving_packets!(
     (ConnectionState::Confgiuration, UpdateTags),
     (ConnectionState::Confgiuration, FinishConfigurationS2c),
     (ConnectionState::Play, LoginPlay),
+    (ConnectionState::Play, ChangeDifficultyS2c),
+    (ConnectionState::Play, PlayerAbilities),
+    (ConnectionState::Play, SetHeldItemS2c),
+    (ConnectionState::Play, UpdateReceipes),
+    (ConnectionState::Play, EntityEvent),
+    (ConnectionState::Play, UpdateReceipeBook),
+    (ConnectionState::Play, SyncPlayerPosition),
+    (ConnectionState::Play, ServerData),
+    (ConnectionState::Play, SystemChatMessage),
+    (ConnectionState::Play, PlayerInfoUpdate),
 );
 
 #[derive(Default)]
@@ -99,7 +119,7 @@ fn test_client() {
 
 impl PacketHandler<ClientPool> for FeatureFlags {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("{:?}", self);
+        println!("feature flags: {:?}", self);
         Ok(())
     }
 }
@@ -110,7 +130,7 @@ impl PacketHandler<ClientPool> for PluginMessageConfS2c {
         server: &mut ClientPool,
         player: &mut Socket<<ClientPool as Server>::Player>,
     ) -> Result<()> {
-        println!("{:?}", self);
+        println!("plugin message: {:?}", self);
         Ok(())
     }
 }
@@ -121,7 +141,7 @@ impl PacketHandler<ClientPool> for PluginMessagePlayS2c {
         server: &mut ClientPool,
         player: &mut Socket<<ClientPool as Server>::Player>,
     ) -> Result<()> {
-        println!("{:?}", self);
+        println!("plugin message play: {:?}", self);
         Ok(())
     }
 }
@@ -153,14 +173,14 @@ impl PacketHandler<ClientPool> for LoginSuccess {
 impl PacketHandler<ClientPool> for SetCompression {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         player.session_relay.compression_threshold = self.compression_threshold;
-        println!("{:?}", self);
+        println!("set compression: {:?}", self);
         Ok(())
     }
 }
 
 impl PacketHandler<ClientPool> for KeepAliveConfS2c {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("{:?}", self);
+        println!("keep alive: {:?}", self);
         Ok(())
     }
 }
@@ -250,5 +270,76 @@ impl SelectorUpdateListener<ClientPool> for ClientPool {
 impl SelectorTicker for SocketSelector<ClientPool> {
     fn on_tick(&mut self) {
         println!("tick");
+    }
+}
+
+impl PacketHandler<ClientPool> for ChangeDifficultyS2c {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for PlayerAbilities {
+    fn handle_packet(
+        &self,
+        server: &mut ClientPool,
+        player: &mut Socket<<ClientPool as Server>::Player>,
+    ) -> Result<()> {
+        println!("{:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetHeldItemS2c {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("{:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateReceipes {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for EntityEvent {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateReceipeBook {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("udpate receipe book: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SyncPlayerPosition {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("sync player pos: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for ServerData {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("{:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SystemChatMessage {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("hi");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for PlayerInfoUpdate {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("player info update");
+        Ok(())
     }
 }
