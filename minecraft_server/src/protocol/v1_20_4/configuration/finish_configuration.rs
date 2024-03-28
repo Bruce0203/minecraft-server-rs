@@ -12,7 +12,7 @@ use crate::{
     protocol::v1_20_4::{
         login::login_play::LoginPlay,
         play::{
-            change_difficulty::{Difficulty, ChangeDifficultyS2c},
+            change_difficulty::{ChangeDifficultyS2c, Difficulty},
             keep_alive::{KeepAlive, KeepAlivePlayS2c},
             player_abilities::{PlayerAbilities, PlayerAbility},
             player_info::{InformedPlayer, PlayerInfoActions, PlayerInfoUpdate},
@@ -22,7 +22,7 @@ use crate::{
             set_default_position::SetDefaultPosition,
             set_entity_metadata::SetEntityMetadata,
             set_health::SetHealth,
-            set_held_item::{SetHeldItemS2c, SetHeldItem},
+            set_held_item::{SetHeldItem, SetHeldItemS2c},
             set_render_distance::SetRenderDistance,
             set_simulation_distance::SetSimulationDistance,
             synchronize_player_position::SyncPlayerPosition,

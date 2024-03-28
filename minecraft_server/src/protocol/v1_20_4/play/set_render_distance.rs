@@ -1,6 +1,9 @@
 use std::io::Result;
 
+use crate::io::prelude::Buffer;
+use crate::io::prelude::Decoder;
 use crate::io::prelude::Encoder;
+use crate::io::prelude::VarIntRead;
 use crate::io::prelude::VarIntWrite;
 use crate::net::prelude::PacketId;
 use crate::net::prelude::Socket;
@@ -13,8 +16,16 @@ pub struct SetRenderDistance {
 }
 
 impl Encoder for SetRenderDistance {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_var_i32(self.view_distance);
         Ok(())
+    }
+}
+
+impl Decoder for SetRenderDistance {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(SetRenderDistance {
+            view_distance: reader.read_var_i32()?,
+        })
     }
 }

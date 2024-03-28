@@ -1,0 +1,3 @@
+- consider not depending on mio to use std::net::TcpStream either when we use test client so we should do refactoring socket code 
+- refactor code about auto trait with Encoder and Decoder 
+- automatic empty pacaket handler macro

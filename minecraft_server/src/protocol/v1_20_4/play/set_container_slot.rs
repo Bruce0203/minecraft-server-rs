@@ -1,7 +1,10 @@
 use std::io::{prelude::Write, Result};
 
 use crate::{
-    io::prelude::{Encoder, I16Write, NbtNetworkWrite, OptionWrite, U8Write, VarIntWrite},
+    io::prelude::{
+        Buffer, Decoder, Encoder, I16Read, I16Write, NbtNetworkWrite, OptionWrite, U8Read, U8Write,
+        VarIntRead, VarIntWrite,
+    },
     net::prelude::PacketWriter,
     server::slot::Slot,
 };
@@ -14,11 +17,22 @@ pub struct SetContainerSlot {
 }
 
 impl Encoder for SetContainerSlot {
-    fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         buf.write_u8(self.window_id)?;
         buf.write_var_i32(self.state_id)?;
         buf.write_i16(self.slot)?;
-        buf.write_option(&self.slot_data)?;
+        self.slot_data.encode_to_buffer(buf)?;
         Ok(())
+    }
+}
+
+impl Decoder for SetContainerSlot {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(SetContainerSlot {
+            window_id: reader.read_u8()?,
+            state_id: reader.read_var_i32()?,
+            slot: reader.read_i16()?,
+            slot_data: Slot::decode_from_read(reader)?,
+        })
     }
 }

@@ -7,7 +7,8 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{
-        Buffer, Decoder, Encoder, F32Write, I64Write, Identifier, U8Read, U8Write, VarIntRead, VarIntSizedVecRead, VarIntWrite, VarStringWrite
+        Buffer, Decoder, Encoder, F32Write, I64Write, Identifier, U8Read, U8Write, VarIntRead,
+        VarIntSizedVecRead, VarIntWrite, VarStringWrite,
     },
     protocol::v1_20_4::configuration::registry::Particle,
     server::{

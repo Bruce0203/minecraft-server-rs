@@ -44,20 +44,41 @@ use crate::{
             },
             play::{
                 change_difficulty::ChangeDifficultyS2c,
+                commands::Commands,
                 entity_event::EntityEvent,
+                game_event::GameEvent,
+                initialize_world_border::InitializeWorldBorder,
                 keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c},
                 player_abilities::PlayerAbilities,
                 player_info::PlayerInfoUpdate,
+                set_center_chunk::SetCenterChunk,
+                set_container_contents::SetContainerContent,
+                set_container_slot::SetContainerSlot,
+                set_default_position::SetDefaultPosition,
+                set_entity_metadata::SetEntityMetadata,
+                set_expereience::SetExperience,
+                set_health::SetHealth,
                 set_held_item::SetHeldItemS2c,
+                set_render_distance::SetRenderDistance,
+                set_simulation_distance::SetSimulationDistance,
+                set_ticking_state::SetTickingState,
+                sound_effect::SoundEffect,
+                step_tick::StepTick,
                 synchronize_player_position::SyncPlayerPosition,
                 system_chat_message::SystemChatMessage,
+                update_advancements::UpdateAdvancements,
+                update_attributes::UpdateAttributes,
                 update_receipe_book::UpdateReceipeBook,
                 update_receipes::UpdateReceipes,
+                update_time::UpdateTime,
             },
             v1_20_4::MinecraftServerV1_20_4,
         },
     },
-    server::prelude::{ConnectionState, GamePlayer, GameServer, MainHand},
+    server::{
+        chunk::Chunk,
+        prelude::{ConnectionState, GamePlayer, GameServer, MainHand},
+    },
 };
 
 pub struct MinecraftClientV1_20_4;
@@ -85,6 +106,25 @@ receiving_packets!(
     (ConnectionState::Play, ServerData),
     (ConnectionState::Play, SystemChatMessage),
     (ConnectionState::Play, PlayerInfoUpdate),
+    (ConnectionState::Play, SetRenderDistance),
+    (ConnectionState::Play, SetSimulationDistance),
+    (ConnectionState::Play, SetCenterChunk),
+    (ConnectionState::Play, InitializeWorldBorder),
+    (ConnectionState::Play, UpdateTime),
+    (ConnectionState::Play, SetDefaultPosition),
+    (ConnectionState::Play, GameEvent),
+    (ConnectionState::Play, SetTickingState),
+    (ConnectionState::Play, StepTick),
+    (ConnectionState::Play, SetContainerContent),
+    (ConnectionState::Play, SetContainerSlot),
+    (ConnectionState::Play, SetEntityMetadata),
+    (ConnectionState::Play, Commands),
+    (ConnectionState::Play, UpdateAttributes),
+    (ConnectionState::Play, UpdateAdvancements),
+    (ConnectionState::Play, SetHealth),
+    (ConnectionState::Play, SetExperience),
+    (ConnectionState::Play, SoundEffect),
+    (ConnectionState::Play, Chunk),
 );
 
 #[derive(Default)]
@@ -340,6 +380,128 @@ impl PacketHandler<ClientPool> for SystemChatMessage {
 impl PacketHandler<ClientPool> for PlayerInfoUpdate {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         println!("player info update");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetRenderDistance {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("hi");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetSimulationDistance {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("set simulation distance: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetCenterChunk {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("set center chunk: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for InitializeWorldBorder {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("init world border");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateTime {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("update time");
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetDefaultPosition {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for GameEvent {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("game event: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetTickingState {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("set ticking state: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for StepTick {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("step tick: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetContainerContent {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetContainerSlot {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetEntityMetadata {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for Commands {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateAttributes {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateAdvancements {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetHealth {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetExperience {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SoundEffect {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for Chunk {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         Ok(())
     }
 }

@@ -4,7 +4,8 @@ use uuid::Uuid;
 
 use crate::{
     io::prelude::{
-        Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite, VarIntWrite,
+        Decoder, Encoder, F64Write, Identifier, U8Write, UuidWrite, VarIntSizedVecWrite,
+        VarIntWrite,
     },
     net::prelude::{PacketId, Socket},
     server::prelude::GamePlayer,
@@ -13,6 +14,15 @@ use crate::{
 pub struct UpdateAttributes {
     pub entity_id: i32,
     pub properties: Vec<AttributeProperty>,
+}
+
+impl Decoder for UpdateAttributes {
+    fn decode_from_read(reader: &mut crate::io::prelude::Buffer) -> Result<Self> {
+        Ok(UpdateAttributes {
+            entity_id: 0,
+            properties: vec![],
+        })
+    }
 }
 
 impl Encoder for UpdateAttributes {

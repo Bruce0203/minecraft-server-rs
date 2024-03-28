@@ -1,6 +1,6 @@
 use std::io::Result;
 
-use crate::io::prelude::{Buffer, Encoder, F32Write, VarIntWrite};
+use crate::io::prelude::{Buffer, Decoder, Encoder, F32Read, F32Write, VarIntRead, VarIntWrite};
 
 pub struct SetHealth {
     pub health: f32,
@@ -14,5 +14,15 @@ impl Encoder for SetHealth {
         buf.write_var_i32(self.food)?;
         buf.write_f32(self.food_saturation)?;
         Ok(())
+    }
+}
+
+impl Decoder for SetHealth {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(SetHealth {
+            health: reader.read_f32()?,
+            food: reader.read_var_i32()?,
+            food_saturation: reader.read_f32()?,
+        })
     }
 }
