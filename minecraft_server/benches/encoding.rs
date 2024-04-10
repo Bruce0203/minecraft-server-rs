@@ -22,7 +22,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                 dimension_name: "qwer".to_identifier(),
                 hashed_seed: 123123412,
                 game_mode: GameMode::Survival,
-                previous_game_mode: Some(GameMode::Creative),
+                previous_game_mode: Some(GameMode::Creative).into(),
                 is_debug: true,
                 is_flat: false,
                 death_location: None,

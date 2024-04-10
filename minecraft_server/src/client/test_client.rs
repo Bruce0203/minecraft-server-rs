@@ -43,34 +43,7 @@ use crate::{
                 set_compression::SetCompression,
             },
             play::{
-                change_difficulty::ChangeDifficultyS2c,
-                commands::Commands,
-                entity_event::EntityEvent,
-                game_event::GameEvent,
-                initialize_world_border::InitializeWorldBorder,
-                keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c},
-                player_abilities::PlayerAbilities,
-                player_info::PlayerInfoUpdate,
-                set_center_chunk::SetCenterChunk,
-                set_container_contents::SetContainerContent,
-                set_container_slot::SetContainerSlot,
-                set_default_position::SetDefaultPosition,
-                set_entity_metadata::SetEntityMetadata,
-                set_expereience::SetExperience,
-                set_health::SetHealth,
-                set_held_item::SetHeldItemS2c,
-                set_render_distance::SetRenderDistance,
-                set_simulation_distance::SetSimulationDistance,
-                set_ticking_state::SetTickingState,
-                sound_effect::SoundEffect,
-                step_tick::StepTick,
-                synchronize_player_position::SyncPlayerPosition,
-                system_chat_message::SystemChatMessage,
-                update_advancements::UpdateAdvancements,
-                update_attributes::UpdateAttributes,
-                update_receipe_book::UpdateReceipeBook,
-                update_receipes::UpdateReceipes,
-                update_time::UpdateTime,
+                bundle_delimiter::BundleDelimiter, change_difficulty::ChangeDifficultyS2c, commands::Commands, damage_event::DamageEvent, enter_combat::EnterCombat, entity_event::EntityEvent, game_event::GameEvent, initialize_world_border::InitializeWorldBorder, keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c}, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, pong::Pong, remove_entities::RemoveEntities, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_entity_velocity::SetEntityVelocity, set_expereience::SetExperience, set_head_rotation::SetHeadRotation, set_health::SetHealth, set_held_item::SetHeldItemS2c, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, set_ticking_state::SetTickingState, sound_effect::SoundEffect, spawn_entity::SpawnEntity, step_tick::StepTick, synchronize_player_position::SyncPlayerPosition, system_chat_message::SystemChatMessage, teleport_entity::TeleportEntity, update_advancements::UpdateAdvancements, update_attributes::UpdateAttributes, update_entity_position::UpdateEntityPosition, update_entity_position_and_rotation::UpdateEntityPositionAndRotation, update_entity_rotation::UpdateEntityRotation, update_receipe_book::UpdateReceipeBook, update_receipes::UpdateReceipes, update_time::UpdateTime
             },
             v1_20_4::MinecraftServerV1_20_4,
         },
@@ -125,6 +98,18 @@ receiving_packets!(
     (ConnectionState::Play, SetExperience),
     (ConnectionState::Play, SoundEffect),
     (ConnectionState::Play, Chunk),
+    (ConnectionState::Play, BundleDelimiter),
+    (ConnectionState::Play, SpawnEntity),
+    (ConnectionState::Play, UpdateEntityPosition),
+    (ConnectionState::Play, SetEntityVelocity),
+    (ConnectionState::Play, UpdateEntityPositionAndRotation),
+    (ConnectionState::Play, UpdateEntityRotation),
+    (ConnectionState::Play, SetHeadRotation),
+    (ConnectionState::Play, TeleportEntity),
+    (ConnectionState::Play, RemoveEntities),
+    (ConnectionState::Play, EnterCombat),
+    (ConnectionState::Play, DamageEvent),
+    (ConnectionState::Play, Pong),
 );
 
 #[derive(Default)]
@@ -505,3 +490,65 @@ impl PacketHandler<ClientPool> for Chunk {
         Ok(())
     }
 }
+
+impl PacketHandler<ClientPool> for BundleDelimiter {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SpawnEntity {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateEntityPosition {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetEntityVelocity {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateEntityPositionAndRotation {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for UpdateEntityRotation {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for SetHeadRotation {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for TeleportEntity {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        Ok(())
+    }
+}
+
+macro_rules! empty_packet_handler {
+    ($($typ:ty, )*) => {
+        $(
+            impl PacketHandler<ClientPool> for $typ {
+                fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+                    Ok(())
+                }
+            }
+        )*
+    };
+}
+
+empty_packet_handler!(RemoveEntities, EnterCombat, DamageEvent, Pong, );

@@ -1,12 +1,16 @@
 use std::{collections::BTreeMap, io::Result, option::Option};
 
 use super::metadata::prelude::BlockState;
-use crate::io::prelude::{Buffer, Encoder, U8Write, VarInt, VarIntSizedVecWrite, VarIntWrite};
+use crate::io::prelude::{
+    Buffer, Decoder, Encoder, U8Read, U8Write, VarInt, VarIntSizedVecRead, VarIntSizedVecWrite,
+    VarIntWrite,
+};
 
+#[derive(Debug)]
 pub struct Palette {
+    pub bits_per_block: u8,
     pub palette: Vec<VarInt>,
     pub data: Vec<i64>,
-    pub bits_per_block: u8,
 }
 
 impl Palette {
@@ -25,6 +29,16 @@ impl Encoder for Palette {
         buf.write_var_int_sized_vec(&self.palette)?;
         buf.write_var_i32(0)?;
         Ok(())
+    }
+}
+
+impl Decoder for Palette {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(Palette {
+            bits_per_block: reader.read_u8()?,
+            palette: reader.read_var_int_sized_vec()?,
+            data: reader.read_var_int_sized_vec()?,
+        })
     }
 }
 

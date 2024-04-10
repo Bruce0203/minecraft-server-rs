@@ -8,7 +8,7 @@ struct MyStruct {
     c: i32,
     d: i32,
     e: i32,
-   k: i32,
+    k: i32,
     l: i32,
     m: i32,
 }

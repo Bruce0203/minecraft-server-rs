@@ -1,6 +1,8 @@
 use std::io::Result;
 
-use crate::io::prelude::{BitSet, BitSetWrite, Buffer, Encoder, VarIntSizedVecWrite, VarIntWrite};
+use crate::io::prelude::{
+    BitSet, BitSetRead, BitSetWrite, Buffer, Decoder, DecoderDeref, Encoder, U8Read, VarIntRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarIntWrite
+};
 
 pub struct Light {
     sky_mask: BitSet,
@@ -40,5 +42,29 @@ impl Encoder for Light {
             buf.write_var_int_sized_vec(bytes)?;
         }
         Ok(())
+    }
+}
+
+impl Decoder for Light {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        impl !DecoderDeref for Vec<u8> {}
+        impl Decoder for Vec<u8> {
+            fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+                let len = reader.read_var_i32()?;
+                let mut vec = Vec::with_capacity(len as usize);
+                for value in 0..len {
+                    vec.push(reader.read_u8()?);
+                }
+                Ok(vec)
+            }
+        }
+        Ok(Light {
+            sky_mask: reader.read_bitset()?,
+            block_mask: reader.read_bitset()?,
+            empty_sky_mask: reader.read_bitset()?,
+            empty_block_mask: reader.read_bitset()?,
+            sky_lights: reader.read_var_int_sized_vec()?,
+            block_lights: reader.read_var_int_sized_vec()?,
+        })
     }
 }

@@ -4,7 +4,8 @@ use std::io::{
 };
 
 use crate::io::prelude::{
-    Buffer, Decoder, Encoder, F32Read, F32Write, F64Read, F64Write, I64Read, VarIntWrite,
+    Buffer, Decoder, Encoder, F32Read, F32Write, F64Read, F64Write, I64Read, U8Read, U8Write,
+    VarIntWrite,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -49,8 +50,20 @@ fn position_encoding() {
     assert_eq!(decoded, pos);
 }
 
-#[derive(derive_more::Deref)]
 pub struct Angle(pub u8);
+
+impl Encoder for Angle {
+    fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
+        buf.write_u8(self.0)?;
+        Ok(())
+    }
+}
+
+impl Decoder for Angle {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(Angle(reader.read_u8()?))
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct FloatRotation {

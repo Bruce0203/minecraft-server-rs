@@ -12,7 +12,7 @@ pub enum GameMode {
     Spectator = 3,
 }
 
-#[derive(Debug)]
+#[derive(Debug, derive_more::From, derive_more::Into)]
 pub struct GameModeOrUndefined(pub Option<GameMode>);
 
 impl Encoder for GameModeOrUndefined {

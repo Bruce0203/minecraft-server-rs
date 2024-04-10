@@ -11,7 +11,6 @@ derive_more = { version = "0.99.17", features = ["constructor"] }
 bitflags = "2.4.2"
 flate2 = "1.0.28"
 serde = { version = "1.0.197", features = ["derive"] }
-hematite-nbt = "0.5.2"
 serde_json = "1.0.114"
 num = "0.4"
 num-derive = "0.4"
@@ -20,7 +19,7 @@ delegate = "0.12.0"
 dyn-clone = "1.0.17"
 smart-default = "0.7.1"
 rand = "0.8.5"
-simdnbt = "0.4.2"
+hematite-nbt = "0.5.2"
 
 [dev-dependencies]
 criterion = "0.5.1"
@@ -30,6 +29,6 @@ num-traits = "0.2"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "encoding"
+name = "nbt"
 harness = false
 

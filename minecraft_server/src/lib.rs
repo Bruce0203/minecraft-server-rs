@@ -1,3 +1,4 @@
+#![feature(cursor_remaining)]
 #![feature(type_alias_impl_trait)]
 #![feature(associated_type_bounds)]
 #![feature(associated_const_equality)]
@@ -18,5 +19,5 @@ pub mod net;
 #[macro_export]
 #[macro_use]
 pub mod protocol;
-pub mod server;
 pub mod client;
+pub mod server;

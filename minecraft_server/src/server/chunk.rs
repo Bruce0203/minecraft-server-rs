@@ -3,10 +3,12 @@ use std::{
     io::{Result, Seek, Write},
 };
 
-use serde::{ser::SerializeSeq, Deserialize, Serialize};
+use nbt::Map;
+use serde::{Deserialize, Serialize};
 
 use crate::io::prelude::{
-    BitSet, BitSetWrite, Buffer, Encoder, I16Write, I32Write, NbtNetworkWrite, U16Write, U8Write,
+    BitSet, BitSetWrite, Buffer, Decoder, Encoder, I16Read, I16Write, I32Read, I32Write,
+    NbtNetworkRead, NbtNetworkWrite, U16Write, U8Read, U8Write, VarIntRead, VarIntSizedVecRead,
     VarIntSizedVecWrite, VarIntWrite,
 };
 
@@ -49,6 +51,19 @@ impl Encoder for Chunk {
     }
 }
 
+impl Decoder for Chunk {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(Chunk {
+            x: reader.read_i32()?,
+            z: reader.read_i32()?,
+            heightmaps: HeightMaps::decode_from_read(reader)?,
+            sections: reader.read_var_int_sized_vec()?,
+            block_entities: reader.read_var_int_sized_vec()?,
+            light: Light::decode_from_read(reader)?,
+        })
+    }
+}
+
 #[test]
 fn test_chunk() {
     let chunk = Chunk::new(0, 0);
@@ -56,6 +71,7 @@ fn test_chunk() {
     println!("{:?}", chunk.sections.encode().unwrap().get_ref().len());
 }
 
+#[derive(Debug)]
 pub struct ChunkSection {
     block_states: Palette,
     biomes: Palette,
@@ -65,9 +81,29 @@ impl Encoder for Vec<ChunkSection> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         //length is not encoded
         for chunk_section in self.iter() {
-            chunk_section.encode_to_buffer(buf)?;
+            chunk_section.block_states.encode_to_buffer(buf)?;
+            chunk_section.biomes.encode_to_buffer(buf)?;
         }
         Ok(())
+    }
+}
+
+impl Decoder for Vec<ChunkSection> {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        let mut vec = Vec::new();
+        while !reader.is_empty() {
+            vec.push(ChunkSection::decode_from_read(reader)?)
+        }
+        Ok(vec)
+    }
+}
+
+impl Decoder for ChunkSection {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(ChunkSection {
+            block_states: Palette::decode_from_read(reader)?,
+            biomes: Palette::decode_from_read(reader)?,
+        })
     }
 }
 
@@ -95,29 +131,30 @@ pub struct ChunkPos {
     z: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
 pub struct HeightMaps {
-    #[serde(serialize_with = "nbt::i64_array")]
-    #[serde(rename = "MOTION_BLOCKING")]
-    pub motion_blocking: Vec<i64>,
-    #[serde(serialize_with = "nbt::i64_array")]
-    #[serde(rename = "WORLD_SURFACE")]
-    pub world_surface: Vec<i64>,
+    nbt: nbt::Value,
 }
 
 impl HeightMaps {
     pub fn new() -> HeightMaps {
         HeightMaps {
-            motion_blocking: Vec::from([0; 37]),
-            world_surface: Vec::from([0; 37]),
+            nbt: nbt::Value::Compound(Map::new()),
         }
     }
 }
 
 impl Encoder for HeightMaps {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        buf.write_network_nbt(self)?;
+        buf.write_nbt_compound(&self.nbt)?;
         Ok(())
+    }
+}
+
+impl Decoder for HeightMaps {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(HeightMaps {
+            nbt: reader.read_nbt_compound()?,
+        })
     }
 }
 
@@ -130,19 +167,6 @@ impl<const LEN: usize> LongArray<LEN> {
     }
 }
 
-impl<const LEN: usize> Serialize for LongArray<LEN> {
-    fn serialize<S>(&self, serializer: S) -> std::prelude::v1::Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut state = serializer.serialize_seq(Some(LEN))?;
-        for ele in self.0.iter() {
-            state.serialize_element(ele)?;
-        }
-        state.end()
-    }
-}
-
 pub struct ByteArray<const LEN: usize>([u8; LEN]);
 
 impl<const LEN: usize> ByteArray<LEN> {
@@ -151,25 +175,12 @@ impl<const LEN: usize> ByteArray<LEN> {
     }
 }
 
-impl<const LEN: usize> Serialize for ByteArray<LEN> {
-    fn serialize<S>(&self, serializer: S) -> std::prelude::v1::Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut state = serializer.serialize_seq(Some(LEN))?;
-        for ele in self.0.iter() {
-            state.serialize_element(ele)?;
-        }
-        state.end()
-    }
-}
-
 pub struct BlockEntity {
     x: u8,
     y: i16,
     z: u8,
     entity_type: i32,
-    data: BlockEntityNbt,
+    data: nbt::Value,
 }
 
 impl Encoder for BlockEntity {
@@ -182,5 +193,16 @@ impl Encoder for BlockEntity {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct BlockEntityNbt {}
+impl Decoder for BlockEntity {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        let packed_xz = reader.read_u8()?;
+        Ok(BlockEntity {
+            x: packed_xz >> 4,
+            z: packed_xz & 15,
+            y: reader.read_i16()?,
+            entity_type: reader.read_var_i32()?,
+            data: reader.read_nbt_compound()?,
+        })
+    }
+}
+
