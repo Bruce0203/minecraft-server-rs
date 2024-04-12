@@ -1,8 +1,11 @@
 use std::io::Result;
 
-use crate::io::prelude::{
-    BoolRead, Buffer, Decoder, DecoderDeref, Encoder, F64Read, OptionRead, OptionWrite, VarIntRead,
-    VarIntWrite, WriteBool,
+use crate::{
+    io::prelude::{
+        BoolRead, Buffer, Decoder, DecoderDeref, Encoder, F64Read, OptionRead, OptionWrite,
+        VarIntRead, VarIntWrite, WriteBool,
+    },
+    server::prelude::DoublePosition,
 };
 
 pub struct DamageEvent {
@@ -10,10 +13,7 @@ pub struct DamageEvent {
     source_type_id: i32,
     source_cause_id: i32,
     source_direct_id: i32,
-    has_source_position: bool,
-    source_position_x: Option<f64>,
-    source_position_y: Option<f64>,
-    source_position_z: Option<f64>,
+    source_position: Option<DoublePosition>,
 }
 
 impl Encoder for DamageEvent {
@@ -22,10 +22,7 @@ impl Encoder for DamageEvent {
         buf.write_var_i32(self.source_type_id)?;
         buf.write_var_i32(self.source_cause_id)?;
         buf.write_var_i32(self.source_direct_id)?;
-        buf.write_bool(self.has_source_position)?;
-        buf.write_option(&self.source_position_x)?;
-        buf.write_option(&self.source_position_y)?;
-        buf.write_option(&self.source_position_z)?;
+        buf.write_option(&self.source_position)?;
         Ok(())
     }
 }
@@ -43,10 +40,7 @@ impl Decoder for DamageEvent {
             source_type_id: reader.read_var_i32()?,
             source_cause_id: reader.read_var_i32()?,
             source_direct_id: reader.read_var_i32()?,
-            has_source_position: reader.read_bool()?,
-            source_position_x: reader.read_option()?,
-            source_position_y: reader.read_option()?,
-            source_position_z: reader.read_option()?,
+            source_position: reader.read_option()?,
         })
     }
 }

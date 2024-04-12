@@ -89,6 +89,7 @@ fn start_loop_with_listener<S: Server>(
         poll.poll(events, Some(Duration::ZERO)).unwrap();
 
         for event in events.iter() {
+            println!("hi");
             let event_token = event.token();
             let token_index = event_token.0;
 
@@ -155,16 +156,14 @@ where
     [(); { S::MAX_PACKET_BUFFER_SIZE }]:,
 {
     fn run_with_listener(&mut self, addr: SocketAddr) {
-        let mut poll = Poll::new().unwrap();
-        let mut events = Events::with_capacity(128);
-
         let mut listener = TcpListener::bind(addr).unwrap();
         let server_token = Token(SERVER_TOKEN_INDEX);
-        poll.registry()
+        self.poll
+            .registry()
             .register(&mut listener, server_token, Interest::READABLE)
             .unwrap();
 
-        start_loop_with_listener::<S>(self, listener, server_token);
+        start_loop_with_listener(self, listener, server_token);
     }
 
     fn run(&mut self) {

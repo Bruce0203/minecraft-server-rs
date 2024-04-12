@@ -73,6 +73,7 @@ impl PacketHandler<GameServer> for HandShake {
         let session_relay = &mut value.session_relay;
         session_relay.connection_state = Into::into(&self.next_state);
         session_relay.protocol_id = self.protocol_version;
+        println!("Handshake!");
         Ok(())
     }
 }

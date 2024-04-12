@@ -237,8 +237,8 @@ impl PacketHandler<GameServer> for FinishConfigurationC2s {
             overlay: false,
         }
         .send_packet(player)?;
-        KeepAlivePlayS2c(KeepAlive { id: 0 }).send_packet(player);
-        KeepAlivePlayS2c(KeepAlive { id: 1 }).send_packet(player);
+        KeepAlivePlayS2c(KeepAlive(0)).send_packet(player);
+        KeepAlivePlayS2c(KeepAlive(1)).send_packet(player);
 
         Ok(())
     }

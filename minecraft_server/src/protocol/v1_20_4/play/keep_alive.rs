@@ -47,9 +47,7 @@ impl Encoder for KeepAlivePlayC2s {
 
 impl Decoder for KeepAlivePlayC2s {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        Ok(KeepAlivePlayC2s(KeepAlive {
-            id: reader.read_i64()?,
-        }))
+        Ok(KeepAlivePlayC2s(KeepAlive(reader.read_i64()?)))
     }
 }
 
@@ -77,23 +75,19 @@ impl Decoder for KeepAliveConfS2c {
     }
 }
 
-#[derive(Debug)]
-pub struct KeepAlive {
-    pub id: i64,
-}
+#[derive(Debug, Clone, Copy)]
+pub struct KeepAlive(pub i64);
 
 impl Encoder for KeepAlive {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        buf.write_i64(self.id)?;
+        buf.write_i64(self.0)?;
         Ok(())
     }
 }
 
 impl Decoder for KeepAlive {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        Ok(KeepAlive {
-            id: reader.read_i64()?,
-        })
+        Ok(KeepAlive(reader.read_i64()?))
     }
 }
 

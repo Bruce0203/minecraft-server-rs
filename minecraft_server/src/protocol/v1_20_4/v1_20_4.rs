@@ -29,7 +29,7 @@ use super::{
         login_success::LoginSuccess, set_compression::SetCompression,
     },
     play::{
-        bundle_delimiter::BundleDelimiter, change_difficulty::ChangeDifficultyS2c, commands::Commands, damage_event::DamageEvent, enter_combat::EnterCombat, entity_event::EntityEvent, game_event::GameEvent, initialize_world_border::InitializeWorldBorder, keep_alive::{KeepAliveConfC2s, KeepAliveConfS2c, KeepAlivePlayC2s, KeepAlivePlayS2c}, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, pong::Pong, remove_entities::RemoveEntities, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_property::SetContainerProperty, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_entity_velocity::SetEntityVelocity, set_expereience::SetExperience, set_head_rotation::SetHeadRotation, set_health::SetHealth, set_held_item::{SetHeldItem, SetHeldItemC2s, SetHeldItemS2c}, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, set_ticking_state::SetTickingState, sound_effect::SoundEffect, spawn_entity::SpawnEntity, step_tick::StepTick, synchronize_player_position::SyncPlayerPosition, system_chat_message::SystemChatMessage, teleport_entity::TeleportEntity, update_advancements::UpdateAdvancements, update_attributes::UpdateAttributes, update_entity_position::UpdateEntityPosition, update_entity_position_and_rotation::UpdateEntityPositionAndRotation, update_entity_rotation::UpdateEntityRotation, update_light::UpdateLight, update_receipe_book::UpdateReceipeBook, update_receipes::UpdateReceipes, update_time::UpdateTime
+        block_update::BlockUpdate, bundle_delimiter::BundleDelimiter, change_difficulty::ChangeDifficultyS2c, combat_death::CombatDeath, commands::Commands, damage_event::DamageEvent, end_combat::EndCombat, enter_combat::EnterCombat, entity_event::EntityEvent, game_event::GameEvent, hurt_animation::HurtAnimation, initialize_world_border::InitializeWorldBorder, keep_alive::{KeepAliveConfC2s, KeepAliveConfS2c, KeepAlivePlayC2s, KeepAlivePlayS2c}, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, pong::Pong, remove_entities::RemoveEntities, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_property::SetContainerProperty, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_entity_velocity::SetEntityVelocity, set_expereience::SetExperience, set_head_rotation::SetHeadRotation, set_health::SetHealth, set_held_item::{SetHeldItem, SetHeldItemC2s, SetHeldItemS2c}, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, set_ticking_state::SetTickingState, sound_effect::SoundEffect, spawn_entity::SpawnEntity, step_tick::StepTick, synchronize_player_position::SyncPlayerPosition, system_chat_message::SystemChatMessage, teleport_entity::TeleportEntity, update_advancements::UpdateAdvancements, update_attributes::UpdateAttributes, update_entity_position::UpdateEntityPosition, update_entity_position_and_rotation::UpdateEntityPositionAndRotation, update_entity_rotation::UpdateEntityRotation, update_light::UpdateLight, update_receipe_book::UpdateReceipeBook, update_receipes::UpdateReceipes, update_time::UpdateTime
     },
     status::{PingRequest, PingResponse, StatusRequest, StatusResponse},
 };
@@ -106,9 +106,13 @@ packet_id!(
     (0x46, SetHeadRotation),
     (0x6D, TeleportEntity),
     (0x40, RemoveEntities),
-    (0x49, EnterCombat),
+    (0x39, EnterCombat),
     (0x19, DamageEvent),
     (0x24, Pong),
+    (0x22, HurtAnimation),
+    (0x09, BlockUpdate),
+    (0x3A, CombatDeath),
+    (0x38, EndCombat),
 );
 
 receiving_packets!(
@@ -127,3 +131,4 @@ receiving_packets!(
     (Play, KeepAlivePlayC2s),
     (Confgiuration, AcknowledgeFinishConfiguration),
 );
+
