@@ -12,7 +12,7 @@ use crate::{
 use super::prelude::{MetadataEncoder, MetadataField, MetadataType};
 use derive_more::Deref;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct EntityMeta {
     pub entity_byte: Option<EntityByte>,
     pub air_ticks: Option<i32>,
@@ -115,7 +115,7 @@ impl Encoder for EntityByte {
 }
 
 bitflags! {
-    #[derive(Deref)]
+    #[derive(Debug, Deref)]
     pub struct EntityByte: u8 {
         const IsOnFire = 0x00;
         const IsCrouching = 0x02;

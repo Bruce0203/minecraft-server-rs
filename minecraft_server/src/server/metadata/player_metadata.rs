@@ -9,7 +9,7 @@ use crate::{
 
 use super::living_entity_metadata::LivingEntityMeta;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct PlayerMeta {
     pub living_entity: LivingEntityMeta,
     pub additional_hearts: Option<f32>,

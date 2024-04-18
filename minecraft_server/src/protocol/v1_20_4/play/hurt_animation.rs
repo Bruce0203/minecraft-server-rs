@@ -2,6 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::{Buffer, Decoder, Encoder, F32Read, F32Write, VarIntRead, VarIntWrite};
 
+#[derive(Debug)]
 pub struct HurtAnimation {
     entity_id: i32,
     yaw: f32,

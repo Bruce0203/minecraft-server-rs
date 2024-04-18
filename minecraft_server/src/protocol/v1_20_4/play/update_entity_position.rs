@@ -4,6 +4,7 @@ use crate::io::prelude::{
     BoolRead, Buffer, Decoder, Encoder, I16Read, I16Write, VarIntRead, VarIntWrite, WriteBool,
 };
 
+#[derive(Debug)]
 pub struct UpdateEntityPosition {
     entity_id: i32,
     delta_x: i16,

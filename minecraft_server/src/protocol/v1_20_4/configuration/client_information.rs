@@ -146,9 +146,8 @@ impl PacketHandler<GameServer> for ClientInformation {
     fn handle_packet(
         &self,
         server: &mut GameServer,
-        _player: &mut Socket<GamePlayer>,
+        player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
-        println!("{:#?}", self);
         Ok(())
     }
 }

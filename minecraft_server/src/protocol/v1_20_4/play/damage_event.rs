@@ -8,6 +8,7 @@ use crate::{
     server::prelude::DoublePosition,
 };
 
+#[derive(Debug)]
 pub struct DamageEvent {
     entity_id: i32,
     source_type_id: i32,

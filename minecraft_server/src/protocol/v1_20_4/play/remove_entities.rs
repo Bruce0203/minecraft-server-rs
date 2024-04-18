@@ -5,6 +5,7 @@ use crate::io::prelude::{
     VarIntSizedVecWrite, VarIntWrite,
 };
 
+#[derive(Debug)]
 pub struct RemoveEntities {
     entity_ids: Vec<i32>,
 }

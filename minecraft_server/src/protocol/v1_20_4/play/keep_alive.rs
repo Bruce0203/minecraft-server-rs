@@ -39,6 +39,12 @@ impl Encoder for KeepAlivePlayS2c {
     }
 }
 
+impl Decoder for KeepAlivePlayS2c {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(KeepAlivePlayS2c(KeepAlive(reader.read_i64()?)))
+    }
+}
+
 impl Encoder for KeepAlivePlayC2s {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         self.0.encode_to_buffer(buf)

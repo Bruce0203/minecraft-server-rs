@@ -34,7 +34,7 @@ impl Decoder for PluginMessageConfC2s {
     }
 }
 
-#[derive(Deref, From)]
+#[derive(Debug, Deref, From)]
 pub struct PluginMessagePlayC2s(pub PluginMessage);
 
 impl !EncoderDeref for PluginMessagePlayC2s {}
@@ -134,7 +134,6 @@ impl PacketHandler<GameServer> for PluginMessageConfC2s {
         server: &mut GameServer,
         player: &mut Socket<GamePlayer>,
     ) -> Result<()> {
-        println!("{:?}", self);
         Ok(())
     }
 }

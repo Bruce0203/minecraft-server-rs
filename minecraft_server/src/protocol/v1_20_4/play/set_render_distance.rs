@@ -11,6 +11,7 @@ use crate::server::prelude::GamePlayer;
 
 use super::set_default_position::SetDefaultPosition;
 
+#[derive(Debug)]
 pub struct SetRenderDistance {
     pub view_distance: i32,
 }

@@ -2,6 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::{Buffer, VarIntSizedVecRead, VarIntSizedVecWrite};
 
+#[derive(Debug)]
 pub struct BitSet(Vec<i64>);
 
 impl BitSet {

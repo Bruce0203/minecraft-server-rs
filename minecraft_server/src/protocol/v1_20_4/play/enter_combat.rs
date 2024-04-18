@@ -2,6 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::{Buffer, Decoder, Encoder};
 
+#[derive(Debug)]
 pub struct EnterCombat;
 
 impl Encoder for EnterCombat {

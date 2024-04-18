@@ -14,6 +14,7 @@ pub trait PacketId: Sized {
 pub trait PacketWriter<Player>: PacketId + Encoder {
     #[inline]
     fn send_packet(&self, player: &mut Socket<Player>) -> Result<()> {
+        println!("[Sent]: {:?}", self);
         Socket::send_packet(player, self)?;
         Ok(())
     }

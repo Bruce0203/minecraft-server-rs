@@ -5,9 +5,8 @@ use num_traits::FromPrimitive;
 
 use crate::io::prelude::{Buffer, Decoder, Encoder, VarIntRead, VarIntWrite};
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, FromPrimitive, Default)]
 #[repr(i32)]
-#[derive(FromPrimitive, Default)]
 pub enum Pose {
     #[default]
     Standing = 0,

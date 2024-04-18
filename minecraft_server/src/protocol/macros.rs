@@ -54,14 +54,20 @@ macro_rules! receiving_packets {
                 let bytes = &mut player.packet_buf;
                 let packet_id = crate::io::prelude::VarIntRead::read_var_i32(bytes)?;
                 let connection_state = &player.session_relay.connection_state;
-                println!("Packet id {:?}[{:#04X?}]", connection_state, packet_id);
                 match (connection_state, packet_id) {
                     $(
                         ($connection_state, <$typ as crate::net::prelude::PacketId>::PACKET_ID) => {
                             use crate::net::prelude::PacketHandler;
                             use crate::net::prelude::Protocol;
                             use crate::io::prelude::Decoder;
+                            use std::time::SystemTime;
+    let before = SystemTime::now();
                             let packet = <$typ>::decode_from_read(bytes)?;
+let after = SystemTime::now();
+    let elapsed = after.duration_since(before);
+    println!("time that decoding elapsed: {:?}", elapsed);
+
+                            println!("{:?}({:?}[{:#04X?}])", &packet, connection_state, packet_id);
                         <$typ as PacketHandler<<$protocol as Protocol>::Server>>::handle_packet(&packet, server, player)?;
                     }
                     )*
@@ -87,6 +93,8 @@ macro_rules! packet_id {
         )*
     };
 }
+
+use std::time::SystemTime;
 
 pub(crate) use packet_id;
 pub(crate) use protocol;

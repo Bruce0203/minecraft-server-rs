@@ -10,6 +10,7 @@ use crate::protocol::v1_20_4::login::set_compression;
 use crate::server::prelude::{GamePlayer, GameServer};
 use uuid::Uuid;
 
+#[derive(Debug)]
 pub struct LoginStart {
     pub name: String,
     pub player_uuid: Uuid,

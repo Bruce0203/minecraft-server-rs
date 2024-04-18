@@ -7,6 +7,7 @@ use crate::{
     server::prelude::Angle,
 };
 
+#[derive(Debug)]
 pub struct SpawnEntity {
     entity_id: i32,
     entity_uuid: Uuid,

@@ -5,6 +5,7 @@ use crate::{
     server::chat::Chat,
 };
 
+#[derive(Debug)]
 pub struct Disconnect {
     reason: Chat,
 }

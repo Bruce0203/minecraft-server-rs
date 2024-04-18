@@ -2,13 +2,14 @@ use std::io::Result;
 
 use crate::io::prelude::{BoolRead, Buffer, Decoder, Encoder, U8Read, U8Write, WriteBool};
 
+#[derive(Debug)]
 pub struct ChangeDifficultyS2c {
     pub new_difficulty: Difficulty,
     pub difficulty_locked: bool,
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Difficulty {
     Peaceful = 0,
     Easy = 1,

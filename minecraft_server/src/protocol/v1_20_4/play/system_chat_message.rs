@@ -5,6 +5,7 @@ use crate::{
     server::chat::{Chat, ChatNbtWrite},
 };
 
+#[derive(Debug)]
 pub struct SystemChatMessage {
     pub content: Chat, //TODO Limit to 262144 bytes
     pub overlay: bool,

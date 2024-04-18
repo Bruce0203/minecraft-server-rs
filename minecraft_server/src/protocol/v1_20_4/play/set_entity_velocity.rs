@@ -2,6 +2,7 @@ use std::io::Result;
 
 use crate::io::prelude::{Buffer, Decoder, Encoder, I16Read, I16Write, VarIntRead, VarIntWrite};
 
+#[derive(Debug)]
 pub struct SetEntityVelocity {
     entity_id: i32,
     velocity_x: i16,

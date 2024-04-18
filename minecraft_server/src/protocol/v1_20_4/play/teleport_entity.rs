@@ -7,6 +7,7 @@ use crate::{
     server::prelude::Angle,
 };
 
+#[derive(Debug)]
 pub struct TeleportEntity {
     entity_id: i32,
     x: f64,

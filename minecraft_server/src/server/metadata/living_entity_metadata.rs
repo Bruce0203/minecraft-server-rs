@@ -11,7 +11,7 @@ use crate::{
 
 use super::prelude::EntityMeta;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct LivingEntityMeta {
     pub entity: EntityMeta,
     pub living_entity_byte: Option<LivingEntityByte>,
@@ -24,6 +24,7 @@ pub struct LivingEntityMeta {
 }
 
 bitflags! {
+    #[derive(Debug)]
     pub struct LivingEntityByte : u8 {
         const IsHandActive = 0x01;
         const ActiveHand = 0x02;

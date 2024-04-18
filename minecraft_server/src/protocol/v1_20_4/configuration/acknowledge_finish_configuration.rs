@@ -6,6 +6,7 @@ use crate::{
     server::prelude::{GamePlayer, GameServer},
 };
 
+#[derive(Debug)]
 pub struct AcknowledgeFinishConfiguration {}
 
 impl Encoder for AcknowledgeFinishConfiguration {

@@ -5,6 +5,7 @@ use crate::{
     server::prelude::{Location, Position},
 };
 
+#[derive(Debug)]
 pub struct BlockUpdate {
     position: Position,
     block_id: i32,

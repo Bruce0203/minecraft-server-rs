@@ -20,6 +20,7 @@ use crate::{
     },
 };
 
+#[derive(Debug)]
 pub struct SetEntityMetadata {
     pub entity_id: i32,
     pub metadata: EntityMetadata,

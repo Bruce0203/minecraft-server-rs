@@ -5,6 +5,7 @@ use crate::{
     server::chat::{Chat, ChatNbtWrite},
 };
 
+#[derive(Debug)]
 pub struct CombatDeath {
     player_id: i32,
     message: Chat,

@@ -15,15 +15,18 @@ use uuid::Uuid;
 
 use crate::server::prelude::Chat;
 
+#[derive(Debug)]
 pub struct PlayerInfoUpdate {
     pub players: Vec<InformedPlayer>,
 }
 
+#[derive(Debug)]
 pub struct InformedPlayer {
     pub uuid: Uuid,
     pub action: Vec<PlayerInfoActions>,
 }
 
+#[derive(Debug)]
 pub enum PlayerInfoActions {
     AddPlayer {
         name: String,
@@ -46,12 +49,14 @@ pub enum PlayerInfoActions {
     },
 }
 
+#[derive(Debug)]
 pub struct PlayerProperty {
     pub name: String,
     pub value: String,
     pub signature: Option<String>,
 }
 
+#[derive(Debug)]
 pub struct PlayerChatSignature {
     chat_session_id: Uuid,
     public_key_expiry_time: i64,

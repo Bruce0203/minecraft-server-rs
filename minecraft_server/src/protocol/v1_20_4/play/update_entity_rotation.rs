@@ -7,6 +7,7 @@ use crate::{
     server::prelude::Angle,
 };
 
+#[derive(Debug)]
 pub struct UpdateEntityRotation {
     entity_id: i32,
     yaw: Angle,

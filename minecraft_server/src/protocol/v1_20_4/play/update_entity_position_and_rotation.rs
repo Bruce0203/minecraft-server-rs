@@ -7,6 +7,7 @@ use crate::{
     server::prelude::Angle,
 };
 
+#[derive(Debug)]
 pub struct UpdateEntityPositionAndRotation {
     entity_id: i32,
     delta_x: i16,

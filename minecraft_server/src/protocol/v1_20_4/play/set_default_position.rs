@@ -5,6 +5,7 @@ use crate::net::prelude::{PacketId, Socket};
 use crate::server::coordinates::Position;
 use crate::server::prelude::GamePlayer;
 
+#[derive(Debug)]
 pub struct SetDefaultPosition {
     pub location: Position,
     pub angle: f32,

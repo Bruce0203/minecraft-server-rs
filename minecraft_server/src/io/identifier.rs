@@ -51,7 +51,6 @@ pub trait IdentifierWrite {
 impl<R: Read> IdentifierRead for R {
     fn read_identifier(&mut self) -> Result<Identifier> {
         let value = Ok(Identifier(self.read_var_string::<32767>()?));
-        println!("{:?}", value);
         value
     }
 }

@@ -14,6 +14,7 @@ use crate::{
     server::prelude::{ConnectionState, GamePlayer, GameServer},
 };
 
+#[derive(Debug)]
 pub struct LoginAcknowledged {}
 
 impl Encoder for LoginAcknowledged {

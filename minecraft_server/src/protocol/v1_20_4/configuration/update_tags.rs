@@ -1,13 +1,21 @@
-use std::io::{prelude::Read, Result};
+use std::{
+    fmt::Debug,
+    io::{prelude::Read, Result},
+};
 
 use crate::io::prelude::{
     Buffer, Decoder, Encoder, Identifier, IdentifierRead, IdentifierWrite, VarInt,
     VarIntSizedVecRead, VarIntSizedVecWrite,
 };
 
-#[derive(Debug)]
 pub struct UpdateTags {
     pub tags: Vec<Tags>,
+}
+
+impl Debug for UpdateTags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UpdateTags").finish()
+    }
 }
 
 #[derive(Debug)]

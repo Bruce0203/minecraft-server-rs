@@ -6,6 +6,7 @@ use std::{
 
 use super::prelude::{DecoderDeref, Encoder, EncoderDeref};
 
+#[derive(Debug)] 
 pub struct Cache<T: Encoder> {
     inner: T,
     cache: UnsafeCell<Option<Vec<u8>>>,

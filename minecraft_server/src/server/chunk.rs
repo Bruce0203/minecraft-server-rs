@@ -1,5 +1,6 @@
 use std::{
     char::MAX,
+    fmt::Debug,
     io::{Result, Seek, Write},
 };
 
@@ -21,6 +22,15 @@ pub struct Chunk {
     pub sections: Vec<ChunkSection>,
     pub block_entities: Vec<BlockEntity>,
     pub light: Light,
+}
+
+impl Debug for Chunk {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Chunk")
+            .field("x", &self.x)
+            .field("z", &self.z)
+            .finish()
+    }
 }
 
 impl Chunk {
@@ -79,7 +89,6 @@ pub struct ChunkSection {
 
 impl Encoder for Vec<ChunkSection> {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
-        //length is not encoded
         for chunk_section in self.iter() {
             chunk_section.block_states.encode_to_buffer(buf)?;
             chunk_section.biomes.encode_to_buffer(buf)?;
@@ -125,12 +134,14 @@ impl Encoder for ChunkSection {
     }
 }
 
+#[derive(Debug)]
 pub struct ChunkPos {
     x: i32,
     y: i32,
     z: i32,
 }
 
+#[derive(Debug)]
 pub struct HeightMaps {
     nbt: nbt::Value,
 }
@@ -175,6 +186,7 @@ impl<const LEN: usize> ByteArray<LEN> {
     }
 }
 
+#[derive(Debug)]
 pub struct BlockEntity {
     x: u8,
     y: i16,
@@ -205,4 +217,3 @@ impl Decoder for BlockEntity {
         })
     }
 }
-

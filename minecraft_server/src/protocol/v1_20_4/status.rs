@@ -21,6 +21,7 @@ impl StatusRequest {
     }
 }
 
+#[derive(Debug)]
 pub struct StatusResponse<'a> {
     server_status: &'a Cache<ServerStatus>,
 }
@@ -65,7 +66,7 @@ impl PacketHandler<GameServer> for PingRequest {
         server: &mut GameServer,
         socket: &mut Socket<GamePlayer>,
     ) -> Result<()> {
-        let ping_response = PingResponse {
+        let ping_response = PingResponseStatus {
             payload: self.payload,
         };
         ping_response.send_packet(socket)?;
@@ -73,13 +74,22 @@ impl PacketHandler<GameServer> for PingRequest {
     }
 }
 
-pub struct PingResponse {
+#[derive(Debug)]
+pub struct PingResponseStatus {
     payload: i64,
 }
 
-impl Encoder for PingResponse {
+impl Encoder for PingResponseStatus {
     fn encode_to_buffer(&self, buf: &mut crate::io::prelude::Buffer) -> Result<()> {
         buf.write_all(&i64::to_be_bytes(self.payload))?;
         Ok(())
+    }
+}
+
+impl Decoder for PingResponseStatus {
+    fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        Ok(PingResponseStatus {
+            payload: reader.read_i64()?,
+        })
     }
 }

@@ -5,6 +5,7 @@ use crate::{
     server::prelude::Angle,
 };
 
+#[derive(Debug)]
 pub struct SetHeadRotation {
     entity_id: i32,
     head_yaw: Angle,

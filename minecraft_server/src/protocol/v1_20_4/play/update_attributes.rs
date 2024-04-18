@@ -11,6 +11,7 @@ use crate::{
     server::prelude::GamePlayer,
 };
 
+#[derive(Debug)]
 pub struct UpdateAttributes {
     pub entity_id: i32,
     pub properties: Vec<AttributeProperty>,
@@ -33,6 +34,7 @@ impl Encoder for UpdateAttributes {
     }
 }
 
+#[derive(Debug)]
 pub struct AttributeProperty {
     pub key: Identifier,
     pub value: f64,
@@ -48,6 +50,7 @@ impl Encoder for AttributeProperty {
     }
 }
 
+#[derive(Debug)]
 pub struct ModifierData {
     pub uuid: Uuid,
     pub amount: f64,
@@ -63,6 +66,7 @@ impl Encoder for ModifierData {
     }
 }
 
+#[derive(Debug)]
 pub enum ModifierOperation {
     Add,
     Precentage,

@@ -29,6 +29,6 @@ num-traits = "0.2"
 minecraft_server = { path = "./" }
 
 [[bench]]
-name = "nbt"
+name = "match_i32"
 harness = false
 

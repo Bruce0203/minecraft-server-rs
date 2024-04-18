@@ -28,7 +28,9 @@ use crate::{
                     ChatMode, ClientInformation, ClientInformationConf, DisplaySkinParts,
                 },
                 feature_flags::FeatureFlags,
-                finish_configuration::{FinishConfigurationC2s, FinishConfigurationS2c},
+                finish_configuration::{
+                    FinishConfigurationAcknowledgedC2s, FinishConfigurationS2c,
+                },
                 plugin_message::{
                     PluginMessage, PluginMessageConfC2s, PluginMessageConfS2c, PluginMessagePlayS2c,
                 },
@@ -43,7 +45,56 @@ use crate::{
                 set_compression::SetCompression,
             },
             play::{
-                block_update::BlockUpdate, bundle_delimiter::BundleDelimiter, change_difficulty::ChangeDifficultyS2c, combat_death::CombatDeath, commands::Commands, damage_event::DamageEvent, end_combat::EndCombat, enter_combat::EnterCombat, entity_event::EntityEvent, game_event::GameEvent, hurt_animation::HurtAnimation, initialize_world_border::InitializeWorldBorder, keep_alive::{KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c, KeepAlivePlayC2s}, player_abilities::PlayerAbilities, player_info::PlayerInfoUpdate, pong::Pong, remove_entities::RemoveEntities, set_center_chunk::SetCenterChunk, set_container_contents::SetContainerContent, set_container_slot::SetContainerSlot, set_default_position::SetDefaultPosition, set_entity_metadata::SetEntityMetadata, set_entity_velocity::SetEntityVelocity, set_expereience::SetExperience, set_head_rotation::SetHeadRotation, set_health::SetHealth, set_held_item::SetHeldItemS2c, set_render_distance::SetRenderDistance, set_simulation_distance::SetSimulationDistance, set_ticking_state::SetTickingState, sound_effect::SoundEffect, spawn_entity::SpawnEntity, step_tick::StepTick, synchronize_player_position::SyncPlayerPosition, system_chat_message::SystemChatMessage, teleport_entity::TeleportEntity, update_advancements::UpdateAdvancements, update_attributes::UpdateAttributes, update_entity_position::UpdateEntityPosition, update_entity_position_and_rotation::UpdateEntityPositionAndRotation, update_entity_rotation::UpdateEntityRotation, update_receipe_book::UpdateReceipeBook, update_receipes::UpdateReceipes, update_time::UpdateTime
+                block_update::BlockUpdate,
+                bundle_delimiter::BundleDelimiter,
+                change_difficulty::ChangeDifficultyS2c,
+                combat_death::CombatDeath,
+                commands::Commands,
+                confirm_teleportation::ConfirmTeleportation,
+                damage_event::DamageEvent,
+                end_combat::EndCombat,
+                enter_combat::EnterCombat,
+                entity_event::EntityEvent,
+                game_event::GameEvent,
+                hurt_animation::HurtAnimation,
+                initialize_world_border::InitializeWorldBorder,
+                keep_alive::{
+                    KeepAlive, KeepAliveConfC2s, KeepAliveConfS2c, KeepAlivePlayC2s,
+                    KeepAlivePlayS2c,
+                },
+                player_abilities::PlayerAbilities,
+                player_info::PlayerInfoUpdate,
+                pong::PongC2s,
+                remove_entities::RemoveEntities,
+                set_block_destroy_stage::SetBlockDestoryStage,
+                set_center_chunk::SetCenterChunk,
+                set_container_contents::SetContainerContent,
+                set_container_slot::SetContainerSlot,
+                set_default_position::SetDefaultPosition,
+                set_entity_metadata::SetEntityMetadata,
+                set_entity_velocity::SetEntityVelocity,
+                set_expereience::SetExperience,
+                set_head_rotation::SetHeadRotation,
+                set_health::SetHealth,
+                set_held_item::SetHeldItemS2c,
+                set_render_distance::SetRenderDistance,
+                set_simulation_distance::SetSimulationDistance,
+                set_ticking_state::SetTickingState,
+                sound_effect::SoundEffect,
+                spawn_entity::SpawnEntity,
+                step_tick::StepTick,
+                synchronize_player_position::SyncPlayerPosition,
+                system_chat_message::SystemChatMessage,
+                teleport_entity::TeleportEntity,
+                update_advancements::UpdateAdvancements,
+                update_attributes::UpdateAttributes,
+                update_entity_position::UpdateEntityPosition,
+                update_entity_position_and_rotation::UpdateEntityPositionAndRotation,
+                update_entity_rotation::UpdateEntityRotation,
+                update_light::UpdateLight,
+                update_receipe_book::UpdateReceipeBook,
+                update_receipes::UpdateReceipes,
+                update_time::UpdateTime,
             },
             v1_20_4::MinecraftServerV1_20_4,
         },
@@ -109,11 +160,13 @@ receiving_packets!(
     (ConnectionState::Play, RemoveEntities),
     (ConnectionState::Play, EnterCombat),
     (ConnectionState::Play, DamageEvent),
-    (ConnectionState::Play, Pong),
+    (ConnectionState::Play, KeepAlivePlayS2c),
     (ConnectionState::Play, HurtAnimation),
     (ConnectionState::Play, BlockUpdate),
     (ConnectionState::Play, CombatDeath),
     (ConnectionState::Play, EndCombat),
+    (ConnectionState::Play, SetBlockDestoryStage),
+    (ConnectionState::Play, UpdateLight),
 );
 
 #[derive(Default)]
@@ -146,35 +199,6 @@ fn test_client() {
     selector.run();
 }
 
-impl PacketHandler<ClientPool> for FeatureFlags {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("feature flags: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for PluginMessageConfS2c {
-    fn handle_packet(
-        &self,
-        server: &mut ClientPool,
-        player: &mut Socket<<ClientPool as Server>::Player>,
-    ) -> Result<()> {
-        println!("plugin message: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for PluginMessagePlayS2c {
-    fn handle_packet(
-        &self,
-        server: &mut ClientPool,
-        player: &mut Socket<<ClientPool as Server>::Player>,
-    ) -> Result<()> {
-        println!("plugin message play: {:?}", self);
-        Ok(())
-    }
-}
-
 impl PacketHandler<ClientPool> for LoginSuccess {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         player.session_relay.connection_state = ConnectionState::Confgiuration;
@@ -202,23 +226,20 @@ impl PacketHandler<ClientPool> for LoginSuccess {
 impl PacketHandler<ClientPool> for SetCompression {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         player.session_relay.compression_threshold = self.compression_threshold;
-        println!("set compression: {:?}", self);
+        Ok(())
+    }
+}
+
+impl PacketHandler<ClientPool> for KeepAlivePlayS2c {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        KeepAlivePlayC2s(self.0).send_packet(player)?;
         Ok(())
     }
 }
 
 impl PacketHandler<ClientPool> for KeepAliveConfS2c {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("keep alive: {:?}", self);
         player.send_packet(&KeepAlivePlayC2s(self.0))?;
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for RegistryData {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        //println!("{:?}", self);
-        println!("RegistryData!!");
         Ok(())
     }
 }
@@ -235,25 +256,20 @@ fn read_packets(player: &mut Socket<Client>, server: &mut ClientPool) {
     player.handle_read_event(server).unwrap();
 }
 
-impl PacketHandler<ClientPool> for UpdateTags {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("UpdateTags!");
-        Ok(())
-    }
-}
-
 impl PacketHandler<ClientPool> for FinishConfigurationS2c {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("FinishConfiguration");
-        FinishConfigurationC2s.send_packet(player)?;
+        FinishConfigurationAcknowledgedC2s.send_packet(player)?;
         player.session_relay.connection_state = ConnectionState::Play;
         Ok(())
     }
 }
 
-impl PacketHandler<ClientPool> for LoginPlay {
+impl PacketHandler<ClientPool> for SyncPlayerPosition {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("LoginPlay!!!: {:?}", self);
+        ConfirmTeleportation {
+            teleport_id: self.teleport_id,
+        }
+        .send_packet(player)?;
         Ok(())
     }
 }
@@ -303,247 +319,6 @@ impl SelectorTicker for SocketSelector<ClientPool> {
     }
 }
 
-impl PacketHandler<ClientPool> for ChangeDifficultyS2c {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for PlayerAbilities {
-    fn handle_packet(
-        &self,
-        server: &mut ClientPool,
-        player: &mut Socket<<ClientPool as Server>::Player>,
-    ) -> Result<()> {
-        println!("{:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetHeldItemS2c {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("{:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateReceipes {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for EntityEvent {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateReceipeBook {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("udpate receipe book: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SyncPlayerPosition {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("sync player pos: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for ServerData {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("{:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SystemChatMessage {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("hi");
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for PlayerInfoUpdate {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("player info update");
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetRenderDistance {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("hi");
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetSimulationDistance {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("set simulation distance: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetCenterChunk {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("set center chunk: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for InitializeWorldBorder {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("init world border");
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateTime {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("update time");
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetDefaultPosition {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for GameEvent {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("game event: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetTickingState {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("set ticking state: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for StepTick {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        println!("step tick: {:?}", self);
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetContainerContent {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetContainerSlot {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetEntityMetadata {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for Commands {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateAttributes {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateAdvancements {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetHealth {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetExperience {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SoundEffect {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for Chunk {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for BundleDelimiter {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SpawnEntity {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateEntityPosition {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetEntityVelocity {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateEntityPositionAndRotation {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for UpdateEntityRotation {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for SetHeadRotation {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl PacketHandler<ClientPool> for TeleportEntity {
-    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
-        Ok(())
-    }
-}
-
 macro_rules! empty_packet_handler {
     ($($typ:ty, )*) => {
         $(
@@ -557,12 +332,55 @@ macro_rules! empty_packet_handler {
 }
 
 empty_packet_handler!(
+    LoginPlay,
+    FeatureFlags,
+    RegistryData,
+    PluginMessageConfS2c,
+    PluginMessagePlayS2c,
+    PlayerAbilities,
+    ChangeDifficultyS2c,
+    SetHeldItemS2c,
+    UpdateReceipes,
+    EntityEvent,
+    ServerData,
+    UpdateReceipeBook,
+    UpdateTime,
+    InitializeWorldBorder,
+    SetCenterChunk,
+    SetRenderDistance,
+    SetSimulationDistance,
+    PlayerInfoUpdate,
+    SystemChatMessage,
+    SetDefaultPosition,
+    GameEvent,
+    SetTickingState,
+    StepTick,
+    SetContainerContent,
+    SetContainerSlot,
+    SetEntityMetadata,
+    Commands,
+    UpdateAttributes,
+    UpdateAdvancements,
+    SetHealth,
+    SetExperience,
+    SoundEffect,
+    Chunk,
+    BundleDelimiter,
+    SpawnEntity,
+    UpdateTags,
+    UpdateEntityPosition,
+    SetEntityVelocity,
+    UpdateEntityPositionAndRotation,
+    UpdateEntityRotation,
+    SetHeadRotation,
+    TeleportEntity,
     RemoveEntities,
     EnterCombat,
     DamageEvent,
-    Pong,
     HurtAnimation,
     BlockUpdate,
     CombatDeath,
     EndCombat,
+    SetBlockDestoryStage,
+    UpdateLight,
 );

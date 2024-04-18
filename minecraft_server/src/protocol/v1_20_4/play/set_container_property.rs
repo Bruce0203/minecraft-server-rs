@@ -2,12 +2,14 @@ use std::io::{prelude::Write, Result};
 
 use crate::io::prelude::{Encoder, U16Write, U8Write, VarIntWrite};
 
+#[derive(Debug)]
 pub struct SetContainerProperty {
     window_id: u8,
     property: u16,
     value: u16,
 }
 
+#[derive(Debug)]
 pub enum Property {
     Furnace(Furnace),
     EnchantmentTable(EnchantmentTable),
@@ -19,6 +21,7 @@ pub enum Property {
     Lectern(Lectern),
 }
 
+#[derive(Debug)]
 pub enum Furnace {
     FireIcon,
     MaximumFuelBurnTime,
@@ -26,6 +29,7 @@ pub enum Furnace {
     MaximumProgress,
 }
 
+#[derive(Debug)]
 pub enum EnchantmentTable {
     LevelRequirementForTopEnchantmentSlot,
     LevelRequirementForMiddleEnchantmentSlot,
@@ -38,29 +42,35 @@ pub enum EnchantmentTable {
     EnchantmentLevelShownOnMouseHoverOverBottomEnchantmentSlot,
 }
 
+#[derive(Debug)]
 pub enum Beacon {
     PowerLevel,
     FirstPotionEffect,
     SecondPotionEffect,
 }
 
+#[derive(Debug)]
 pub enum Anvil {
     RepairCost,
 }
 
+#[derive(Debug)]
 pub enum BrewingStand {
     BrewTime,
     FuelTime,
 }
 
+#[derive(Debug)]
 pub enum Stonecutter {
     SelectedRecipe,
 }
 
+#[derive(Debug)]
 pub enum Loom {
     SelectedPattern,
 }
 
+#[derive(Debug)]
 pub enum Lectern {
     PageNumber,
 }

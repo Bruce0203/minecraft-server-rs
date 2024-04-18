@@ -45,15 +45,17 @@ use crate::{
 
 use super::server_data::ServerData;
 
-pub struct FinishConfigurationC2s;
+#[derive(Debug)]
+pub struct FinishConfigurationAcknowledgedC2s;
+#[derive(Debug)]
 pub struct FinishConfigurationS2c;
 
-impl Decoder for FinishConfigurationC2s {
+impl Decoder for FinishConfigurationAcknowledgedC2s {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
-        Ok(FinishConfigurationC2s)
+        Ok(FinishConfigurationAcknowledgedC2s)
     }
 }
-impl Encoder for FinishConfigurationC2s {
+impl Encoder for FinishConfigurationAcknowledgedC2s {
     fn encode_to_buffer(&self, buf: &mut Buffer) -> Result<()> {
         Ok(())
     }
@@ -71,7 +73,7 @@ impl Decoder for FinishConfigurationS2c {
     }
 }
 
-impl PacketHandler<GameServer> for FinishConfigurationC2s {
+impl PacketHandler<GameServer> for FinishConfigurationAcknowledgedC2s {
     fn handle_packet(
         &self,
         server: &mut GameServer,

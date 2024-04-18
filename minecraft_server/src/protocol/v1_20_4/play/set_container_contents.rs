@@ -8,6 +8,7 @@ use crate::{
     server::slot::{self, Slot},
 };
 
+#[derive(Debug)]
 pub struct SetContainerContent {
     pub window_id: u8,
     pub state_id: i32,

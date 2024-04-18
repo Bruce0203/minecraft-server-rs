@@ -1,4 +1,4 @@
-use std::{any::Any, io::Result, ops::Deref};
+use std::{any::Any, fmt::Debug, io::Result, ops::Deref};
 
 use bitflags::Flags;
 use uuid::Uuid;
@@ -13,6 +13,7 @@ use crate::{
 };
 use derive_more::Deref;
 
+#[derive(Debug)]
 pub struct EntityMetadata(pub Box<dyn Encoder>);
 
 impl Encoder for EntityMetadata {
@@ -33,6 +34,7 @@ pub trait MetadataField: MetadataType {
     fn get_index(&self) -> u8;
 }
 
+#[derive(Debug)]
 pub struct MetadataEncoder<E: MetadataType> {
     index: usize,
     metadata: E,
@@ -111,7 +113,7 @@ impl Encoder for (Identifier, Position) {
     }
 }
 
-#[derive(Deref, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, Deref, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct BlockState(VarInt);
 
 impl Encoder for BlockState {
@@ -119,6 +121,8 @@ impl Encoder for BlockState {
         todo!()
     }
 }
+
+#[derive(Debug)]
 pub struct VillagerData {
     villager_type: VillagerType,
     villager_profession: VillagerProfession,
@@ -131,6 +135,7 @@ impl Encoder for VillagerData {
     }
 }
 
+#[derive(Debug)]
 #[repr(i32)]
 pub enum VillagerType {
     Desert = 0,
@@ -142,6 +147,7 @@ pub enum VillagerType {
     Taiga = 6,
 }
 
+#[derive(Debug)]
 #[repr(i32)]
 pub enum VillagerProfession {
     None = 0,
@@ -161,6 +167,7 @@ pub enum VillagerProfession {
     WeaponSmith = 14,
 }
 
+#[derive(Debug)]
 pub enum CatVariant {}
 
 impl Encoder for CatVariant {
@@ -169,6 +176,7 @@ impl Encoder for CatVariant {
     }
 }
 
+#[derive(Debug)]
 pub enum FrogVariant {}
 
 impl Encoder for FrogVariant {
@@ -177,6 +185,7 @@ impl Encoder for FrogVariant {
     }
 }
 
+#[derive(Debug)]
 pub enum PaintingVariant {}
 
 impl Encoder for PaintingVariant {
@@ -185,6 +194,7 @@ impl Encoder for PaintingVariant {
     }
 }
 
+#[derive(Debug)]
 pub enum SnifferState {}
 
 impl Encoder for SnifferState {

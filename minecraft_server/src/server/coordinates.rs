@@ -50,6 +50,8 @@ fn position_encoding() {
     assert_eq!(decoded, pos);
 }
 
+
+#[derive(Debug)]
 pub struct Angle(pub u8);
 
 impl Encoder for Angle {

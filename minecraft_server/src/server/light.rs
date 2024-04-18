@@ -4,6 +4,7 @@ use crate::io::prelude::{
     BitSet, BitSetRead, BitSetWrite, Buffer, Decoder, DecoderDeref, Encoder, U8Read, VarIntRead, VarIntSizedVecRead, VarIntSizedVecWrite, VarIntWrite
 };
 
+#[derive(Debug)]
 pub struct Light {
     sky_mask: BitSet,
     block_mask: BitSet,
