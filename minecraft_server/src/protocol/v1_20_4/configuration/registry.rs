@@ -1,4 +1,4 @@
-use std::io::{prelude::Read, Result, Write};
+use std::{fs::File, io::{prelude::Read, Result, Write}};
 
 use serde::{Deserialize, Serialize};
 
@@ -179,6 +179,11 @@ impl Encoder for RegistryData {
 
 impl Decoder for RegistryData {
     fn decode_from_read(reader: &mut Buffer) -> Result<Self> {
+        let value = reader.read_nbt_compound()?;
+        let mut buf = Buffer::new(vec![]);
+        let mut file = File::create("registry_data.txt").unwrap();
+        value.to_writer(&mut file)?;
+        println!("{:?}", buf.get_ref());
         Ok(RegistryData {})
     }
 }

@@ -31,10 +31,6 @@ impl PacketHandler<GameServer> for LoginStart {
         server: &mut GameServer,
         socket: &mut Socket<GamePlayer>,
     ) -> Result<()> {
-        println!(
-            "LoginStart(name={:?}, player_uuid={:?})",
-            self.name, self.player_uuid
-        );
         let login_success = LoginSuccess {
             uuid: self.player_uuid,
             username: self.name.to_owned(),

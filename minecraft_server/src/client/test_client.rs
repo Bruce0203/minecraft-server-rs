@@ -237,6 +237,13 @@ impl PacketHandler<ClientPool> for KeepAlivePlayS2c {
     }
 }
 
+impl PacketHandler<ClientPool> for RegistryData {
+    fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
+        println!("{:?}", self);
+        Ok(())
+    }
+}
+
 impl PacketHandler<ClientPool> for KeepAliveConfS2c {
     fn handle_packet(&self, server: &mut ClientPool, player: &mut Socket<Client>) -> Result<()> {
         player.send_packet(&KeepAlivePlayC2s(self.0))?;
@@ -334,7 +341,6 @@ macro_rules! empty_packet_handler {
 empty_packet_handler!(
     LoginPlay,
     FeatureFlags,
-    RegistryData,
     PluginMessageConfS2c,
     PluginMessagePlayS2c,
     PlayerAbilities,
